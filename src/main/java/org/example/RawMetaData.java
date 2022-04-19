@@ -8,18 +8,14 @@ public class RawMetaData {
     private String cachedRPath;
     private String lastModify;
     private String genes;
-    private String genom_url;
-    private String gc;
 
-    public RawMetaData(String kingdom, String group, String subgroup, String organism, String lastModify, String genes, String url, String gc) { // TODO: one string + views into it
+    public RawMetaData(String kingdom, String group, String subgroup, String organism, String lastModify, String genes) { // TODO: one string + views into it
         this.kingdom = kingdom;
         this.group = group;
         this.subgroup = subgroup;
         this.organism = organism;
         this.lastModify = lastModify;
         this.genes = genes;
-        this.genom_url = url;
-        this.gc = gc;
         this.cachedRPath = Config.data_directory() + "/Results/" + getKingdom() + "/" + getGroup() + "/" + getSubgroup() + "/" + getOrganism();
     }
 
@@ -36,22 +32,12 @@ public class RawMetaData {
         return subgroup;
     }
 
-    public String getGc() {
-        return gc;
-    }
-
-    public String getGenom_url() {
-        return genom_url;
-    }
-
     public String getLastModify() {
         return lastModify;
     }
-
     public String getNcs() {
         return genes;
     }
-
     public String resultPath() {
         return cachedRPath;
     }

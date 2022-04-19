@@ -10,6 +10,9 @@ public class Main {
         try {
             ncbi = new Ncbi();
             var rd = ncbi.createRawMetaData("eukaryotes");
+            for (var meta : rd) {
+                System.out.printf("%20s %20s %20s\n", meta.getGroup(), meta.getSubgroup(), meta.getOrganism());
+            }
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
