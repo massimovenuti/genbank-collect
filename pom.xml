@@ -19,7 +19,11 @@
             <artifactId>biojava-core</artifactId>
             <version>6.0.5</version>
         </dependency>
-        <!-- other biojava modules as needed -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.8.0</version>
+        </dependency>
     </dependencies>
 
 </project>
