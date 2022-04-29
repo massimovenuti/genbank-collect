@@ -7,9 +7,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String[] cds = {"CDS"};
         Parser parser = new Parser();
-        // Exemple de fichier qui fait planter : https://www.ncbi.nlm.nih.gov/nuccore/NC_000001.11?report=genbank
-        parser.parse("Eukaryota", "Animals", "Amphibians", cds, "Homo sapiens", "NC_XXXXX",  "data/sequence.gb");
-//        Ncbi ncbi = null;
+        parser.parse("Eukaryota", "Animals", "Amphibians", "Homo sapiens", "", "NC_XXXXX", cds, "data/sequence_1.gb");
+
+        //        Ncbi ncbi = null;
 //        boolean error = false;
 //        try {
 //            ncbi = new Ncbi();
