@@ -1,7 +1,9 @@
 package org.example;
 
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.io.*;
 
@@ -15,17 +17,25 @@ public class Parser {
 
     /**
      * Todo : gérer les join
+     *
+     * Les joins sur plusieurs lignes semblent ne pas être bien pris en compte. À voir si c'est standard ou non.
      */
     public void parse(String kingdom, String group, String subgroup, String organism, String organelle, String nc, String[] regions, String gb_file_path) throws Exception {
         System.err.println("[DEBUG] Parsing : " + gb_file_path);
+        File dnaFile =  new File(gb_file_path);
 
-        File dnaFile = new File(gb_file_path);
+        FileInputStream inStream = null;
+        try {
+            inStream = new FileInputStream(dnaFile);
+        } catch (IOException e) {
+            System.err.println("[ERROR] Failed to open file " + gb_file_path);
+            throw e;
+        }
 
-        FileInputStream inStream = new FileInputStream(dnaFile);
         GenbankReader<DNASequence, NucleotideCompound> dnaReader = new GenbankReader(
                 inStream,
                 new GenericGenbankHeaderParser(),
-                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet())
+                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet())
         );
 
         String dir_path = getDirPath(kingdom, group, subgroup);
@@ -34,13 +44,20 @@ public class Parser {
         try {
             Files.createDirectories(Paths.get(dir_path));
         } catch (IOException e) {
-            System.err.println("Error : failed to create directory");
-            return;
+            System.err.println("[ERROR] Failed to create directory");
+            throw e;
         }
 
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
-        LinkedHashMap<String, DNASequence> dnaSequences = dnaReader.process(1);
+        LinkedHashMap<String, DNASequence> dnaSequences = null;
+
+        try {
+            dnaSequences = dnaReader.process(1);
+        } catch (CompoundNotFoundException e) {
+            System.err.println("[ERROR] Found unexpected compound");
+            throw e;
+        }
 
         while (!dnaSequences.isEmpty()) {
             for (DNASequence sequence : dnaSequences.values()) {
@@ -48,8 +65,9 @@ public class Parser {
                     var features = sequence.getFeaturesByType(region);
                     System.err.print("[DEBUG] " + region + " : " + features.size() + " features [");
                     if (features.isEmpty()) continue;
+                    String file_path = getFilePath(kingdom, group, subgroup, organism, organelle, nc, region);
                     try {
-                        writer = new FileWriter(getFilePath(kingdom, group, subgroup, organism, organelle, nc, region), false);
+                        writer = new FileWriter(file_path, false);
                         bufferedWriter = new BufferedWriter(writer);
                         int i = 0;
                         int percent = (int) (.05 * features.size());
@@ -65,24 +83,32 @@ public class Parser {
                         }
                         System.err.println("Done]");
                     } catch (Exception e) {
+                        System.err.println("[ERROR] Failed to write file " + file_path);
                         throw e;
                     } finally {
                         try {
                             if (bufferedWriter != null) bufferedWriter.close();
                             if (writer != null) writer.close();
                         } catch (IOException e) {
-                            System.err.println("Error : failed to close file");
+                            System.err.println("[ERROR] Failed to close file " + file_path);
+                            throw e;
                         }
                     }
                 }
             }
-            dnaSequences = dnaReader.process(1);
+            try {
+                dnaSequences = dnaReader.process(1);
+            } catch (CompoundNotFoundException e) {
+                System.err.println("[ERROR] Found unexpected compound");
+                throw e;
+            }
         }
         try {
             dnaReader.close();
             inStream.close();
         } catch (IOException e) {
-            System.err.println("Error : failed to close file");
+            System.err.println("[ERROR] Failed to close file " + gb_file_path);
+            throw e;
         }
     }
 
