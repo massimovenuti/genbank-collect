@@ -6,23 +6,31 @@ import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.io.*;
+import org.biojava.nbio.core.sequence.location.template.Location;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Parser {
-    private String file_extension = ".txt";
+    private static String file_extension = ".txt";
+    private Map<String, String> join_key_words;
+
+    public Parser() {
+        join_key_words = new HashMap<String, String>();
+        join_key_words.put("CDS", "Exon");
+        join_key_words.put("intron", "Intron");
+    }
 
     /**
-     * Todo : gérer les join
-     *
-     * Les joins sur plusieurs lignes semblent ne pas être bien pris en compte. À voir si c'est standard ou non.
+     * Rq : les joins sur plusieurs lignes semblent ne pas être bien pris en compte. À voir si c'est standard ou non.
      */
     public void parse(String kingdom, String group, String subgroup, String organism, String organelle, String nc, String[] regions, String gb_file_path) throws Exception {
         System.err.println("[DEBUG] Parsing : " + gb_file_path);
-        File dnaFile =  new File(gb_file_path);
+        File dnaFile = new File(gb_file_path);
 
         FileInputStream inStream = null;
         try {
@@ -35,7 +43,7 @@ public class Parser {
         GenbankReader<DNASequence, NucleotideCompound> dnaReader = new GenbankReader(
                 inStream,
                 new GenericGenbankHeaderParser(),
-                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet())
+                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet())
         );
 
         String dir_path = getDirPath(kingdom, group, subgroup);
@@ -63,23 +71,27 @@ public class Parser {
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features [");
-                    if (features.isEmpty()) continue;
+                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features ");
+                    if (features.isEmpty()) {
+                        System.err.println("[Done]");
+                        continue;
+                    }
                     String file_path = getFilePath(kingdom, group, subgroup, organism, organelle, nc, region);
                     try {
                         writer = new FileWriter(file_path, false);
                         bufferedWriter = new BufferedWriter(writer);
                         int i = 0;
-                        int percent = (int) (.05 * features.size());
+                        int percent = (int) (.1 * features.size());
+                        System.err.print("[");
                         for (var feature : features) {
                             if (i++ % percent == 0)
                                 System.err.print(i * 100 / features.size() + "%...");
-                            int start = feature.getLocations().getStart().getPosition();
-                            int end = feature.getLocations().getEnd().getPosition();
-                            bufferedWriter.write(getSequenceHeader(organism, organelle, nc, region, feature.getSource()));
-                            bufferedWriter.newLine();
-                            bufferedWriter.write(sequence.getSequenceAsString(start, end, feature.getLocations().getStrand()));
-                            bufferedWriter.newLine();
+                            String header = getSequenceHeader(organism, organelle, nc, region, feature.getSource());
+                            writeSequence(sequence, feature.getLocations(), header, bufferedWriter);
+                            for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++) {
+                                String new_header = header + " " + join_key_words.get(region) + " " + (k + 1);
+                                writeSequence(sequence, feature.getLocations().getSubLocations().get(k), new_header, bufferedWriter);
+                            }
                         }
                         System.err.println("Done]");
                     } catch (Exception e) {
@@ -110,6 +122,15 @@ public class Parser {
             System.err.println("[ERROR] Failed to close file " + gb_file_path);
             throw e;
         }
+    }
+
+    private void writeSequence(DNASequence complete_sequence, Location location, String header, BufferedWriter writer) throws IOException {
+        int start = location.getStart().getPosition();
+        int end = location.getEnd().getPosition();
+        writer.write(header);
+        writer.newLine();
+        writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
+        writer.newLine();
     }
 
     public String getFileName(String region, String organism, String organelle, String nc) {
