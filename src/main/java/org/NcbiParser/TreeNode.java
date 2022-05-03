@@ -6,11 +6,11 @@ import java.util.ArrayList;
 
 public class TreeNode {
     private ArrayList<TreeNode> children;
-
+    private TreeNode parent;
     public ArrayList<TreeNode> getChildren() {
         return children;
     }
-
+    public TreeNode getParent() { return parent; }
     public String getText() {
         return text;
     }
@@ -26,8 +26,9 @@ public class TreeNode {
         return ret;
     }
 
-    public TreeNode(String text) {
+    public TreeNode(String text, TreeNode parent) {
         this.text = text;
+        this.parent = parent;
     }
 
     public void push_node(TreeNode node) {
