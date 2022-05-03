@@ -7,7 +7,7 @@ Répertorie les progrès des taches
  */
 public class Progress {
     private ArrayList<ProgressTask> progressTasks;
-    public ProgressTask registerTask(String name) {}
-    public ArrayList<ProgressTask> all_tasks() {}
+    public ProgressTask registerTask(String name) {return null;}
+    public ArrayList<ProgressTask> all_tasks() {return null;}
     public void remove_task(ProgressTask t) {}
 }
