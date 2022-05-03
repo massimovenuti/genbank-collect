@@ -9,9 +9,12 @@ public class Main {
         boolean error = false;
         try {
             ncbi = new Ncbi();
-            var rd = ncbi.createRawMetaData("eukaryotes");
-            for (var meta : rd) {
-                System.out.printf("%20s %20s %20s\n", meta.getGroup(), meta.getSubgroup(), meta.getOrganism());
+            var ov = ncbi.overview();
+            for (var line : ov) {
+                for (var col : line) {
+                    System.out.printf("%20s ", col);
+                }
+                System.out.printf("\n");
             }
         } catch (Exception e) {
             error = true;

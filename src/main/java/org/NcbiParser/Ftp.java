@@ -14,8 +14,6 @@ public class Ftp {
     private void connect() throws IOException {
         try {
             ftpClient.connect(server);
-            //System.out.println("Connected to: " + server);
-            //System.out.print(ftpClient.getReplyString());
 
             int reply = ftpClient.getReplyCode();
 
