@@ -29,6 +29,7 @@ public class TreeNode {
     public TreeNode(String text, TreeNode parent) {
         this.text = text;
         this.parent = parent;
+        children = new ArrayList<>();
     }
 
     public void push_node(TreeNode node) {
