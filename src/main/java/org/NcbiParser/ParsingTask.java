@@ -10,6 +10,6 @@ public abstract class ParsingTask implements Task {
 
     @Override
     public boolean run(MultiTasker mt) {
-        
+
     }
 }
