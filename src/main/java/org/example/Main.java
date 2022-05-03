@@ -13,6 +13,12 @@ public class Main {
             for (var meta : rd) {
                 System.out.printf("%20s %20s %20s\n", meta.getGroup(), meta.getSubgroup(), meta.getOrganism());
             }
+
+            var hier = ncbi.getHierarchy();
+
+
+            System.out.println(hier);
+
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
