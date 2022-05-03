@@ -19,7 +19,7 @@ import java.util.ArrayList;
     - Entrepot_view_mdr : jointure de Kingdom, Group, Subgroup, Organism, Overview et Parsing_Result
  */
 
-public class Bdd {
+public class DataBase {
     /*
         Met à jour la base avec les dernières données d'overview, viruses.txt, x.ids, etc.
      */
@@ -34,13 +34,14 @@ public class Bdd {
 
         Peut être renvoyer direct (kingdom, group, subgroup, organism) pour aller plus vite ?
      */
-    public static ArrayList<Integer> allIdsNeedingUpdate() { }
+    public static ArrayList<Integer> allIdsNeedingUpdate() { return null;}
     //public static ArrayList<OverviewData> allOrganismNeddingUpdate() {
 
     /*
         Récupère la hiérarchie depuis la BDD
      */
-    public static TreeNode compute_hierarchy() {}
-    }
+    public static TreeNode compute_hierarchy() {return null;}
 
 }
+
+

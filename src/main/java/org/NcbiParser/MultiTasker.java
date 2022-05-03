@@ -5,13 +5,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MultiTasker {
     private ConcurrentLinkedQueue<DLTask> downloads;
-    private ConcurrentLinkedQueue<ParseTask> parsings;
+    private ConcurrentLinkedQueue<ParsingTask> parsings;
 
     public void pushTask(DLTask task) {
     }
 
-    public void pushTask(ParseTask task) {}
+    public void pushTask(ParsingTask task) {}
 
-    public DLTask popDLTask() {}
-    public ParseTask popDLTask() {}
+    public DLTask popDLTask() {return null;}
+    public ParsingTask popParsingTask() {return null;}
 }
