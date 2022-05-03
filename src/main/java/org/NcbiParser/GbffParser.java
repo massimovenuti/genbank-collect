@@ -7,6 +7,6 @@ public class GbffParser implements Parser{
 
     @Override
     public boolean parse_into(String outDirectory) {
-
+        return false;
     }
 }
