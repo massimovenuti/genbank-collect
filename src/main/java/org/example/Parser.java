@@ -1,6 +1,8 @@
 package org.example;
 
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
+import org.biojava.nbio.core.sequence.GeneSequence;
+import org.biojava.nbio.core.sequence.IntronSequence;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
@@ -27,7 +29,8 @@ public class Parser {
     }
 
     /**
-     * Rq : les joins sur plusieurs lignes semblent ne pas être bien pris en compte. À voir si c'est standard ou non.
+     * TODO : gérer les joins sur plusieurs lignes, pour l'instant ils sont ignorés. À voir si c'est standard ou non
+     * TODO : checker le fonctionnement des introns : biojava le gère automatiquement ou on doit faire des calculs supplémentaires ?
      */
     public void parse(String kingdom, String group, String subgroup, String organism, String organelle, String nc, String[] regions, String gb_file_path) throws Exception {
         System.err.println("[DEBUG] Parsing : " + gb_file_path);
@@ -72,30 +75,26 @@ public class Parser {
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features ");
-                    if (features.isEmpty()) {
-                        System.err.println("[Done]");
+                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features");
+                    if (features.isEmpty())
                         continue;
-                    }
                     String file_path = getFilePath(kingdom, group, subgroup, organism, organelle, nc, region);
                     try {
                         writer = new FileWriter(file_path, false);
                         bufferedWriter = new BufferedWriter(writer);
-                        int i = 0;
-                        int percent = (int) (.1 * features.size());
-                        System.err.print("[");
                         for (var feature : features) {
-                            if (i++ % percent == 0)
-                                System.err.print(i * 100 / features.size() + "%...");
                             String header = getSequenceHeader(organism, organelle, nc, region, feature.getSource());
-                            bufferedWriter.write(header);
-                            bufferedWriter.newLine();
-                            if (feature.getLocations().getSubLocations().size() == 0) { // join
+                            if (feature.getLocations().getSubLocations().size() == 0) {
+                                bufferedWriter.write(header);
+                                bufferedWriter.newLine();
                                 writeSequence(sequence, feature.getLocations(), bufferedWriter);
-                            } else if (containsMultipleJoins(feature.getSource())) {
-                                System.err.println("[ERROR] Multiple joins : dropping feature");
+                                bufferedWriter.newLine();
+                            } else if (wrongFormat(feature.getSource())) {
+                                System.err.println("[DEBUG] Wrong format : dropping feature");
                                 continue;
                             } else {
+                                bufferedWriter.write(header);
+                                bufferedWriter.newLine();
                                 for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++)
                                     writeSequence(sequence, feature.getLocations().getSubLocations().get(k), bufferedWriter);
                                 bufferedWriter.newLine();
@@ -107,7 +106,6 @@ public class Parser {
                                 }
                             }
                         }
-                        System.err.println("Done]");
                     } catch (Exception e) {
                         System.err.println("[ERROR] Failed to write file " + file_path);
                         throw e;
@@ -125,7 +123,7 @@ public class Parser {
             try {
                 dnaSequences = dnaReader.process(1);
             } catch (CompoundNotFoundException e) {
-                System.err.println("[ERROR] Found unexpected compound");
+                System.err.println("[DEBUG] Found unexpected compound");
                 throw e;
             }
         }
@@ -139,13 +137,15 @@ public class Parser {
     }
 
     /**
-     * Check if the location contains multiple joins
+     * Check if source is well formatted
      */
-    private boolean containsMultipleJoins(String source) {
+    private boolean wrongFormat(String source) {
+        if (source.indexOf('\n') >= 0)
+            return true;
         int i = source.indexOf("join");
-        if (i >= 0)
-            i = source.indexOf("join", i+4);
-        return i >= 0;
+        if (i >= 0 & source.indexOf("join", i + 4) >= 0)
+            return true;
+        return false;
     }
 
     private void writeSequence(DNASequence complete_sequence, Location location, BufferedWriter writer) throws IOException {
