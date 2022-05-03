@@ -4,7 +4,7 @@ public class Config {
     static private String cached_dir, results_dir;
     public static String data_directory() {
         if (cached_dir == null || cached_dir.length() == 0)
-            cached_dir = System.getProperty("user.dir") + "/data";
+            cached_dir = System.getProperty("user.dir") + "/data.gbff";
         return cached_dir;
     }
 

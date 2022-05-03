@@ -85,17 +85,26 @@ public class Parser {
                         int percent = (int) (.1 * features.size());
                         System.err.print("[");
                         for (var feature : features) {
-                            if (containsMultipleJoins(feature.getSource())) {
-                                System.err.println("[ERROR] Multiple joins, dropping feature");
-                                continue;
-                            }
                             if (i++ % percent == 0)
                                 System.err.print(i * 100 / features.size() + "%...");
                             String header = getSequenceHeader(organism, organelle, nc, region, feature.getSource());
-                            writeSequence(sequence, feature.getLocations(), header, bufferedWriter);
-                            for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++) {
-                                String new_header = header + " " + join_key_words.get(region) + " " + (k + 1);
-                                writeSequence(sequence, feature.getLocations().getSubLocations().get(k), new_header, bufferedWriter);
+                            bufferedWriter.write(header);
+                            bufferedWriter.newLine();
+                            if (feature.getLocations().getSubLocations().size() == 0) { // join
+                                writeSequence(sequence, feature.getLocations(), bufferedWriter);
+                            } else if (containsMultipleJoins(feature.getSource())) {
+                                System.err.println("[ERROR] Multiple joins : dropping feature");
+                                continue;
+                            } else {
+                                for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++)
+                                    writeSequence(sequence, feature.getLocations().getSubLocations().get(k), bufferedWriter);
+                                bufferedWriter.newLine();
+                                for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++) {
+                                    bufferedWriter.write(header + " " + join_key_words.get(region) + " " + (k + 1));
+                                    bufferedWriter.newLine();
+                                    writeSequence(sequence, feature.getLocations().getSubLocations().get(k), bufferedWriter);
+                                    bufferedWriter.newLine();
+                                }
                             }
                         }
                         System.err.println("Done]");
@@ -139,13 +148,10 @@ public class Parser {
         return i >= 0;
     }
 
-    private void writeSequence(DNASequence complete_sequence, Location location, String header, BufferedWriter writer) throws IOException {
+    private void writeSequence(DNASequence complete_sequence, Location location, BufferedWriter writer) throws IOException {
         int start = location.getStart().getPosition();
         int end = location.getEnd().getPosition();
-        writer.write(header);
-        writer.newLine();
         writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
-        writer.newLine();
     }
 
     public String getFileName(String region, String organism, String organelle, String nc) {
