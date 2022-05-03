@@ -40,4 +40,5 @@ build/
 .DS_Store
 
 data/
+results/
 .attach_pid*

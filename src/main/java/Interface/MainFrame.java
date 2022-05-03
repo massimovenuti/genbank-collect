@@ -1,15 +1,22 @@
 package Interface;
 
-import org.example.Ncbi;
+import org.apache.commons.net.ftp.FTP;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
-    private JTree tree1;
+    private JTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
+    private JTextArea logArea;
+    private JProgressBar progressBar1;
+    private JLabel currentStateLabel;
+    private JLabel endStateLabel;
+    private JScrollPane scrollPanel;
+
+    public
 
     public MainFrame(String title) {
         super(title);
@@ -22,8 +29,9 @@ public class MainFrame extends JFrame {
              */
             @Override
             public void actionPerformed(ActionEvent e){
-                JOptionPane.showMessageDialog(null, "hello");
+                logArea.append("Starting parsing process...\n");
                 // ajouter fonction de lancemenet parser.
+
             }
         });
     }
@@ -32,5 +40,9 @@ public class MainFrame extends JFrame {
     public static void main(String[] args) {
         JFrame frame = new MainFrame("GeneBank");
         frame.setVisible(true);
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }
