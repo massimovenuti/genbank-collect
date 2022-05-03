@@ -11,5 +11,5 @@ public class DLTask implements Task {
     String path;
 
 
-    public boolean run(MultiTasker mt) {}
+    public boolean run(MultiTasker mt) {return false;}
 }
