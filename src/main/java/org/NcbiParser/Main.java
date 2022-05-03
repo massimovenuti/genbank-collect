@@ -1,4 +1,4 @@
-package org.example;
+package org.NcbiParser;
 
 import java.io.*;
 import java.util.*;
