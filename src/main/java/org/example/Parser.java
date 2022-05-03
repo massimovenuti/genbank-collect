@@ -43,7 +43,7 @@ public class Parser {
         GenbankReader<DNASequence, NucleotideCompound> dnaReader = new GenbankReader(
                 inStream,
                 new GenericGenbankHeaderParser(),
-                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet())
+                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet())
         );
 
         String dir_path = getDirPath(kingdom, group, subgroup);
