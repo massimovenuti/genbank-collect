@@ -7,11 +7,11 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String[] regions = {"intron"};
+        String[] regions = {"CDS"};
         Parser parser = new Parser();
 
         try {
-            parser.parse("Eukaryota", "Animals", "Amphibians", "Homo sapiens", "", "NC_XXXXX", regions, "data/data");
+            parser.parse("Eukaryota", "Animals", "Amphibians", "Homo sapiens", "", "NC_XXXXX", regions, "data/sequence_10.gb");
         } catch (Exception e) {
             System.err.println("[ERROR] Error occurred while parsing");
         }

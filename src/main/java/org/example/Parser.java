@@ -6,6 +6,7 @@ import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.io.*;
+import org.biojava.nbio.core.sequence.location.template.AbstractLocation;
 import org.biojava.nbio.core.sequence.location.template.Location;
 
 import java.io.*;
@@ -43,7 +44,7 @@ public class Parser {
         GenbankReader<DNASequence, NucleotideCompound> dnaReader = new GenbankReader(
                 inStream,
                 new GenericGenbankHeaderParser(),
-                new DNASequenceCreator(DNACompoundSet.getDNACompoundSet())
+                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet())
         );
 
         String dir_path = getDirPath(kingdom, group, subgroup);
@@ -84,6 +85,10 @@ public class Parser {
                         int percent = (int) (.1 * features.size());
                         System.err.print("[");
                         for (var feature : features) {
+                            if (containsMultipleJoins(feature.getSource())) {
+                                System.err.println("[ERROR] Multiple joins, dropping feature");
+                                continue;
+                            }
                             if (i++ % percent == 0)
                                 System.err.print(i * 100 / features.size() + "%...");
                             String header = getSequenceHeader(organism, organelle, nc, region, feature.getSource());
@@ -122,6 +127,16 @@ public class Parser {
             System.err.println("[ERROR] Failed to close file " + gb_file_path);
             throw e;
         }
+    }
+
+    /**
+     * Check if the location contains multiple joins
+     */
+    private boolean containsMultipleJoins(String source) {
+        int i = source.indexOf("join");
+        if (i >= 0)
+            i = source.indexOf("join", i+4);
+        return i >= 0;
     }
 
     private void writeSequence(DNASequence complete_sequence, Location location, String header, BufferedWriter writer) throws IOException {
