@@ -6,24 +6,19 @@ import java.util.ArrayList;
 Répertorie les progrès des taches
  */
 public class Progress {
-
     private ArrayList<ProgressTask> progressTasks;
+
     public ProgressTask registerTask(String name) {
-        return null;
-    }
-    public ArrayList<ProgressTask> all_tasks() {return progressTasks;}
-
-    public Progress(){
-        this.progressTasks = new ArrayList<>();
+        progressTasks = new ArrayList<ProgressTask>();
+        progressTasks.add(new ProgressTask(name));
+        return progressTasks.get(progressTasks.size() - 1);
     }
 
-    public void pushback(ProgressTask pt)
-    {
-        progressTasks.add(pt);
+    public ArrayList<ProgressTask> all_tasks() {
+        return progressTasks;
     }
-    public void remove_task(ProgressTask t)
-    {
+
+    public void remove_task(ProgressTask t) {
         progressTasks.remove(t);
     }
-
 }
