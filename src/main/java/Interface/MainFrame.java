@@ -1,5 +1,7 @@
 package Interface;
 
+
+
 import org.NcbiParser.TreeNode;
 import org.NcbiParser.TreeLeaf;
 import javax.swing.text.Position;
@@ -113,24 +115,10 @@ public class MainFrame extends JFrame {
             @Override
             public void mouseClicked(MouseEvent event) {
                 super.mouseClicked(event);
-                DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                DefaultMutableTreeNode node;
-                if (event.getButton() == MouseEvent.BUTTON3) {
-                    test2.push_node(leafT1);
-                    node = update_tree(leafT1, test2.getText());
-                    if(node != null) { model.reload(node); }
-                    test2.push_node(leafF1);
-                    node = update_tree(leafF1, test2.getText());
-                    if(node != null) { model.nodeChanged(node); }
-                    test4.push_node(leafT2);
-                    node = update_tree(leafT2, test4.getText());
-                    if(node != null) { model.nodeChanged(node); }
-                } else {
-                    logArea.append("Starting process...\n");
-                    arbo = build_tree();
-                    treeModel = new DefaultTreeModel(arbo);
-                    tree.setModel(treeModel);
-                }
+                logArea.append("Starting process...\n");
+                arbo = build_tree();
+                treeModel = new DefaultTreeModel(arbo);
+                tree.setModel(treeModel);
             }
         });
     }
@@ -141,7 +129,6 @@ public class MainFrame extends JFrame {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
