@@ -1,27 +1,28 @@
 package org.NcbiParser;
 
-import java.io.FileNotFoundException;
-import java.util.Arrays;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
-        String gbffPath = "data/sequence_10.gb";
-        String outDir = "Results/Eukaryota/Animals/Amphibians/";
-        String organism = "Homo Sapiens";
-        String[] regions = {"CDS"};
-
+    public static void main(String[] args) throws IOException {
+        Ncbi ncbi = null;
+        boolean error = false;
         try {
-            GbffParser parser = new GbffParser(gbffPath);
-
-            parser.setOrganism(organism);
-            parser.setRegions(regions);
-
-            parser.parse_into(outDir);
-
-        } catch (FileNotFoundException e) {
-            System.err.println("[ERROR] Failed to open file");
+            ncbi = new Ncbi();
+            /*var ov = ncbi.prokaryotes();
+            for (var line : ov) {
+                for (var col : line) {
+                    System.out.printf("%20s ", col);
+                }
+                System.out.printf("\n");
+            }*/
+            ncbi.getGbffFromGc("GCA_012011025.1");
+            ncbi.getGbkFromVirus("Acholeplasma virus L2");
         } catch (Exception e) {
-            System.err.println("[ERROR] Error occurred while parsing");
+            error = true;
+            e.printStackTrace();
+        } finally {
+            System.exit(error ? 1 : 0);
         }
     }
 }
