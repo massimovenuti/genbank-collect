@@ -43,6 +43,32 @@ public class MainPanel extends JFrame {
     private JCheckBox a5utrCheckBox;
     private JTextField choixTextField;
     private JPanel regionPanel;
+    private JProgressBar progressBar1;
+    private JProgressBar progressBar2;
+    private JProgressBar progressBar3;
+    private JProgressBar progressBar4;
+    private JProgressBar progressBar5;
+    private JProgressBar progressBar6;
+    private JProgressBar progressBar7;
+    private JProgressBar progressBar8;
+    private JProgressBar progressBar9;
+    private JProgressBar progressBar10;
+    private JProgressBar progressBar11;
+    private JProgressBar progressBar12;
+    private JProgressBar progressBar13;
+    private JLabel label1;
+    private JLabel label2;
+    private JLabel label3;
+    private JLabel label4;
+    private JLabel label5;
+    private JLabel label6;
+    private JLabel label7;
+    private JLabel label8;
+    private JLabel label9;
+    private JLabel label10;
+    private JLabel label11;
+    private JLabel label12;
+    private JLabel label13;
 
     boolean active = true;
 
@@ -130,6 +156,16 @@ public class MainPanel extends JFrame {
         this.progress = new Progress();
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
+        for (Component c: progressBarContainer.getComponents()){
+            if(c instanceof JProgressBar){
+                c.setVisible(false);
+                progBars.add((JProgressBar) c);
+            }
+            if(c instanceof JLabel){
+                c.setVisible(false);
+                barLabels.add((JLabel) c);
+            }
+        }
 
         progress.registerTask("task1");
         progress.all_tasks().get(0).addTodo(5);
@@ -169,31 +205,20 @@ public class MainPanel extends JFrame {
                     {
                         path.toString();
                     }
-                    progressBarContainer = new JPanel();
 
-                    for (int i = 0; i < progress.all_tasks().size(); i++) {
-                        ProgressTask temp_prog;
-                        temp_prog = progress.all_tasks().get(i);
-                        JProgressBar tempbar = new JProgressBar(0, temp_prog.getTodo());
-                        JLabel label = new JLabel(temp_prog.getName() + " estimated time: " + String.valueOf(temp_prog.estimatedTimeLeftMs()));
-                        tempbar.setLocation(progressBarContainer.getX() + 15,
-                                        i * (progressBarContainer.getY() + 15));
-                        tempbar.setValue(0);
+                    for (int i = 0; i < progress.all_tasks().size() ; i++) {
 
-                        label.setLocation(progressBarContainer.getX() + tempbar.getX() + tempbar.getWidth() + 5,
-                                        i * (progressBarContainer.getY() + 15));
-
-                        progBars.add(tempbar);
-                        barLabels.add(label);
-
-                        progressBarContainer.add(progBars.get(i));
-                        progressBarContainer.add(barLabels.get(i));
-                        progressBarContainer.setSize(300, 300);
                         progBars.get(i).setVisible(true);
-                        progressBarContainer.updateUI();
-                        progressBarContainer.setVisible(true);
+                        barLabels.get(i).setVisible(true);
+                        progBars.get(i).setMinimum(0);
+                        progBars.get(i).setMaximum(progress.all_tasks().get(i).getTodo());
+                        progBars.get(i).setValue(progress.all_tasks().get(i).getDone());
+                        barLabels.get(i).setText("process: " + progress.all_tasks().get(i).getName() + " , estimated time: " + String.valueOf(progress.all_tasks().get(i).estimatedTimeLeftMs()));
+
+
                     }
             }
+
         });
         tree.addTreeSelectionListener(new TreeSelectionListener() {
 
@@ -226,6 +251,7 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
         tree = new JTree(treeModel);
+
 
     }
 }
