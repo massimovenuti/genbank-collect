@@ -5,13 +5,12 @@ package org.NcbiParser;
 import java.util.ArrayList;
 
 public class TreeNode {
-    private TreeNode parent;
     private ArrayList<TreeNode> children;
 
     public ArrayList<TreeNode> getChildren() {
         return children;
     }
-    public TreeNode getParent() { return parent; }
+
     public String getText() {
         return text;
     }
@@ -27,10 +26,9 @@ public class TreeNode {
         return ret;
     }
 
-    public TreeNode(String text, TreeNode parent) {
+    public TreeNode(String text) {
         this.text = text;
-        this.parent = parent;
-        children = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     public void push_node(TreeNode node) {

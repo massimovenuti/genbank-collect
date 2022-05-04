@@ -1,25 +1,21 @@
 package Interface;
 
 
+import org.NcbiParser.Progress;
+import org.NcbiParser.ProgressTask;
 
 import org.NcbiParser.TreeNode;
 import org.NcbiParser.TreeLeaf;
-import javax.swing.text.Position;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import javax.swing.tree.TreePath;
 
-
-public class MainFrame extends JFrame {
+public class MainPanel extends JFrame {
     private JTree tree;
     DefaultMutableTreeNode root_node;
     DefaultTreeModel treeModel;
@@ -27,30 +23,31 @@ public class MainFrame extends JFrame {
     private JButton parseButton;
     private JPanel mainPanel;
     private JTextArea logArea;
-    private JProgressBar parseBar;
-    private JLabel currentStateLabel;
-    private JLabel endStateLabel;
     private JScrollPane scrollPanel;
+
     private JProgressBar downloadBar;
+    private JButton triggerButton;
+    private JPanel progressBarContainer;
+
+    private Progress progress;
+
+    /*exemple progress */
+    public ProgressTask pt = new ProgressTask("prog1");
 
     /* exemple tree */
-    public TreeNode root = new TreeNode("root", null);
-    public TreeNode euka = new TreeNode("eukaryote", root);
-    public TreeNode bakteria = new TreeNode("bacteria", root);
-    public TreeNode test1 = new TreeNode("test_1", euka);
-    public TreeNode test2 = new TreeNode("test_2", euka);
-    public TreeNode test3 = new TreeNode("test_3", bakteria);
-    public TreeNode test4 = new TreeNode("test_4", test3);
-    public TreeLeaf leafT = new TreeLeaf("leaf", true, test2);
+    public TreeNode root = new TreeNode("root");
+    public TreeNode euka = new TreeNode("eukaryote");
+    public TreeNode bakteria = new TreeNode("bacteria");
+    public TreeNode test1 = new TreeNode("test_1");
+    public TreeNode test2 = new TreeNode("test_2");
+    public TreeNode test3 = new TreeNode("test_3");
+    public TreeNode test4 = new TreeNode("test_4");
+    public TreeLeaf leafT = new TreeLeaf("leaf", true);
 
-    public TreeLeaf leafT1 = new TreeLeaf("leaf1", true, test2);
-    public TreeLeaf leafT2 = new TreeLeaf("leaf2", true, test4);
-    public TreeLeaf leafF = new TreeLeaf("leaf00", false, test4);
-    public TreeLeaf leafF1 = new TreeLeaf("leaf000", false, test2);
-
-    public void update_view() {
-
-    }
+    public TreeLeaf leafT1 = new TreeLeaf("leaf1", true);
+    public TreeLeaf leafT2 = new TreeLeaf("leaf2", true);
+    public TreeLeaf leafF = new TreeLeaf("leaf00", false);
+    public TreeLeaf leafF1 = new TreeLeaf("leaf000", false);
 
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
         DefaultMutableTreeNode temp;
@@ -96,7 +93,8 @@ public class MainFrame extends JFrame {
         return node.getPreviousNode();
     }*/
 
-    public MainFrame(String title) {
+
+    public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
@@ -110,7 +108,7 @@ public class MainFrame extends JFrame {
         test3.push_node(test4);
         test2.push_node(leafT);
         test4.push_node(leafF);
-
+        this.progress = new Progress();
         parseButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
@@ -121,10 +119,22 @@ public class MainFrame extends JFrame {
                 tree.setModel(treeModel);
             }
         });
+        triggerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                for( int i = 0; i < progress.all_tasks().size(); i++ ){
+                    JProgressBar tempbar = new JProgressBar(0, progress.all_tasks().get(i).getTotal());
+                    JLabel label = new JLabel(progress.all_tasks().get(i).getName());
+                    progressBarContainer.add(tempbar);
+                    progressBarContainer.add(label);
+                }
+
+            }
+        });
     }
 
     public static void main(String[] args) {
-        JFrame frame = new MainFrame("GeneBank");
+        JFrame frame = new MainPanel("GeneBank");
         frame.setVisible(true);
     }
 
