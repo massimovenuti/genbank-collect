@@ -8,8 +8,4 @@ public class GlobalProgress {
             progress = new Progress();
         return progress;
     }
-
-    public GlobalProgress(Progress progress){
-        this.progress = progress;
-    }
 }
