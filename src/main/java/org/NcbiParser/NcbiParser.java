@@ -1,7 +1,5 @@
 package org.NcbiParser;
 
-import jdk.incubator.vector.VectorMask;
-
 import java.io.*;
 import java.util.*;
 
@@ -15,8 +13,8 @@ public class NcbiParser {
             var line = br.readLine();
             var header = line.split("\t");
             var col_idx = new ArrayList<Integer>();
-            for (int i = 0; i < header.length; i++) {
-                for (int j = 0; j < columns.size(); ++j) {
+            for (int j = 0; j < columns.size(); ++j) {
+                for (int i = 0; i < header.length; i++) {
                     if (header[i].contentEquals(columns.get(j))) {
                         col_idx.add(i);
                     }

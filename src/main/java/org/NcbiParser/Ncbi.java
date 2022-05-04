@@ -1,9 +1,6 @@
 package org.NcbiParser;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Ncbi {
@@ -21,29 +18,59 @@ public class Ncbi {
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
-    /*public Vector<RawMetaData> createRawMetaData(String kingdom) throws IOException {
-        var ret = new Vector<RawMetaData>();
+    public ArrayList<ArrayList<String>> eukaryotes() throws IOException {
+        var f = ftp.getFile(report_dir + "/eukaryotes.txt");
+        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
+        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    }
 
-        var kingdom_report = ftp.getFile(report_dir + "/" + kingdom.toLowerCase() + ".txt");
-        // parsing overview
-        var br = new BufferedReader(new FileReader(kingdom_report));
-        var line = br.readLine();
-        var header = Arrays.asList(line.split("\t"));
-        var cols = new Vector<Integer>();
-        cols.add(header.indexOf("#Organism/Name"));
-        cols.add(header.indexOf("Group"));
-        cols.add(header.indexOf("SubGroup"));
-        cols.add(header.indexOf("Genes"));
-        cols.add(header.indexOf("Modify Date"));
-        while ((line = br.readLine()) != null) {
-            var splitted = line.split("\t");
-            if (splitted.length > cols.get(4)) {
-                ret.add(new RawMetaData(null, splitted[cols.get(1)],
-                        splitted[cols.get(2)], splitted[cols.get(0)],
-                        splitted[cols.get(4)], splitted[cols.get(3)]));
-            }
-        }
-        br.close();
-        return ret;
-    }*/
+    public ArrayList<ArrayList<String>> viruses() throws IOException {
+        var f = ftp.getFile(report_dir + "/viruses.txt");
+        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"/*, Segmemts*/};
+        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    }
+
+    public ArrayList<ArrayList<String>> prokaryotes() throws IOException {
+        var f = ftp.getFile(report_dir + "/prokaryotes.txt");
+        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", "Segmemts"};
+        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    }
+
+    /*
+    - Prokaryotes / Eukaryotes : GCA_022488325.1 -> /genomes/all/022/488/325/GCA_022488325.1_ASM2248832v1/
+        * GCA_022488325.1_ASM2248832v1_genomic.gbff.gz
+    - Viruses : nom = Acholeplasma virus L2 -> /genomes/Viruses/acholeplasma_virus_l2_uid14066/
+        * NC_001447.gbk
+     */
+    public static String gcPath(String gc) {
+        String g = gc.substring(0, 3);
+        String dirs[] = {gc.substring(4, 4+3), gc.substring(4+3, 4+6), gc.substring(4+6, 4+9)};
+        String suffix = gc.substring(4+9);
+        String ftpDir = "/genomes/all/" + g + "/" + dirs[0] + "/" + dirs[1] + "/" + dirs[2] + "/";
+        return ftpDir;
+    }
+
+    public String gcDirectory(String gc) throws IOException {
+        String p = gcPath(gc);
+        return ftp.getDirectoryFromStart(p, gc);
+    }
+
+    public File getGbffFromGc(String gc) throws IOException {
+        String path = gcPath(gc);
+        String sub = gcDirectory(gc);
+        return ftp.getFile(path + sub + "/" + sub + "_genomic.gbff.gz");
+    }
+
+    public String virusDirectory(String virusName) throws IOException {
+        String virus = virusName.replace(" ", "_").toLowerCase();
+        String path = "/genomes/Viruses/";
+        return path + ftp.getDirectoryFromStart(path, virus) + "/";
+    }
+
+    public File getGbkFromVirus(String virusName) throws IOException {
+        // TODO: plusieurs .gbk ??
+        String path = virusDirectory(virusName);
+        String filename = ftp.getFileFromEnd(path, ".gbk");
+        return ftp.getFile(path + filename);
+    }
 }

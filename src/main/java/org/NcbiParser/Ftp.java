@@ -117,4 +117,26 @@ public class Ftp {
             fileHashMap.put(f.getName(), f);
         }
     }
+
+    public String getDirectoryFromStart(String path, String leading) throws IOException {
+        var files = ftpClient.listDirectories(path);
+        for (var f : files) {
+            if (f.getName().startsWith(leading)) {
+                return f.getName();
+            }
+        }
+        return "";
+    }
+
+    public String getFileFromEnd(String path, String ending) throws IOException {
+        //System.out.println(path);
+        var files = ftpClient.listFiles(path);
+        for (var f : files) {
+            //System.out.println(f);
+            if (f.getName().endsWith(ending)) {
+                return f.getName();
+            }
+        }
+        return "";
+    }
 }
