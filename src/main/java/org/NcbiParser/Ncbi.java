@@ -12,28 +12,52 @@ public class Ncbi {
         ftp.cacheMetadata(report_dir);
     }
 
-    public ArrayList<ArrayList<String>> overview() throws IOException {
+    public ArrayList<ArrayList<String>> rawOverview() throws IOException {
         var f = ftp.getFile(report_dir + "/overview.txt");
         String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
-    public ArrayList<ArrayList<String>> eukaryotes() throws IOException {
+    public ArrayList<ArrayList<String>> rawIndex(String name) throws IOException {
+        var f = ftp.getFile(report_dir + name);
+        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
+        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    }
+    /*
+    public ArrayList<ArrayList<String>> rawEukaryotes() throws IOException {
         var f = ftp.getFile(report_dir + "/eukaryotes.txt");
         String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
-    public ArrayList<ArrayList<String>> viruses() throws IOException {
+    public ArrayList<ArrayList<String>> rawViruses() throws IOException {
         var f = ftp.getFile(report_dir + "/viruses.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"/*, Segmemts*/};
+        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
-    public ArrayList<ArrayList<String>> prokaryotes() throws IOException {
+    public ArrayList<ArrayList<String>> rawProkaryotes() throws IOException {
         var f = ftp.getFile(report_dir + "/prokaryotes.txt");
         String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", "Segmemts"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    }*/
+
+    public ArrayList<OverviewData> overview_to_db() throws IOException {
+        var raw = rawOverview();
+        var ret = new ArrayList<OverviewData>();
+        for (var s : raw) {
+            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3)));
+        }
+        return ret;
+    }
+
+    public ArrayList<IndexData> index_to_db(String name) throws IOException {
+        var raw = rawIndex(name);
+        var ret = new ArrayList<IndexData>();
+        for (var s : raw) {
+            ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4)));
+        }
+        return ret;
     }
 
     /*
