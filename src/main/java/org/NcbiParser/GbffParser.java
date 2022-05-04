@@ -28,12 +28,13 @@ public class GbffParser implements Parser{
 
     public GbffParser(String gbffPath) throws IOException {
         this.gbffPath = gbffPath;
+        System.out.println(gbffPath);
 
         try {
 //            inStream = new FileInputStream(gbffPath);
             InputStreamProvider isProvider = new InputStreamProvider();
-            inStream = isProvider.getInputStream(gbffPath);
-//            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
+            //inStream = isProvider.getInputStream(gbffPath);
+            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file " + gbffPath);
             throw e;

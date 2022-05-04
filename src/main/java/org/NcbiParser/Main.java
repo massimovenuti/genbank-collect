@@ -12,7 +12,7 @@ public class Main {
 //            update(ncbi);
             File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
             GbffParser parser = new GbffParser(gbffFile.getPath());
-            parser.parse_into("Resutls/", "Homo Sapiens", "", new String[]{"CDS"});
+            parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
         } catch (Exception e) {
             error = true;

@@ -22,6 +22,8 @@ public class Ftp {
                 throw new IOException("FTP server refused connection.");
             }
 
+            ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+
         } catch (Throwable e) {
             throw new IOException("Unable to connnect to ftp server: " + e.getMessage(), e);
         }
@@ -62,7 +64,7 @@ public class Ftp {
         // https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftpClient = new FTPClient();
         ftpClient.setControlKeepAliveTimeout(300);
-        //ftp.setControlEncoding("UTF-8");
+        //ftpCV.setControlEncoding("UTF-8");
         //ftp.setAutodetectUTF8(true);
         FTPClientConfig config = new FTPClientConfig();
         //config.setServerTimeZoneId("Europe/Paris");
