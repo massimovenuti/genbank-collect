@@ -1,18 +1,21 @@
 package Interface;
 
 
-import org.NcbiParser.Progress;
-import org.NcbiParser.ProgressTask;
-
-import org.NcbiParser.TreeNode;
-import org.NcbiParser.TreeLeaf;
+import org.NcbiParser.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Objects;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 
 public class MainPanel extends JFrame {
@@ -28,11 +31,26 @@ public class MainPanel extends JFrame {
     private JProgressBar downloadBar;
     private JButton triggerButton;
     private JPanel progressBarContainer;
+    private JCheckBox cdsCheckBox;
+    private JCheckBox centromereCheckBox;
+    private JCheckBox intronCheckBox;
+    private JCheckBox mobile_elementCheckBox;
+    private JCheckBox ncrnaCheckBox;
+    private JCheckBox rrnaCheckBox;
+    private JCheckBox telomereCheckBox;
+    private JCheckBox trnaCheckBox;
+    private JCheckBox a3utrCheckBox;
+    private JCheckBox a5utrCheckBox;
+    private JTextField choixTextField;
+    private JPanel regionPanel;
 
-    private Progress progress;
+    boolean active = true;
 
+    public ArrayList<TreePath> treePaths;
     /*exemple progress */
-    public ProgressTask pt = new ProgressTask("prog1");
+    public ArrayList<JProgressBar> progBars;
+    public ArrayList<JLabel> barLabels;
+    private Progress progress;
 
     /* exemple tree */
     public TreeNode root = new TreeNode("root");
@@ -49,10 +67,33 @@ public class MainPanel extends JFrame {
     public TreeLeaf leafF = new TreeLeaf("leaf00", false);
     public TreeLeaf leafF1 = new TreeLeaf("leaf000", false);
 
+    ImageIcon obsoleteIcon;
+    ImageIcon up_to_dateIcon;
+
+    public ArrayList<String> create_region_array(){
+        ArrayList<String> checked = new ArrayList<>();
+        for (Component c : regionPanel.getComponents())
+        {
+            if(c instanceof JCheckBox){
+                if(((JCheckBox) c).isSelected()){
+                    checked.add(((JCheckBox) c).getText());
+                }
+            }
+        }
+        if(!choixTextField.equals(""))
+            checked.add(choixTextField.getText());
+        return checked;
+    }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
+        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
         DefaultMutableTreeNode temp;
         temp = new DefaultMutableTreeNode(child.getText());
         parent_node.add(temp);
+        if (child.is_uptodate()) {
+            renderer.setIcon(up_to_dateIcon);
+        } else {
+            renderer.setIcon(obsoleteIcon);
+        }
         if (child instanceof TreeLeaf) {
             return;
         } else {
@@ -72,28 +113,6 @@ public class MainPanel extends JFrame {
         }
         return root_node;
     }
-
-    /*public DefaultMutableTreeNode update_tree(TreeNode target, String parent_name) {
-        Enumeration iter = root_node.breadthFirstEnumeration();
-        Boolean found = false;
-        DefaultMutableTreeNode node = null;
-        while (iter.hasMoreElements()) {
-            node = new DefaultMutableTreeNode(iter.nextElement());
-            if (parent_name.indexOf(node.getUserObject().toString()) != -1) {
-                System.out.println("parent found");
-                DefaultMutableTreeNode temp = new DefaultMutableTreeNode(target.getText());
-                node.add(temp);
-                found = true;
-                break;
-            }
-        }
-        if (!found){
-            System.out.println("Error in update_tree: " + parent_name + " not found");
-        }
-        return node.getPreviousNode();
-    }*/
-
-
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,24 +128,88 @@ public class MainPanel extends JFrame {
         test2.push_node(leafT);
         test4.push_node(leafF);
         this.progress = new Progress();
+        this.progBars = new ArrayList<>();
+        this.barLabels = new ArrayList<>();
+
+        progress.registerTask("task1");
+        progress.all_tasks().get(0).addTodo(5);
+        progress.all_tasks().get(0).addTodo(2);
+
+        progress.registerTask("task2");
+        progress.all_tasks().get(1).addTodo(1);
+        progress.all_tasks().get(1).addTodo(2);
+
+        progress.registerTask("task3");
+        progress.all_tasks().get(2).addTodo(3);
+        progress.all_tasks().get(2).addTodo(1);
+
+        progress.registerTask("task4");
+        progress.all_tasks().get(3).addTodo(3);
+        progress.all_tasks().get(3).addTodo(1);
+        treePaths = new ArrayList<>();
+        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+        arbo = build_tree();
+        treeModel = new DefaultTreeModel(arbo);
+        tree.setModel(treeModel);
         parseButton.addMouseListener(new MouseAdapter() {
+            ArrayList<String> regions = new ArrayList<>();
             @Override
             public void mouseClicked(MouseEvent event) {
                 super.mouseClicked(event);
+                regions = create_region_array();
                 logArea.append("Starting process...\n");
-                arbo = build_tree();
-                treeModel = new DefaultTreeModel(arbo);
-                tree.setModel(treeModel);
+
             }
         });
         triggerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for( int i = 0; i < progress.all_tasks().size(); i++ ){
-                    JProgressBar tempbar = new JProgressBar(0, progress.all_tasks().get(i).getTotal());
-                    JLabel label = new JLabel(progress.all_tasks().get(i).getName());
-                    progressBarContainer.add(tempbar);
-                    progressBarContainer.add(label);
+                    for ( TreePath path : treePaths)
+                    {
+                        path.toString();
+                    }
+                    progressBarContainer = new JPanel();
+
+                    for (int i = 0; i < progress.all_tasks().size(); i++) {
+                        ProgressTask temp_prog;
+                        temp_prog = progress.all_tasks().get(i);
+                        JProgressBar tempbar = new JProgressBar(0, temp_prog.getTodo());
+                        JLabel label = new JLabel(temp_prog.getName() + " estimated time: " + String.valueOf(temp_prog.estimatedTimeLeftMs()));
+                        tempbar.setLocation(progressBarContainer.getX() + 15,
+                                        i * (progressBarContainer.getY() + 15));
+                        tempbar.setValue(0);
+
+                        label.setLocation(progressBarContainer.getX() + tempbar.getX() + tempbar.getWidth() + 5,
+                                        i * (progressBarContainer.getY() + 15));
+
+                        progBars.add(tempbar);
+                        barLabels.add(label);
+
+                        progressBarContainer.add(progBars.get(i));
+                        progressBarContainer.add(barLabels.get(i));
+                        progressBarContainer.setSize(300, 300);
+                        progBars.get(i).setVisible(true);
+                        progressBarContainer.updateUI();
+                        progressBarContainer.setVisible(true);
+                    }
+            }
+        });
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
+
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                if(active) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+                    TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+                    if (!treePaths.contains(path)) {
+                        treePaths.add(path);
+                    } else {
+                        treePaths.remove(path);
+                    }
+                    active = false;
+                    tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+                    active = true;
                 }
 
             }
@@ -143,5 +226,6 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
         tree = new JTree(treeModel);
+
     }
 }
