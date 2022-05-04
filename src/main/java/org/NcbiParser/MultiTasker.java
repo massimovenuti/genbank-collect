@@ -7,11 +7,19 @@ public class MultiTasker {
     private ConcurrentLinkedQueue<DLTask> downloads;
     private ConcurrentLinkedQueue<ParsingTask> parsings;
 
-    public void pushTask(DLTask task) {
+    public MultiTasker() {
+        downloads = new ConcurrentLinkedQueue<DLTask>();
+        parsings = new ConcurrentLinkedQueue<ParsingTask>();
     }
 
-    public void pushTask(ParsingTask task) {}
+    public void pushTask(DLTask task) {
+        downloads.add(task);
+    }
 
-    public DLTask popDLTask() {return null;}
-    public ParsingTask popParsingTask() {return null;}
+    public void pushTask(ParsingTask task) {
+        parsings.add(task);
+    }
+
+    public DLTask popDLTask() {return downloads.poll();}
+    public ParsingTask popParsingTask() {return parsings.poll();}
 }
