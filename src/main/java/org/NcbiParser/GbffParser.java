@@ -20,8 +20,8 @@ import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
-//    InputStream inStream = null;
-    GZIPInputStream inStream = null;
+    InputStream inStream = null;
+//    GZIPInputStream inStream = null;
 //    UncompressInputStream inStream;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
     String gbffPath = "", fileExtension = "txt";
@@ -32,7 +32,7 @@ public class GbffParser implements Parser{
         try {
 //            inStream = new FileInputStream(gbffPath);
             InputStreamProvider isProvider = new InputStreamProvider();
-            inStream = (GZIPInputStream) isProvider.getInputStream(gbffPath);
+            inStream = isProvider.getInputStream(gbffPath);
 //            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file " + gbffPath);
