@@ -8,30 +8,27 @@ import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
-import org.biojava.nbio.core.util.InputStreamProvider;
-import org.biojava.nbio.core.util.UncompressInputStream;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
     InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
-    String gbffPath = "", fileExtension = ".txt";
+    String gbPath, fileExtension = ".txt";
 
-    public GbffParser(String gbffPath) throws IOException {
-        this.gbffPath = gbffPath;
+    public GbffParser(File gbFile) throws IOException {
+        this.gbPath = gbFile.getPath();
 
         try {
-            InputStreamProvider inputStreamProvider = new InputStreamProvider();
-            inStream = inputStreamProvider.getInputStream(gbffPath);
+            inStream = new GZIPInputStream(new FileInputStream(gbFile));
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to open file " + gbffPath);
+            System.err.println("[ERROR] Failed to open file " + gbFile);
             throw e;
         }
 
@@ -69,8 +66,8 @@ public class GbffParser implements Parser{
         writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, String[] regions) throws IOException, CompoundNotFoundException {
-        System.err.println("[DEBUG] Parsing : " + gbffPath);
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
+        System.err.println("[DEBUG] Parsing : " + gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -150,7 +147,7 @@ public class GbffParser implements Parser{
             dnaReader.close();
             inStream.close();
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to close file " + gbffPath);
+            System.err.println("[ERROR] Failed to close file " + gbPath);
             throw e;
         }
 
