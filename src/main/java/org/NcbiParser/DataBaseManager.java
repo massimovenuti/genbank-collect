@@ -1,6 +1,7 @@
 package org.NcbiParser;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public final class DataBaseManager {
     private static String path_;
@@ -52,44 +53,59 @@ public final class DataBaseManager {
         }
     }
 
-    /**
-     * insert ou ignore dans les table generique kingdom
-     * @param nomTable nom de la table doit être (kingdom groupe subgroup)
-     * @return clé de la ligne
-     */
-    public static int insertOrIgnoreIdNom(String nomTable,String name) throws SQLException {
-        String req = "INSERT OR IGNORE INTO " + nomTable + " (nom) VALUES(?);";
-        PreparedStatement ps = null;
 
+    public static void insertOverviewTable(ArrayList<String> kindomNames,ArrayList<String> GroupNames,ArrayList<String> subGroupNames,
+                                           ArrayList<String> organismNames) throws SQLException {
+        PreparedStatement ps;
         try{
-            ps = connection_.prepareStatement(req);
-            ps.setString(1,name);
-            ps.executeUpdate();
+            String compiledQuery = "INSERT OR IGNORE INTO OVERVIEW (kingdom, groupe, subgroup, organisme, organelle)" +
+                    " VALUES" + "(?, ?, ?, ?, ?)";
+            ps = connection_.prepareStatement(compiledQuery);
 
-            Statement s = connection_.createStatement();
-            ResultSet rs = s.executeQuery("SELECT id FROM " + nomTable + " WHERE nom = \"" + name + "\" ;");
-            return Integer.parseInt(rs.getString("id"));
-        }catch (Exception eio){
-            System.out.println(eio.getMessage());
-            return -1;
+            for(int i = 0; i <kindomNames.size(); i++) {
+                ps.setString(1, kindomNames.get(i));
+                ps.setString(2, GroupNames.get(i));
+                ps.setString(3, subGroupNames.get(i));
+                ps.setString(4, organismNames.get(i));
+                ps.setString(5, null);
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+
+        }catch(Exception eio){
+            throw new RuntimeException("Error batch");
         }
+
+
     }
 
-    public static void insertOrIgnoreOrganism(int kinCle,int grouCle,int subCle,String name){
-        String req = "INSERT OR IGNORE INTO ORGANISM (kingdom_id, group_id, subgroup_id, nom) VALUES (?, ?, ?, ?)";
-        PreparedStatement ps = null;
-
+    public static void insertIndexesTables(ArrayList<String> GroupNames,ArrayList<String> subGroupNames,
+                                           ArrayList<String> organismNames,ArrayList<String> gcc,
+                                           ArrayList<String> lastModify){
+        PreparedStatement ps;
         try{
-            ps = connection_.prepareStatement(req);
-            ps.setInt(1,kinCle);
-            ps.setInt(2,grouCle);
-            ps.setInt(3,subCle);
-            ps.setString(4,name);
-            ps.executeUpdate();
-        }catch (Exception eio){
-            System.out.println(eio.getMessage());
+            String compiledQuery = "INSERT OR IGNORE INTO INDEXES (groupe, subgroup,organisme, GC, last_modify)" +
+                    " VALUES" + "(?, ?, ?, ?, ?)";
+            ps = connection_.prepareStatement(compiledQuery);
+
+            for(int i = 0; i <GroupNames.size(); i++) {
+                ps.setString(1, GroupNames.get(i));
+                ps.setString(2, subGroupNames.get(i));
+                ps.setString(3, organismNames.get(i));
+                ps.setString(4, gcc.get(i));
+                ps.setString(5, lastModify.get(i));
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+
+        }catch(Exception eio){
+            throw new RuntimeException("Error batch");
         }
+
     }
+
 
     public static Connection getConnection_(){
         return connection_;

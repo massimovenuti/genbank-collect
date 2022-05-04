@@ -29,12 +29,18 @@ public class DataBase {
     public static void updateFromOverview(ArrayList<OverviewData> overview_parsed) throws SQLException {
         if(DataBaseManager.getConnection_() != null){
             try{
+                ArrayList<String> kingdomNames = new ArrayList<String>();
+                ArrayList<String> groupNames = new ArrayList<String>();
+                ArrayList<String> subgroupNames = new ArrayList<String>();
+                ArrayList<String> organismNames = new ArrayList<String>();
+
                 for (var data : overview_parsed) {
-                    int indKindom = DataBaseManager.insertOrIgnoreIdNom("KINGDOM", data.getKingdom());
-                    int indGroup = DataBaseManager.insertOrIgnoreIdNom("GROUPE", data.getGroup());
-                    int indSubgroup = DataBaseManager.insertOrIgnoreIdNom("SUBGROUP", data.getSubgroup());
-                    DataBaseManager.insertOrIgnoreOrganism(indKindom,indGroup,indSubgroup,data.getOrganism());
+                    kingdomNames.add(data.getKingdom());
+                    groupNames.add(data.getGroup());
+                    subgroupNames.add(data.getSubgroup());
+                    organismNames.add(data.getOrganism());
                 }
+                DataBaseManager.insertOverviewTable(kingdomNames,groupNames,subgroupNames,organismNames);
 
             }catch(Exception eio){
 
@@ -42,7 +48,30 @@ public class DataBase {
         }
     }
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
-    public static void updateFromIndexFile(ArrayList<IndexData> index_parsed) { }
+    public static void updateFromIndexFile(ArrayList<IndexData> index_parsed) {
+        if(DataBaseManager.getConnection_() != null){
+            try{
+                ArrayList<String> groupNames = new ArrayList<String>();
+                ArrayList<String> subgroupNames = new ArrayList<String>();
+                ArrayList<String> organismNames = new ArrayList<String>();
+                ArrayList<String> GC = new ArrayList<String>();
+                ArrayList<String> lastModify = new ArrayList<String>();
+
+                for (var data : index_parsed) {
+                    groupNames.add(data.getGroup());
+                    subgroupNames.add(data.getSubgroup());
+                    organismNames.add(data.getOrganism());
+                    GC.add(data.getGc());
+                    lastModify.add(data.getModifyDate());
+                }
+                DataBaseManager.insertIndexesTables(groupNames,subgroupNames,organismNames,GC,lastModify);
+
+            }catch(Exception eio){
+
+            }
+        }
+
+    }
 
     /*
         à partir de la base mise à jour, donne les ids des organismes pour
@@ -67,58 +96,28 @@ public class DataBase {
         //Ouverture de la base ou création si inéxistante
         DataBaseManager.connectionToDb();
 
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS KINGDOM (" +
+        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS OVERVIEW (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nom TEXT UNIQUE)");
+                "kingdom TEXT," +
+                "groupe TEXT," +
+                "subgroup TEXT," +
+                "organisme TEXT," +
+                "organelle TEXT)");
 
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS GROUPE (" +
+        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS INDEXES (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nom TEXT UNIQUE)");
+                "groupe TEXT," +
+                "subgroup TEXT," +
+                "organisme TEXT," +
+                "GC TEXT," +
+                "last_modify TEXT)");
 
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS SUBGROUP (" +
+        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS FILES (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nom TEXT UNIQUE)");
+                "Type TEXT," +
+                "indexes_id INTEGER," +
+                "date TEXT)");
 
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS ORGANELLE (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nom TEXT UNIQUE," +
-                "organism_id INTEGER," +
-                "FOREIGN KEY (organism_id) REFERENCES ORGANISM(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE)");
-
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS ORGANISM (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "kingdom_id INTEGER," +
-                "group_id INTEGER," +
-                "subgroup_id INTEGER," +
-                "nom TEXT UNIQUE," +
-                "UNIQUE(kingdom_id,group_id,subgroup_id,nom)," +
-                "FOREIGN KEY (kingdom_id) REFERENCES KINGDOM(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE," +
-                "FOREIGN KEY (group_id) REFERENCES GROUPE(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE," +
-                "FOREIGN KEY (subgroup_id) REFERENCES SUBGROUP(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE)");
-
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS HIERARCHYDATE (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "organism_id INTEGER," +
-                "date_id INTEGER," +
-                "FOREIGN KEY (organism_id) REFERENCES ORGANISM(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE," +
-                "FOREIGN KEY (date_id) REFERENCES DATE(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE)");
-
-
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS PARSINGRESULTS (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "organism_id INTEGER," +
-                "date_id INTEGER," +
-                "nb_files_parsed INTEGER," +
-                "FOREIGN KEY (organism_id) REFERENCES ORGANISM(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE," +
-                "FOREIGN KEY (date_id) REFERENCES DATE(id)" +
-                "   ON DELETE CASCADE ON UPDATE CASCADE)");
 
     }
 
