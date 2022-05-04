@@ -1,7 +1,6 @@
 package org.NcbiParser;
 
 import java.io.*;
-import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -9,11 +8,11 @@ public class Main {
         boolean error = false;
         try {
             ncbi = new Ncbi();
-            var mt = new MultiThreading(4, 1);
+            var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             update(ncbi);
             var r = ncbi.index_to_db("eukaryotes.txt");
             for (var line : r)
-                mt.getMt().pushTask(new DLGCTask(line.getGc()));
+                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), null, line.getGc())));
             //ncbi.getGbffFromGc("GCA_012011025.1");
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
             // File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");

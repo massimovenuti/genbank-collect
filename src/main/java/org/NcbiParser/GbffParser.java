@@ -8,15 +8,13 @@ import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
-import org.biojava.nbio.core.util.InputStreamProvider;
-import org.biojava.nbio.core.util.UncompressInputStream;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
@@ -24,14 +22,13 @@ public class GbffParser implements Parser{
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
     String gbffPath = "", fileExtension = ".txt";
 
-    public GbffParser(String gbffPath) throws IOException {
-        this.gbffPath = gbffPath;
-        System.out.println(gbffPath);
+    public GbffParser(File gbFile) throws IOException {
+        System.out.println(gbFile);
 
         try {
-            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
+            inStream = new GZIPInputStream(new FileInputStream(gbFile));
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to open file " + gbffPath);
+            System.err.println("[ERROR] Failed to open file " + gbFile);
             throw e;
         }
 
@@ -64,7 +61,7 @@ public class GbffParser implements Parser{
         writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, String[] regions) throws IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
         System.err.println("[DEBUG] Parsing : " + gbffPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
