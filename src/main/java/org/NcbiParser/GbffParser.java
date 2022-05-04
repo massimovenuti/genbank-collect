@@ -44,15 +44,20 @@ public class GbffParser implements Parser{
     }
 
     /**
-     * Check if source is well formatted
+     * Check if source is on multiple lines
      */
-    private boolean wrongFormat(String source) {
-        if (source.indexOf('\n') >= 0)
-            return true;
+    private boolean multipleLineSource(String source) {
+        return source.indexOf('\n') >= 0;
+    }
+
+    /**
+     * Check if source contains multiple joins
+     */
+    private boolean containsMultipleJoins(String source) {
         int i = source.indexOf("join");
-        if (i >= 0 & source.indexOf("join", i + 4) >= 0)
-            return true;
-        return false;
+        if (i >= 0)
+            i = source.indexOf("join", i + 4);
+        return i >= 0;
     }
 
     private void writeSequence(DNASequence complete_sequence, Location location, BufferedWriter writer) throws IOException {
@@ -81,7 +86,7 @@ public class GbffParser implements Parser{
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features\n");
+                    System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty())
                         continue;
                     String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
@@ -96,9 +101,10 @@ public class GbffParser implements Parser{
                                 bufferedWriter.newLine();
                                 writeSequence(sequence, feature.getLocations(), bufferedWriter);
                                 bufferedWriter.newLine();
-                            } else if (wrongFormat(feature.getSource())) {
-                                System.err.println("[DEBUG] Wrong format : dropping feature");
-                                continue;
+                            } else if (multipleLineSource(feature.getSource())) {
+                                System.err.println("[DEBUG] Wrong format : multiple lines source");
+                            } else if (containsMultipleJoins(feature.getSource())) {
+                                System.err.println("[DEBUG] Wrong format : multiple joins");
                             } else {
                                 bufferedWriter.write(header);
                                 bufferedWriter.newLine();
