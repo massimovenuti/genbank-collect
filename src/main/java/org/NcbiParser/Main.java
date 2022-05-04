@@ -10,7 +10,9 @@ public class Main {
         try {
             ncbi = new Ncbi();
             update(ncbi);
-            //ncbi.getGbffFromGc("GCA_012011025.1");
+            File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
+            GbffParser parser = new GbffParser(gbffFile.getPath());
+            parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
         } catch (Exception e) {
             error = true;
