@@ -9,11 +9,12 @@ public class IndexData {
 
     private String modifyDate;
     
-    public IndexData(String group, String subgroup, String organism, String modifyDate) {
+    public IndexData(String group, String subgroup, String organism, String modifyDate, String gc) {
         this.group = group;
         this.subgroup = subgroup;
         this.organism = organism;
         this.modifyDate = modifyDate;
+        this.gc = gc;
     }
 
     public String getGroup() {
@@ -30,4 +31,10 @@ public class IndexData {
 
     private String subgroup;
     private String organism;
+
+    public String getGc() {
+        return gc;
+    }
+
+    private String gc;
 }
