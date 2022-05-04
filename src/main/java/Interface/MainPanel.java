@@ -70,28 +70,20 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
 
+    private GlobalProgress progress;
     boolean active = true;
 
     public ArrayList<TreePath> treePaths;
+
+    public ArrayList<TreeNode> quadruplets;
+
+    public ArrayList<ArrayList<TreeNode>> selectedNodes;
     /*exemple progress */
     public ArrayList<JProgressBar> progBars;
     public ArrayList<JLabel> barLabels;
-    private Progress progress;
 
     /* exemple tree */
     public TreeNode root = new TreeNode("root");
-    public TreeNode euka = new TreeNode("eukaryote");
-    public TreeNode bakteria = new TreeNode("bacteria");
-    public TreeNode test1 = new TreeNode("test_1");
-    public TreeNode test2 = new TreeNode("test_2");
-    public TreeNode test3 = new TreeNode("test_3");
-    public TreeNode test4 = new TreeNode("test_4");
-    public TreeLeaf leafT = new TreeLeaf("leaf", true);
-
-    public TreeLeaf leafT1 = new TreeLeaf("leaf1", true);
-    public TreeLeaf leafT2 = new TreeLeaf("leaf2", true);
-    public TreeLeaf leafF = new TreeLeaf("leaf00", false);
-    public TreeLeaf leafF1 = new TreeLeaf("leaf000", false);
 
     ImageIcon obsoleteIcon;
     ImageIcon up_to_dateIcon;
@@ -139,23 +131,49 @@ public class MainPanel extends JFrame {
         }
         return root_node;
     }
+
+    public ArrayList<TreeNode> init_quadruplet(TreeNode node, int depth)
+    {
+        ArrayList<TreeNode> out = new ArrayList<>();
+        for(int i = 0; i < 4 ; i++)
+        {
+            if(i == depth -1){
+                out.add(node);
+            }
+            else{
+                out.add(null);
+            }
+        }
+        return out;
+    }
+
+    public TreeNode find_by_name(TreeNode current,String name){
+        TreeNode temp = null;
+        if(name == current.getText())
+            return current;
+        if(current instanceof TreeLeaf)
+            return null;
+        else{
+
+            for(TreeNode child : current.getChildren()){
+                temp = find_by_name(child, name);
+                if(temp != null)
+                    break;
+            }
+
+        }
+        return temp;
+    }
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
-
-        root.push_node(euka);
-        root.push_node(bakteria);
-        euka.push_node(test1);
-        euka.push_node(test2);
-        bakteria.push_node(test3);
-        test3.push_node(test4);
-        test2.push_node(leafT);
-        test4.push_node(leafF);
-        this.progress = new Progress();
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
+        treePaths = new ArrayList<>();
+        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
                 c.setVisible(false);
@@ -167,35 +185,23 @@ public class MainPanel extends JFrame {
             }
         }
 
-        progress.registerTask("task1");
-        progress.all_tasks().get(0).addTodo(5);
-        progress.all_tasks().get(0).addTodo(2);
-
-        progress.registerTask("task2");
-        progress.all_tasks().get(1).addTodo(1);
-        progress.all_tasks().get(1).addTodo(2);
-
-        progress.registerTask("task3");
-        progress.all_tasks().get(2).addTodo(3);
-        progress.all_tasks().get(2).addTodo(1);
-
-        progress.registerTask("task4");
-        progress.all_tasks().get(3).addTodo(3);
-        progress.all_tasks().get(3).addTodo(1);
-        treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+        /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
+        * du reste il ne faut initialiser le root qui est une variable globale TreeNode
+        */
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
+
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
             @Override
             public void mouseClicked(MouseEvent event) {
                 super.mouseClicked(event);
-                regions = create_region_array();
                 logArea.append("Starting process...\n");
+                regions = create_region_array();
 
+                parseButton.setEnabled(false);
             }
         });
         triggerButton.addMouseListener(new MouseAdapter() {
@@ -206,16 +212,13 @@ public class MainPanel extends JFrame {
                         path.toString();
                     }
 
-                    for (int i = 0; i < progress.all_tasks().size() ; i++) {
-
+                    for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
                         progBars.get(i).setVisible(true);
                         barLabels.get(i).setVisible(true);
                         progBars.get(i).setMinimum(0);
-                        progBars.get(i).setMaximum(progress.all_tasks().get(i).getTodo());
-                        progBars.get(i).setValue(progress.all_tasks().get(i).getDone());
-                        barLabels.get(i).setText("process: " + progress.all_tasks().get(i).getName() + " , estimated time: " + String.valueOf(progress.all_tasks().get(i).estimatedTimeLeftMs()));
-
-
+                        progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
+                        progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
+                        barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName() + " , estimated time: " + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
                     }
             }
 
@@ -227,10 +230,14 @@ public class MainPanel extends JFrame {
                 if(active) {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
                     TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+                    TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
+                    quadruplets = init_quadruplet(tree_node, node.getLevel());
                     if (!treePaths.contains(path)) {
                         treePaths.add(path);
+                        selectedNodes.add(quadruplets);
                     } else {
                         treePaths.remove(path);
+                        selectedNodes.remove(quadruplets);
                     }
                     active = false;
                     tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
