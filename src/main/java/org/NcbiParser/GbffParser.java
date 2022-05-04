@@ -8,24 +8,28 @@ import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
+import org.biojava.nbio.core.util.InputStreamProvider;
+import org.biojava.nbio.core.util.UncompressInputStream;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
-    FileInputStream inStream = null;
+    InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
-    String[] regions;
-    String gbffPath = "", organism = "", organelle = "", fileExtension = "txt";
+    String gbffPath = "", fileExtension = ".txt";
 
-    public GbffParser(String gbffPath) throws FileNotFoundException {
+    public GbffParser(String gbffPath) throws IOException {
         this.gbffPath = gbffPath;
+        System.out.println(gbffPath);
 
         try {
-            inStream = new FileInputStream(gbffPath);
+            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file " + gbffPath);
             throw e;
@@ -60,25 +64,7 @@ public class GbffParser implements Parser{
         writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
     }
 
-
-    public void setOrganism(String organism) {
-        this.organism = organism;
-    }
-
-    public void setOrganelle(String organelle) {
-        this.organelle = organelle;
-    }
-
-    public void setRegions(String[] regions) {
-        this.regions = regions;
-    }
-
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-
-    @Override
-    public boolean parse_into(String outDirectory) throws IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, String[] regions) throws IOException, CompoundNotFoundException {
         System.err.println("[DEBUG] Parsing : " + gbffPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
@@ -101,7 +87,7 @@ public class GbffParser implements Parser{
                     System.err.print("[DEBUG] " + region + " : " + features.size() + " features\n");
                     if (features.isEmpty())
                         continue;
-                    String filePath = String.join("_", outDirectory, region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
+                    String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
                     filePath = filePath.replace(" ", "_");
                     try {
                         writer = new FileWriter(filePath, false);
@@ -163,5 +149,10 @@ public class GbffParser implements Parser{
         }
 
         return true;
+    }
+
+    @Override
+    public boolean parse_into(String outDirectory) {
+        return false;
     }
 }
