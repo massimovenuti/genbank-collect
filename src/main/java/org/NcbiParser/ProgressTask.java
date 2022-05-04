@@ -1,7 +1,5 @@
 package org.NcbiParser;
 
-import java.util.Timer;
-
 // suivi d'une tache
 public class ProgressTask {
     private String name;
@@ -15,19 +13,33 @@ public class ProgressTask {
         return done;
     }
 
-    public int getTotal() {
-        return total;
+    public int getTodo() {
+        return todo;
     }
 
-    private int total;
+    private int todo;
     private long start_ms;
 
     public ProgressTask(String name) {
         this.name = name;
         this.start_ms = System.currentTimeMillis();
+        this.done = 0;
+        this.todo = 0;
     }
 
-    public long elapsed_ms() {
+    public long elapsedMs() {
         return System.currentTimeMillis() - start_ms;
+    }
+
+    public float estimatedTimeLeftMs() {
+        return getTodo() > 0 ? elapsedMs() / (((float) getDone()) / ((float)getTodo())) : 0;
+    }
+
+    public void addTodo(int todo) {
+        this.todo += todo;
+    }
+
+    public void addDone(int done) {
+        this.done += done;
     }
 }
