@@ -12,6 +12,6 @@ public class MultiTasker {
 
     public void pushTask(ParsingTask task) {}
 
-    public DLTask popDLTask() {return null;}
-    public ParsingTask popParsingTask() {return null;}
+    public DLTask popDLTask() {return downloads.poll();}
+    public ParsingTask popParsingTask() {return parsings.poll();}
 }
