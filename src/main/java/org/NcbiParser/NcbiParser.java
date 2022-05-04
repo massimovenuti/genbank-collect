@@ -21,10 +21,14 @@ public class NcbiParser {
                 }
             }
 
+            int max = Collections.max(col_idx);
+
             // parse full file and extract columns
             while ((line = br.readLine()) != null) {
                 var split = line.split("\t");
                 var l = new ArrayList<String>();
+                if (split.length <= max)
+                    continue;
                 for (var idx : col_idx) {
                     l.add(split[idx]);
                 }
@@ -33,7 +37,7 @@ public class NcbiParser {
 
             return ret;
         } catch (Throwable e) {
-            throw new IOException("Bad NCBI file");
+            throw new IOException("Bad NCBI file: " + e.getMessage());
         }
     }
 }
