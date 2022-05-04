@@ -10,10 +10,16 @@ public class Main {
         try {
             ncbi = new Ncbi();
             update(ncbi);
-            File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
-            GbffParser parser = new GbffParser(gbffFile.getPath());
-            parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
-            //ncbi.getGbkFromVirus("Acholeplasma virus L2");
+
+            var r = ncbi.index_to_db("viruses.txt");
+
+            for (var line : r) {
+                File gbffFile = ncbi.getGbkFromVirus(line.getOrganism());
+                if (gbffFile.isDirectory()) continue;
+                GbffParser parser = new GbffParser(gbffFile.getPath());
+                parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
+            }
+//                ncbi.getGbffFromGc(line.getGc());
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
