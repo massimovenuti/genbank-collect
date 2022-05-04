@@ -19,7 +19,7 @@ public class Ncbi {
     }
 
     public ArrayList<ArrayList<String>> rawIndex(String name) throws IOException {
-        var f = ftp.getFile(report_dir + name);
+        var f = ftp.getFile(report_dir + "/" + name);
         String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
@@ -55,7 +55,7 @@ public class Ncbi {
         var raw = rawIndex(name);
         var ret = new ArrayList<IndexData>();
         for (var s : raw) {
-            ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4)));
+            ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), s.size() >= 5 ? s.get(4) : null));
         }
         return ret;
     }
