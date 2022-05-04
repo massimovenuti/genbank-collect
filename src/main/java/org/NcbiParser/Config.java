@@ -10,6 +10,7 @@ public class Config {
     }
 
     public static String organism_path(String kingdom, String group, String subgroup, String organism) {
-        return data_directory() + "/Results/" + kingdom + "/" + group + "/" + subgroup + "/" + organism + "/";
+        String path = String.join("/", "Results", kingdom, group, subgroup, organism) + "/";
+        return path.replace(' ', '_');
     }
 }

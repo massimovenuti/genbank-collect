@@ -20,10 +20,10 @@ public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
     InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
-    String gbffPath = "", fileExtension = ".txt";
+    String gbPath, fileExtension = ".txt";
 
     public GbffParser(File gbFile) throws IOException {
-        System.out.println(gbFile);
+        this.gbPath = gbFile.getPath();
 
         try {
             inStream = new GZIPInputStream(new FileInputStream(gbFile));
@@ -62,7 +62,7 @@ public class GbffParser implements Parser{
     }
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
-        System.err.println("[DEBUG] Parsing : " + gbffPath);
+        System.err.println("[DEBUG] Parsing : " + gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -141,7 +141,7 @@ public class GbffParser implements Parser{
             dnaReader.close();
             inStream.close();
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to close file " + gbffPath);
+            System.err.println("[ERROR] Failed to close file " + gbPath);
             throw e;
         }
 

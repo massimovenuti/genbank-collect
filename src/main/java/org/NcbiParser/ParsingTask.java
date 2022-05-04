@@ -4,6 +4,8 @@ import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class ParsingTask implements Task {
@@ -20,9 +22,10 @@ public class ParsingTask implements Task {
     @Override
     public boolean run(MultiTasker mt) {
         try {
-            GbffParser parser = new GbffParser(gbFile);
             var dir = Config.organism_path(row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism());
-
+            Files.createDirectories(Paths.get(dir));
+            System.out.println(dir);
+            GbffParser parser = new GbffParser(gbFile);
             return parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
         } catch (IOException | CompoundNotFoundException e) {
             e.printStackTrace();
