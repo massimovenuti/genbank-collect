@@ -87,7 +87,7 @@ public class GbffParser implements Parser{
                     System.err.print("[DEBUG] " + region + " : " + features.size() + " features\n");
                     if (features.isEmpty())
                         continue;
-                    String filePath = String.join("_", outDirectory, region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
+                    String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
                     filePath = filePath.replace(" ", "_");
                     try {
                         writer = new FileWriter(filePath, false);
