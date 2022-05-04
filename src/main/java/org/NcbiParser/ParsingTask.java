@@ -2,10 +2,9 @@ package org.NcbiParser;
 
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public abstract class ParsingTask implements Task {
+public class ParsingTask implements Task {
     String gbffPath, outDir, organism, organelle;
     String[] regions;
 
