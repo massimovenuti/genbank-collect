@@ -12,8 +12,15 @@ public class ParsingThread extends Thread {
     @Override
     public void run() {
         while (true) {
-            var pt = mt.popParsingTask();
-            pt.run(mt);
+            ParsingTask pt = null;
+            try {
+                while ((pt = mt.popParsingTask()) == null)
+                    Thread.sleep(10);
+                System.out.println("Parsing...");
+                pt.run(mt);
+            } catch (Throwable t) {
+                System.out.printf("Erreur de parsing: %s\n", t.getMessage());
+            }
         }
     }
 }

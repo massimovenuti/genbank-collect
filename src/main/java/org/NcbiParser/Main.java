@@ -9,9 +9,16 @@ public class Main {
         boolean error = false;
         try {
             ncbi = new Ncbi();
+            var mt = new MultiThreading(4, 1);
             update(ncbi);
+            var r = ncbi.index_to_db("eukaryotes.txt");
+            for (var line : r)
+                mt.getMt().pushTask(new DLGCTask(line.getGc()));
             //ncbi.getGbffFromGc("GCA_012011025.1");
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
+            while (true) {
+                Thread.sleep(10);
+            }
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
