@@ -21,19 +21,14 @@ import java.util.zip.ZipInputStream;
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
     InputStream inStream = null;
-//    GZIPInputStream inStream = null;
-//    UncompressInputStream inStream;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
-    String gbffPath = "", fileExtension = "txt";
+    String gbffPath = "", fileExtension = ".txt";
 
     public GbffParser(String gbffPath) throws IOException {
         this.gbffPath = gbffPath;
         System.out.println(gbffPath);
 
         try {
-//            inStream = new FileInputStream(gbffPath);
-            InputStreamProvider isProvider = new InputStreamProvider();
-            //inStream = isProvider.getInputStream(gbffPath);
             inStream = new GZIPInputStream(new FileInputStream(gbffPath));
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file " + gbffPath);
