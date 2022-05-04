@@ -8,23 +8,32 @@ import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
+import org.biojava.nbio.core.util.InputStreamProvider;
+import org.biojava.nbio.core.util.UncompressInputStream;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
-    FileInputStream inStream = null;
+//    InputStream inStream = null;
+    GZIPInputStream inStream = null;
+//    UncompressInputStream inStream;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
     String gbffPath = "", fileExtension = "txt";
 
-    public GbffParser(String gbffPath) throws FileNotFoundException {
+    public GbffParser(String gbffPath) throws IOException {
         this.gbffPath = gbffPath;
 
         try {
-            inStream = new FileInputStream(gbffPath);
+//            inStream = new FileInputStream(gbffPath);
+            InputStreamProvider isProvider = new InputStreamProvider();
+            inStream = (GZIPInputStream) isProvider.getInputStream(gbffPath);
+//            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file " + gbffPath);
             throw e;
