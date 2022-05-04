@@ -16,6 +16,9 @@ public class Main {
                 mt.getMt().pushTask(new DLGCTask(line.getGc()));
             //ncbi.getGbffFromGc("GCA_012011025.1");
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
+            // File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
+            // GbffParser parser = new GbffParser(gbffFile.getPath());
+            // parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
             while (true) {
                 Thread.sleep(10);
             }
