@@ -9,20 +9,24 @@ public class Main {
         boolean error = false;
         try {
             ncbi = new Ncbi();
-            /*var ov = ncbi.prokaryotes();
-            for (var line : ov) {
-                for (var col : line) {
-                    System.out.printf("%20s ", col);
-                }
-                System.out.printf("\n");
-            }*/
-            ncbi.getGbffFromGc("GCA_012011025.1");
-            ncbi.getGbkFromVirus("Acholeplasma virus L2");
+            update(ncbi);
+            //ncbi.getGbffFromGc("GCA_012011025.1");
+            //ncbi.getGbkFromVirus("Acholeplasma virus L2");
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
         } finally {
             System.exit(error ? 1 : 0);
+        }
+    }
+
+    // dl les index et met à jour la DB
+    public static void update(Ncbi ncbi) throws IOException {
+        var od = ncbi.overview_to_db();
+        DataBase.updateFromOverview(od);
+        String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
+        for (var idx : arr) {
+            DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
         }
     }
 }
