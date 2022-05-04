@@ -1,15 +1,35 @@
 package org.NcbiParser;
 
-public abstract class ParsingTask implements Task {
-    public ParsingTask(String gbffPath, String outDir) {
+import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
-    }
-    public ParsingTask(String fastaPath, String gbPath, String outDir) {
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
+public class ParsingTask implements Task {
+    File gbFile;
+    UpdateRow row;
+    ArrayList<String> regions;
+
+    public ParsingTask(File gbFile, UpdateRow row) {
+        this.gbFile = gbFile;
+        this.row = row;
+        this.regions = GlobalGUIVariables.get().getRegions();
     }
 
     @Override
     public boolean run(MultiTasker mt) {
+        try {
+            var dir = Config.organism_path(row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism());
+            Files.createDirectories(Paths.get(dir));
+            System.out.println(dir);
+            GbffParser parser = new GbffParser(gbFile);
+            return parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
+        } catch (IOException | CompoundNotFoundException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 }
