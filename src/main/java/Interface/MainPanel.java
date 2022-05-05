@@ -282,6 +282,14 @@ public class MainPanel extends JFrame {
 
             }
         });
+        removeButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                set_bars_invisible();
+
+            }
+        });
     }
 
     public static void main(String[] args) {

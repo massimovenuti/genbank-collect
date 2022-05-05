@@ -49,9 +49,9 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
-    public JButton getAddTrigger() { return trigger_ad; }
+    public JButton getAddTrigger() { return trigger_add; }
 
-    public JButton getRemoveTrigger() { return trigger_ad; }
+    public JButton getRemoveTrigger() { return trigger_remove; }
 
 
     public void setNbThreadsParsing(int nbThreadsParsing) {

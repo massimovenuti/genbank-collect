@@ -14,6 +14,7 @@ public class Progress {
     }
     public ProgressTask registerTask(String name) {
         progressTasks.add(new ProgressTask(name));
+        GlobalGUIVariables.get().getAddTrigger().doClick();
         return progressTasks.get(progressTasks.size() - 1);
     }
 
