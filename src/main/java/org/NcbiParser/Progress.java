@@ -8,8 +8,11 @@ Répertorie les progrès des taches
 public class Progress {
     private ArrayList<ProgressTask> progressTasks;
 
-    public ProgressTask registerTask(String name) {
+    public Progress()
+    {
         progressTasks = new ArrayList<ProgressTask>();
+    }
+    public ProgressTask registerTask(String name) {
         progressTasks.add(new ProgressTask(name));
         return progressTasks.get(progressTasks.size() - 1);
     }
