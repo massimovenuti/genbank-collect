@@ -5,7 +5,7 @@ package org.NcbiParser;
 import java.util.ArrayList;
 
 public class TreeNode {
-    private ArrayList<TreeNode> children;
+    private ArrayList<TreeNode> children = new ArrayList<TreeNode>();
 
     public ArrayList<TreeNode> getChildren() {
         return children;

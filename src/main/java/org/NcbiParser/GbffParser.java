@@ -8,6 +8,7 @@ import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
+import org.biojava.nbio.core.util.InputStreamProvider;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,9 +27,10 @@ public class GbffParser implements Parser{
         this.gbPath = gbFile.getPath();
 
         try {
-            inStream = new GZIPInputStream(new FileInputStream(gbFile));
+            InputStreamProvider inputStreamProvider = new InputStreamProvider();
+            inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to open file " + gbFile);
+            System.err.println("[ERROR] Failed to open file : " + gbPath);
             throw e;
         }
 
