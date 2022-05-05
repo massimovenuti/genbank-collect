@@ -1,5 +1,7 @@
 package org.NcbiParser;
 
+import com.sun.source.tree.Tree;
+
 public class GlobalGUIVariables {
     private static GUIVariables guiVariables;
 

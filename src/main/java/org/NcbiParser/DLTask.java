@@ -15,13 +15,14 @@ public class DLTask {
     private UpdateRow row;
 
     public boolean run(MultiTasker mt, Ncbi ncbi) throws IOException {
+        System.out.printf("Downloading: %20s\n", row.getGc());
         File dl = null;
         if (row.getGc() == null && row.getKingdom().equalsIgnoreCase("virus")) {
             dl = ncbi.getGbkFromVirus(row.getOrganism());
         } else {
             dl = ncbi.getGbffFromGc(row.getGc());
         }
-        System.out.printf("download ended: %20s\n", row.getGc());
+        System.out.printf("Download ended: %20s\n", row.getGc());
         mt.pushTask(new ParsingTask(dl, row));
         return true;
     }

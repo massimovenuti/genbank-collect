@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
+    private TreeNode tree;
+
     public GUIVariables() {
         this.stop = false;
         this.nbThreadsDL = 4;
@@ -57,6 +59,10 @@ public class GUIVariables {
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
     }
+
+    public void setTree(TreeNode tree) {this.tree = tree;}
+
+    public TreeNode getTree() {return this.tree;}
 
     private ArrayList<String> regions;
     private int nbThreadsDL;

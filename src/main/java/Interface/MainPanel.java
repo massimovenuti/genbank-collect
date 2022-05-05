@@ -212,6 +212,7 @@ public class MainPanel extends JFrame {
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
+        root = GlobalGUIVariables.get().getTree();
         /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
         * du reste il ne faut initialiser le root qui est une variable globale TreeNode
         */
@@ -292,7 +293,11 @@ public class MainPanel extends JFrame {
 
     public static void main(String[] args) {
         JFrame frame = new MainPanel("GeneBank");
+        frame.setPreferredSize(new Dimension(10000, 10000));
+        frame.revalidate();
+        frame.repaint();
         frame.setVisible(true);
+
     }
 
     private void createUIComponents() {
@@ -300,6 +305,9 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
         tree = new JTree(treeModel);
+        tree.setMinimumSize(new Dimension(700, 500));
+        tree.revalidate();
+        tree.repaint();
 
 
     }
