@@ -64,16 +64,15 @@ public class Main {
         gl.remove_task(task);
     }
 
-    public static JTree createHierarchy(ArrayList<OverviewData> data) {
+    public static TreeNode createHierarchy(ArrayList<OverviewData> data) {
         Collections.sort(data);
 
         Iterator iter = data.iterator();
 
-
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode();
-        DefaultMutableTreeNode kingdom = null;
-        DefaultMutableTreeNode group  = null;
-        DefaultMutableTreeNode subGroup  = null;
+        TreeNode top = new TreeNode("");
+        TreeNode kingdom = null;
+        TreeNode group  = null;
+        TreeNode subGroup  = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "";
 
@@ -82,40 +81,40 @@ public class Main {
 
             if (!od.getKingdom().equals(prevKingdom)) {
                 if (kingdom != null) {
-                    group.add(subGroup);
-                    kingdom.add(group);
-                    top.add(kingdom);
+                    group.push_node(subGroup);
+                    kingdom.push_node(group);
+                    top.push_node(kingdom);
                 }
-                kingdom = new DefaultMutableTreeNode(od.getKingdom());
+                kingdom = new TreeNode(od.getKingdom());
                 prevKingdom = od.getKingdom();
-                group = new DefaultMutableTreeNode(od.getGroup());
+                group = new TreeNode(od.getGroup());
                 prevGroup = od.getGroup();
-                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                subGroup = new TreeNode(od.getSubgroup());
                 prevSubGroup = od.getSubgroup();
             }
             if (!od.getGroup().equals(prevGroup)) {
                 if (group != null) {
-                    group.add(subGroup);
-                    kingdom.add(group);
+                    group.push_node(subGroup);
+                    kingdom.push_node(group);
                 }
-                group = new DefaultMutableTreeNode(od.getGroup());
+                group = new TreeNode(od.getGroup());
                 prevGroup = od.getGroup();
-                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                subGroup = new TreeNode(od.getSubgroup());
                 prevSubGroup = od.getSubgroup();
             }
             if (!od.getSubgroup().equals(prevSubGroup)) {
                 if (subGroup != null)
-                    group.add(subGroup);
-                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                    group.push_node(subGroup);
+                subGroup = new TreeNode(od.getSubgroup());
                 prevSubGroup = od.getSubgroup();
             }
-            subGroup.add(new DefaultMutableTreeNode(od.getOrganism()));
+            subGroup.push_node(new TreeLeaf(od.getOrganism(), false));
         }
 
-        group.add(subGroup);
-        kingdom.add(group);
-        top.add(kingdom);
+        group.push_node(subGroup);
+        kingdom.push_node(group);
+        top.push_node(kingdom);
 
-        return new JTree(top);
+        return top;
     }
 }
