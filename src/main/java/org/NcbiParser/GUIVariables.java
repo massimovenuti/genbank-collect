@@ -1,5 +1,6 @@
 package org.NcbiParser;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
@@ -27,6 +28,15 @@ public class GUIVariables {
         this.regions = regions;
     }
 
+    public void setAddTrigger(JButton trigger) {
+        this.trigger_add = trigger;
+    }
+    public void setRemoveTrigger(JButton trigger) {
+        this.trigger_remove = trigger;
+    }
+
+
+
     public int getNbThreadsDL() {
         return nbThreadsDL;
     }
@@ -39,6 +49,11 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
+    public JButton getAddTrigger() { return trigger_ad; }
+
+    public JButton getRemoveTrigger() { return trigger_ad; }
+
+
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
     }
@@ -46,6 +61,10 @@ public class GUIVariables {
     private ArrayList<String> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
+
+    private JButton trigger_add;
+
+    private JButton trigger_remove;
 
     private boolean stop;
 }

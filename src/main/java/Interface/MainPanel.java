@@ -25,7 +25,6 @@ public class MainPanel extends JFrame {
     private JScrollPane scrollPanel;
 
     private JProgressBar downloadBar;
-    private JButton triggerButton;
     private JPanel progressBarContainer;
     private JCheckBox cdsCheckBox;
     private JCheckBox centromereCheckBox;
@@ -65,6 +64,7 @@ public class MainPanel extends JFrame {
     private JLabel label11;
     private JLabel label12;
     private JLabel label13;
+    private JButton triggerButton;
     private JButton stopButton;
     private JButton removeButton;
 
@@ -127,7 +127,6 @@ public class MainPanel extends JFrame {
             }
         }
     }
-
     public DefaultMutableTreeNode build_tree() {
         root_node = new DefaultMutableTreeNode("Root");
         ArrayList<TreeNode> children = root.getChildren();
@@ -183,7 +182,9 @@ public class MainPanel extends JFrame {
             }
         }
     }
-
+    public JButton get_trigger(){
+        return triggerButton;
+    }
     public void show_bars(){
         for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
             progBars.get(i).setVisible(true);
@@ -217,6 +218,10 @@ public class MainPanel extends JFrame {
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
+
+        GlobalGUIVariables.get().setAddTrigger(triggerButton);
+        GlobalGUIVariables.get().setAddTrigger(removeButton);
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
             @Override
@@ -271,8 +276,8 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-
                 parseButton.setEnabled(true);
+                set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
 
             }

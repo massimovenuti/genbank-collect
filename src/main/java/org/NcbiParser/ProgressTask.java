@@ -1,5 +1,7 @@
 package org.NcbiParser;
 
+import Interface.MainPanel;
+
 // suivi d'une tache
 public class ProgressTask {
     private String name;
@@ -37,6 +39,7 @@ public class ProgressTask {
 
     public void addTodo(int todo) {
         this.todo += todo;
+        GlobalGUIVariables.get().get
     }
 
     public void addDone(int done) {
