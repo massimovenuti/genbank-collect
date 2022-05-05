@@ -28,9 +28,12 @@ public class TreeNode {
 
     public TreeNode(String text) {
         this.text = text;
+        this.children = new ArrayList<>();
     }
 
     public void push_node(TreeNode node) {
         children.add(node);
     }
+
+
 }
