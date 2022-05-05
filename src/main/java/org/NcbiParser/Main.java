@@ -3,24 +3,43 @@ package org.NcbiParser;
 import java.io.*;
 
 public class Main {
+    public static Ncbi ncbi;
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
+    }
+
+    public static void atProgStart() {
         boolean error = false;
         try {
-            ncbi = new Ncbi();
-            var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
+            if (ncbi == null)
+                ncbi = new Ncbi();
             update(ncbi);
-            var r = ncbi.index_to_db("eukaryotes.txt");
-            for (var line : r)
-                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), null, line.getGc())));
             //ncbi.getGbffFromGc("GCA_012011025.1");
             //ncbi.getGbkFromVirus("Acholeplasma virus L2");
             // File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
             // GbffParser parser = new GbffParser(gbffFile.getPath());
-            // parser.parse_into("Results/", "Homo Sapiens", "", new String[]{"CDS"});
-            while (true) {
-                Thread.sleep(10);
+            // parser.parse_in`to("Results/", "²Homo Sapiens", "", new String[]{"CDS"});
+        } catch (Exception e) {
+            error = true;
+            e.printStackTrace();
+        } finally {
+            System.exit(error ? 1 : 0);
+        }
+    }
+
+    public static void startParsing() {
+        boolean error = false;
+        try {
+            if (ncbi == null)
+                ncbi = new Ncbi();
+            var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
+            var r = ncbi.index_to_db("eukaryotes.txt");
+            for (var line : r)
+                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), null, line.getGc())));
+            while (!GlobalGUIVariables.get().isStop()) {
+                Thread.sleep(150, 0);
             }
+            mt.stopEverything();
         } catch (Exception e) {
             error = true;
             e.printStackTrace();
