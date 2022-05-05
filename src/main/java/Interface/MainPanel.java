@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Objects;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.Position;
@@ -20,9 +19,6 @@ import javax.swing.tree.TreePath;
 
 public class MainPanel extends JFrame {
     private JTree tree;
-    DefaultMutableTreeNode root_node;
-    DefaultTreeModel treeModel;
-    DefaultMutableTreeNode arbo;
     private JButton parseButton;
     private JPanel mainPanel;
     private JTextArea logArea;
@@ -69,21 +65,30 @@ public class MainPanel extends JFrame {
     private JLabel label11;
     private JLabel label12;
     private JLabel label13;
+    private JButton stopButton;
+    private JButton removeButton;
 
     private GlobalProgress progress;
-    boolean active = true;
+
+    public GUIVariables gui_variables;
+    private boolean active = true;
 
     public ArrayList<TreePath> treePaths;
 
     public ArrayList<TreeNode> quadruplets;
 
     public ArrayList<ArrayList<TreeNode>> selectedNodes;
-    /*exemple progress */
+
     public ArrayList<JProgressBar> progBars;
     public ArrayList<JLabel> barLabels;
 
-    /* exemple tree */
     public TreeNode root = new TreeNode("root");
+
+    private DefaultMutableTreeNode root_node;
+    private DefaultTreeModel treeModel;
+    private DefaultMutableTreeNode arbo;
+
+
 
     ImageIcon obsoleteIcon;
     ImageIcon up_to_dateIcon;
@@ -164,16 +169,9 @@ public class MainPanel extends JFrame {
         }
         return temp;
     }
-    public MainPanel(String title) {
-        super(title);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setContentPane(mainPanel);
-        this.pack();
-        this.progBars = new ArrayList<>();
-        this.barLabels = new ArrayList<>();
-        treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+
+    public void set_bars_invisible()
+    {
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
                 c.setVisible(false);
@@ -184,24 +182,55 @@ public class MainPanel extends JFrame {
                 barLabels.add((JLabel) c);
             }
         }
+    }
 
+    public void show_bars(){
+        for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
+            progBars.get(i).setVisible(true);
+            barLabels.get(i).setVisible(true);
+            progBars.get(i).setMinimum(0);
+            progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
+            progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
+            barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName()
+                    + " , estimated time: "
+                    + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
+        }
+    }
+    public MainPanel(String title) {
+        super(title);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setContentPane(mainPanel);
+        this.pack();
+
+        this.progBars = new ArrayList<>();
+        this.barLabels = new ArrayList<>();
+        treePaths = new ArrayList<>();
+        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+
+        set_bars_invisible();
+        stopButton.setVisible(false);
+        parseButton.setEnabled(false);
+        Main.atProgStart();
+        parseButton.setEnabled(true);
         /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
         * du reste il ne faut initialiser le root qui est une variable globale TreeNode
         */
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
-
-
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
             @Override
-            public void mouseClicked(MouseEvent event) {
+            public void mousePressed(MouseEvent event) {
                 super.mouseClicked(event);
                 logArea.append("Starting process...\n");
                 regions = create_region_array();
-
+                GlobalGUIVariables.get().setRegions(regions);
+                GlobalGUIVariables.get().setStop(false);
                 parseButton.setEnabled(false);
+                Main.startParsing();
+
             }
         });
         triggerButton.addMouseListener(new MouseAdapter() {
@@ -211,15 +240,7 @@ public class MainPanel extends JFrame {
                     {
                         path.toString();
                     }
-
-                    for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
-                        progBars.get(i).setVisible(true);
-                        barLabels.get(i).setVisible(true);
-                        progBars.get(i).setMinimum(0);
-                        progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
-                        progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
-                        barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName() + " , estimated time: " + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
-                    }
+                    show_bars();
             }
 
         });
@@ -239,10 +260,21 @@ public class MainPanel extends JFrame {
                         treePaths.remove(path);
                         selectedNodes.remove(quadruplets);
                     }
+
                     active = false;
                     tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
                     active = true;
                 }
+
+            }
+        });
+        stopButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+
+                parseButton.setEnabled(true);
+                GlobalGUIVariables.get().setStop(true);
 
             }
         });
