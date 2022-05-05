@@ -43,7 +43,7 @@ public class DataBase {
                 DataBaseManager.insertOverviewTable(kingdomNames,groupNames,subgroupNames,organismNames);
 
             }catch(Exception eio){
-
+                throw new RuntimeException("Error while putting the overview in db");
             }
         }
     }
@@ -73,6 +73,17 @@ public class DataBase {
 
     }
 
+    /**
+     *
+     * @param group
+     * @param subGroup
+     * @param organism
+     * @return le kingdom en fonction du group, sous groupe et organisme
+     */
+    public static String getKindom(String group,String subGroup, String organism){
+        return DataBaseManager.kingdomFromOverview(group, subGroup, organism);
+    }
+
     /*
         à partir de la base mise à jour, donne les ids des organismes pour
         lesquels les deux dates (celle dans overview, et la dernière maj locale) diffèrent
@@ -80,7 +91,9 @@ public class DataBase {
 
         Peut être renvoyer direct (kingdom, group, subgroup, organism) pour aller plus vite ?
      */
-    public static ArrayList<Integer> allIdsNeedingUpdate() { return null;}
+    public static ArrayList<Integer> allIdsNeedingUpdate() {
+        return null;
+        }
     //public static ArrayList<OverviewData> allOrganismNeddingUpdate() {
 
     /*
@@ -116,6 +129,8 @@ public class DataBase {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "Type TEXT," +
                 "indexes_id INTEGER," +
+                "FOREIGN KEY (indexes_id) REFERENCES INDEXES (id)" +
+                "   ON UPDATE CASCADE ON REMOVE CASCADE," +
                 "date TEXT)");
 
 

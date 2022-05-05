@@ -39,20 +39,6 @@ public class Main {
             task.addDone(1);
         }
         gl.remove_task(task);
-/*
-import java.util.ArrayList;
 
-public class Main {
-    public static void main(String[] args) throws Exception {
-        String path = "/Users/julesbangard/Documents/test/DBnorm.db";
-        ArrayList<OverviewData> ov = new ArrayList<OverviewData>();
-        OverviewData first = new OverviewData("king1","group1","sub1","orga1");
-        OverviewData sec = new OverviewData("king1","group2","sub2","orga2");
-        ov.add(first);
-        ov.add(sec);
-        DataBase.createOrOpenDataBase(path);
-        DataBase.updateFromOverview(ov);
-        DataBaseManager.closeDb();
->>>>>>> Stashed changes*/
     }
 }

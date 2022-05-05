@@ -44,6 +44,20 @@ public final class DataBaseManager {
 
     }
 
+    public static String kingdomFromOverview(String groupe, String subGroup, String organism){
+        Statement s;
+        try{
+            String req = "SELECT kingdom FROM OVERVIEW " +
+                    "WHERE groupe = \"" + groupe + "\" AND subgroup = \"" + subGroup + "\" AND organisme = \"" + organism + "\"" ;
+            s = connection_.createStatement();
+            ResultSet rs = s.executeQuery(req);
+            return rs.getString("kingdom");
+        }catch(Exception eio){
+            System.out.println(eio.getMessage());
+            return null;
+        }
+    }
+
     public static void closeDb() throws SQLException {
         try
         {
