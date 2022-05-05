@@ -244,7 +244,7 @@ public class MainPanel extends JFrame {
             }
 
         });
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
+        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
@@ -267,7 +267,7 @@ public class MainPanel extends JFrame {
                 }
 
             }
-        });
+        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
