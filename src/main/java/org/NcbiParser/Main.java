@@ -53,6 +53,7 @@ public class Main {
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(4);
         var od = ncbi.overview_to_db();
+        GlobalGUIVariables.get().setTree(createHierarchy(od));
         task.addDone(1);
         DataBase.updateFromOverview(od);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
