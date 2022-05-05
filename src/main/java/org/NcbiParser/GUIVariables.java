@@ -12,6 +12,8 @@ public class GUIVariables {
         this.nbThreadsParsing = 2;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove
+        trigger_remove = null;
+        trigger_add = null;
     }
 
     public ArrayList<String> getRegions() {
@@ -51,9 +53,9 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
-    public JButton getAddTrigger() { return trigger_add; }
+    public JButton getAddTrigger() { return this.trigger_add; }
 
-    public JButton getRemoveTrigger() { return trigger_remove; }
+    public JButton getRemoveTrigger() { return this.trigger_remove; }
 
 
     public void setNbThreadsParsing(int nbThreadsParsing) {

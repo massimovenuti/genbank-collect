@@ -202,7 +202,8 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
-
+        GlobalGUIVariables.get().setAddTrigger(triggerButton);
+        GlobalGUIVariables.get().setAddTrigger(removeButton);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -213,15 +214,11 @@ public class MainPanel extends JFrame {
         stopButton.setVisible(false);
         Main.atProgStart();
         root = GlobalGUIVariables.get().getTree();
-        /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
-        * du reste il ne faut initialiser le root qui est une variable globale TreeNode
-        */
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
 
-        GlobalGUIVariables.get().setAddTrigger(triggerButton);
-        GlobalGUIVariables.get().setAddTrigger(removeButton);
+
 
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
@@ -308,6 +305,7 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
+
 
 
     }
