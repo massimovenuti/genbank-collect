@@ -16,7 +16,6 @@ public class ParsingThread extends Thread {
             try {
                 while ((pt = mt.popParsingTask()) == null)
                     Thread.sleep(10);
-                System.out.println("Parsing...");
                 pt.run(mt);
             } catch (Throwable t) {
                 System.out.printf("Erreur de parsing: %s\n", t.getMessage());
