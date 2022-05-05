@@ -240,11 +240,9 @@ public class MainPanel extends JFrame {
         triggerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                    for ( TreePath path : treePaths)
-                    {
-                        path.toString();
-                    }
                     show_bars();
+                System.out.println("triggered");
+
             }
 
         });
