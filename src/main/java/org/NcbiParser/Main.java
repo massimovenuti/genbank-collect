@@ -1,6 +1,11 @@
 package org.NcbiParser;
 
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -44,5 +49,60 @@ public class Main {
             task.addDone(1);
         }
         gl.remove_task(task);
+    }
+
+    public static JTree createHierarchy(ArrayList<OverviewData> data) {
+        Collections.sort(data);
+
+        Iterator iter = data.iterator();
+
+
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode();
+        DefaultMutableTreeNode kingdom = null;
+        DefaultMutableTreeNode group  = null;
+        DefaultMutableTreeNode subGroup  = null;
+
+        String prevKingdom = "", prevGroup = "", prevSubGroup = "";
+
+        while (iter.hasNext()) {
+            OverviewData od = (OverviewData) iter.next();
+
+            if (!od.getKingdom().equals(prevKingdom)) {
+                if (kingdom != null) {
+                    group.add(subGroup);
+                    kingdom.add(group);
+                    top.add(kingdom);
+                }
+                kingdom = new DefaultMutableTreeNode(od.getKingdom());
+                prevKingdom = od.getKingdom();
+                group = new DefaultMutableTreeNode(od.getGroup());
+                prevGroup = od.getGroup();
+                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                prevSubGroup = od.getSubgroup();
+            }
+            if (!od.getGroup().equals(prevGroup)) {
+                if (group != null) {
+                    group.add(subGroup);
+                    kingdom.add(group);
+                }
+                group = new DefaultMutableTreeNode(od.getGroup());
+                prevGroup = od.getGroup();
+                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                prevSubGroup = od.getSubgroup();
+            }
+            if (!od.getSubgroup().equals(prevSubGroup)) {
+                if (subGroup != null)
+                    group.add(subGroup);
+                subGroup = new DefaultMutableTreeNode(od.getSubgroup());
+                prevSubGroup = od.getSubgroup();
+            }
+            subGroup.add(new DefaultMutableTreeNode(od.getOrganism()));
+        }
+
+        group.add(subGroup);
+        kingdom.add(group);
+        top.add(kingdom);
+
+        return new JTree(top);
     }
 }
