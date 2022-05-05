@@ -22,7 +22,7 @@ public class DLTask {
         } else {
             dl = ncbi.getGbffFromGc(row.getGc());
         }
-        System.out.printf("Download ended: %20s\n", row.getGc());
+        System.out.printf("Download ended: %17s\n", row.getGc());
         mt.pushTask(new ParsingTask(dl, row));
         return true;
     }
