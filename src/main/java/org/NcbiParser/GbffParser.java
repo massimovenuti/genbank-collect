@@ -69,7 +69,7 @@ public class GbffParser implements Parser{
     }
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
-        System.out.printf("Parsing: %20s\n", gbPath);
+        System.out.printf("Parsing: %24s\n", gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -153,7 +153,7 @@ public class GbffParser implements Parser{
             throw e;
         }
 
-        System.out.printf("Parsing ended: %20s\n", gbPath);
+        System.out.printf("Parsing ended: %18s\n", gbPath);
         return true;
     }
 
