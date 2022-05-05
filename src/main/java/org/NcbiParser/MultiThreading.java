@@ -24,5 +24,10 @@ public class MultiThreading {
             t.start();
     }
 
+    public void stopEverything() {
+        for (var t : threads) {
+            t.interrupt();
+        }
+    }
 
 }
