@@ -9,29 +9,28 @@ import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.location.template.Location;
 import org.biojava.nbio.core.util.InputStreamProvider;
-import org.biojava.nbio.core.util.UncompressInputStream;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 public class GbffParser implements Parser{
     private Map<String, String> joinKeyWords;
     InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
-    String gbffPath = "", fileExtension = ".txt";
+    String gbPath, fileExtension = ".txt";
 
-    public GbffParser(String gbffPath) throws IOException {
-        this.gbffPath = gbffPath;
-        System.out.println(gbffPath);
+    public GbffParser(File gbFile) throws IOException {
+        this.gbPath = gbFile.getPath();
 
         try {
-            inStream = new GZIPInputStream(new FileInputStream(gbffPath));
+            InputStreamProvider inputStreamProvider = new InputStreamProvider();
+            inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to open file " + gbffPath);
+            System.err.println("[ERROR] Failed to open file : " + gbPath);
             throw e;
         }
 
@@ -47,15 +46,20 @@ public class GbffParser implements Parser{
     }
 
     /**
-     * Check if source is well formatted
+     * Check if source is on multiple lines
      */
-    private boolean wrongFormat(String source) {
-        if (source.indexOf('\n') >= 0)
-            return true;
+    private boolean multipleLineSource(String source) {
+        return source.indexOf('\n') >= 0;
+    }
+
+    /**
+     * Check if source contains multiple joins
+     */
+    private boolean containsMultipleJoins(String source) {
         int i = source.indexOf("join");
-        if (i >= 0 & source.indexOf("join", i + 4) >= 0)
-            return true;
-        return false;
+        if (i >= 0)
+            i = source.indexOf("join", i + 4);
+        return i >= 0;
     }
 
     private void writeSequence(DNASequence complete_sequence, Location location, BufferedWriter writer) throws IOException {
@@ -64,8 +68,8 @@ public class GbffParser implements Parser{
         writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, String[] regions) throws IOException, CompoundNotFoundException {
-        System.err.println("[DEBUG] Parsing : " + gbffPath);
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
+        System.err.println("[DEBUG] Parsing : " + gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -84,7 +88,7 @@ public class GbffParser implements Parser{
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-                    System.err.print("[DEBUG] " + region + " : " + features.size() + " features\n");
+                    System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty())
                         continue;
                     String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
@@ -99,9 +103,10 @@ public class GbffParser implements Parser{
                                 bufferedWriter.newLine();
                                 writeSequence(sequence, feature.getLocations(), bufferedWriter);
                                 bufferedWriter.newLine();
-                            } else if (wrongFormat(feature.getSource())) {
-                                System.err.println("[DEBUG] Wrong format : dropping feature");
-                                continue;
+                            } else if (multipleLineSource(feature.getSource())) {
+                                System.err.println("[DEBUG] Wrong format : multiple lines source");
+                            } else if (containsMultipleJoins(feature.getSource())) {
+                                System.err.println("[DEBUG] Wrong format : multiple joins");
                             } else {
                                 bufferedWriter.write(header);
                                 bufferedWriter.newLine();
@@ -144,7 +149,7 @@ public class GbffParser implements Parser{
             dnaReader.close();
             inStream.close();
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to close file " + gbffPath);
+            System.err.println("[ERROR] Failed to close file " + gbPath);
             throw e;
         }
 
