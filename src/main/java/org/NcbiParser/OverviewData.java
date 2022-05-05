@@ -1,6 +1,6 @@
 package org.NcbiParser;
 
-public class OverviewData {
+public class OverviewData implements Comparable<OverviewData> {
     private String kingdom;
     private String group;
 
@@ -29,4 +29,17 @@ public class OverviewData {
 
     private String subgroup;
     private String organism;
+
+    public int compareTo(OverviewData overviewData) {
+        int cmp = getKingdom().compareTo(overviewData.getKingdom());
+        if (cmp != 0)
+            return cmp;
+        cmp = getGroup().compareTo(overviewData.getGroup());
+        if (cmp != 0)
+            return cmp;
+        cmp = getSubgroup().compareTo(overviewData.getSubgroup());
+        if (cmp != 0)
+            return cmp;
+        return getOrganism().compareTo(overviewData.getOrganism());
+    }
 }
