@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
- 
+
     public GUIVariables() {
         this.stop = false;
         this.nbThreadsDL = 4;
