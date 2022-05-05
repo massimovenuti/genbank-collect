@@ -211,6 +211,7 @@ public class MainPanel extends JFrame {
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
+        root = GlobalGUIVariables.get().getTree();
         /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
         * du reste il ne faut initialiser le root qui est une variable globale TreeNode
         */
