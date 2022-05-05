@@ -30,8 +30,14 @@ public class Ftp {
     }
 
     private void login() throws IOException {
-        for (int i = 0; i < 5 && !logged; i++)
+        for (int i = 0; i < 50 && !logged; i++) {
             logged = ftpClient.login("anonymous", "");
+            try {
+                Thread.sleep(100, 0);
+            } catch (Exception e) {
+                //pass
+            }
+        }
         if (!logged)
             throw new IOException("Login failed");
     }

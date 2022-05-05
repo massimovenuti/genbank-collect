@@ -244,7 +244,7 @@ public class MainPanel extends JFrame {
             }
 
         });
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
+        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
@@ -267,7 +267,7 @@ public class MainPanel extends JFrame {
                 }
 
             }
-        });
+        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -282,7 +282,11 @@ public class MainPanel extends JFrame {
 
     public static void main(String[] args) {
         JFrame frame = new MainPanel("GeneBank");
+        frame.setPreferredSize(new Dimension(10000, 10000));
+        frame.revalidate();
+        frame.repaint();
         frame.setVisible(true);
+
     }
 
     private void createUIComponents() {
@@ -290,6 +294,9 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
         tree = new JTree(treeModel);
+        tree.setMinimumSize(new Dimension(700, 500));
+        tree.revalidate();
+        tree.repaint();
 
 
     }

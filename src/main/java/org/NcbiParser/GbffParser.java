@@ -69,7 +69,7 @@ public class GbffParser implements Parser{
     }
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
-        System.err.println("[DEBUG] Parsing : " + gbPath);
+        System.out.printf("Parsing: %20s\n", gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -77,10 +77,10 @@ public class GbffParser implements Parser{
         try {
             dnaSequences = dnaReader.process(1);
         } catch (CompoundNotFoundException e) {
-            System.err.println("[DEBUG] Found unexpected compound");
+            System.err.println("Found unexpected compound");
             throw e;
         } catch (Exception e) {
-            System.err.println("[ERROR] Failed to read file");
+            System.err.println("[ERROR] Failed to read file : " + gbPath);
             throw e;
         }
 
@@ -88,7 +88,7 @@ public class GbffParser implements Parser{
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-                    System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
+//                    System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty())
                         continue;
                     String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
@@ -104,9 +104,9 @@ public class GbffParser implements Parser{
                                 writeSequence(sequence, feature.getLocations(), bufferedWriter);
                                 bufferedWriter.newLine();
                             } else if (multipleLineSource(feature.getSource())) {
-                                System.err.println("[DEBUG] Wrong format : multiple lines source");
+//                                System.err.println("[DEBUG] Wrong format : multiple lines source");
                             } else if (containsMultipleJoins(feature.getSource())) {
-                                System.err.println("[DEBUG] Wrong format : multiple joins");
+//                                System.err.println("[DEBUG] Wrong format : multiple joins");
                             } else {
                                 bufferedWriter.write(header);
                                 bufferedWriter.newLine();
@@ -138,10 +138,10 @@ public class GbffParser implements Parser{
             try {
                 dnaSequences = dnaReader.process(1);
             } catch (CompoundNotFoundException e) {
-                System.err.println("[DEBUG] Found unexpected compound");
+                System.err.println("Found unexpected compound");
                 throw e;
             } catch (Exception e) {
-                System.err.println("[ERROR] Failed to read file");
+                System.err.println("[ERROR] Failed to read file : " + gbPath);
                 throw e;
             }
         }
@@ -153,6 +153,7 @@ public class GbffParser implements Parser{
             throw e;
         }
 
+        System.out.printf("Parsing ended: %20s\n", gbPath);
         return true;
     }
 
