@@ -210,9 +210,7 @@ public class MainPanel extends JFrame {
 
         set_bars_invisible();
         stopButton.setVisible(false);
-        parseButton.setEnabled(false);
         Main.atProgStart();
-        parseButton.setEnabled(true);
         /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
         * du reste il ne faut initialiser le root qui est une variable globale TreeNode
         */
@@ -228,7 +226,8 @@ public class MainPanel extends JFrame {
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);
-                parseButton.setEnabled(false);
+                parseButton.setVisible(false);
+                stopButton.setVisible(true);
                 Main.startParsing();
 
             }
