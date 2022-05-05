@@ -58,7 +58,7 @@ public class Main {
         DataBase.updateFromOverview(od);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
         for (var idx : arr) {
-            System.out.printf("file : %20s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
+            System.out.printf("File: %20s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
             DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
             task.addDone(1);
         }
