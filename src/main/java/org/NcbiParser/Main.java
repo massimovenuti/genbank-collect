@@ -54,6 +54,7 @@ public class Main {
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(4);
         var od = ncbi.overview_to_db();
+        GlobalGUIVariables.get().setTree(createHierarchy(od));
         task.addDone(1);
         DataBase.createOrOpenDataBase(System.getProperty("user.dir") + "/Results/test.db");
         DataBase.updateFromOverview(od);
