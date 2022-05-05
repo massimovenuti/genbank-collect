@@ -32,11 +32,11 @@ public class Main {
             var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             var r = ncbi.index_to_db("eukaryotes.txt");
             for (var line : r)
-                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), null, line.getGc())));
-            while (!GlobalGUIVariables.get().isStop()) {
+                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc())));
+            /*while (!GlobalGUIVariables.get().isStop()) {
                 Thread.sleep(150, 0);
             }
-            mt.stopEverything();
+            mt.stopEverything();*/
         } catch (Exception e) {
             e.printStackTrace();
         }
