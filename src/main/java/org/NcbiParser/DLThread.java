@@ -18,7 +18,6 @@ public class DLThread extends Thread {
                 while( (dlt = mt.popDLTask()) == null) {
                     Thread.sleep(10, 0);
                 }
-                System.out.println("Downloading...");
                 dlt.run(mt, ncbi);
             } catch (Throwable t) {
                 System.out.printf("Erreur de dl: %s", t.getMessage());
