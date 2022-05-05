@@ -6,10 +6,11 @@ public class Main {
     public static Ncbi ncbi;
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
+        atProgStart();
+        startParsing();
     }
 
     public static void atProgStart() {
-        boolean error = false;
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
@@ -20,15 +21,11 @@ public class Main {
             // GbffParser parser = new GbffParser(gbffFile.getPath());
             // parser.parse_in`to("Results/", "²Homo Sapiens", "", new String[]{"CDS"});
         } catch (Exception e) {
-            error = true;
             e.printStackTrace();
-        } finally {
-            System.exit(error ? 1 : 0);
         }
     }
 
     public static void startParsing() {
-        boolean error = false;
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
@@ -41,10 +38,7 @@ public class Main {
             }
             mt.stopEverything();
         } catch (Exception e) {
-            error = true;
             e.printStackTrace();
-        } finally {
-            System.exit(error ? 1 : 0);
         }
     }
 
