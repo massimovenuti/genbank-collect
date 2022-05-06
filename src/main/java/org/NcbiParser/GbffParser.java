@@ -2,22 +2,28 @@ package org.NcbiParser;
 
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.Strand;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
+import org.biojava.nbio.core.sequence.features.FeatureInterface;
 import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
+import org.biojava.nbio.core.sequence.location.template.AbstractLocation;
 import org.biojava.nbio.core.sequence.location.template.Location;
+import org.biojava.nbio.core.sequence.template.AbstractSequence;
 import org.biojava.nbio.core.util.InputStreamProvider;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class GbffParser implements Parser{
+public class GbffParser implements Parser {
     private Map<String, String> joinKeyWords;
     InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
@@ -34,11 +40,7 @@ public class GbffParser implements Parser{
             throw e;
         }
 
-        dnaReader = new GenbankReader(
-                inStream,
-                new GenericGenbankHeaderParser(),
-                new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet())
-        );
+        dnaReader = new GenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
 
         joinKeyWords = new HashMap<String, String>();
         joinKeyWords.put("CDS", "Exon");
@@ -57,15 +59,8 @@ public class GbffParser implements Parser{
      */
     private boolean containsMultipleJoins(String source) {
         int i = source.indexOf("join");
-        if (i >= 0)
-            i = source.indexOf("join", i + 4);
+        if (i >= 0) i = source.indexOf("join", i + 4);
         return i >= 0;
-    }
-
-    private void writeSequence(DNASequence complete_sequence, Location location, BufferedWriter writer) throws IOException {
-        int start = location.getStart().getPosition();
-        int end = location.getEnd().getPosition();
-        writer.write(complete_sequence.getSequenceAsString(start, end, location.getStrand()));
     }
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
@@ -88,38 +83,15 @@ public class GbffParser implements Parser{
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
                     var features = sequence.getFeaturesByType(region);
-//                    System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
-                    if (features.isEmpty())
-                        continue;
-                    String filePath = outDirectory + String.join("_", region, organism, organelle, sequence.getAccession().toString()) + fileExtension;
-                    filePath = filePath.replace(" ", "_");
+                    if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
+                    if (features.isEmpty()) continue;
+                    String filePath = makeFilePath(outDirectory, region, organism, organelle, sequence.getAccession().toString());
                     try {
                         writer = new FileWriter(filePath, false);
                         bufferedWriter = new BufferedWriter(writer);
                         for (var feature : features) {
-                            String header = String.join(" ", region, organism, sequence.getAccession().toString()) + ": " + feature.getSource();
-                            if (feature.getLocations().getSubLocations().size() == 0) {
-                                bufferedWriter.write(header);
-                                bufferedWriter.newLine();
-                                writeSequence(sequence, feature.getLocations(), bufferedWriter);
-                                bufferedWriter.newLine();
-                            } else if (multipleLineSource(feature.getSource())) {
-//                                System.err.println("[DEBUG] Wrong format : multiple lines source");
-                            } else if (containsMultipleJoins(feature.getSource())) {
-//                                System.err.println("[DEBUG] Wrong format : multiple joins");
-                            } else {
-                                bufferedWriter.write(header);
-                                bufferedWriter.newLine();
-                                for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++)
-                                    writeSequence(sequence, feature.getLocations().getSubLocations().get(k), bufferedWriter);
-                                bufferedWriter.newLine();
-                                for (int k = 0; k < feature.getLocations().getSubLocations().size(); k++) {
-                                    bufferedWriter.write(header + " " + joinKeyWords.get(region) + " " + (k + 1));
-                                    bufferedWriter.newLine();
-                                    writeSequence(sequence, feature.getLocations().getSubLocations().get(k), bufferedWriter);
-                                    bufferedWriter.newLine();
-                                }
-                            }
+                            String header = makeSequenceHeader(region, organism, sequence.getAccession().toString(), organelle, feature.getSource());
+                            writeFeature(feature, sequence, header, region, bufferedWriter);
                         }
                     } catch (Exception e) {
                         System.err.println("[ERROR] Failed to write file " + filePath);
@@ -155,6 +127,68 @@ public class GbffParser implements Parser{
 
         System.out.printf("Parsing ended: %18s\n", gbPath);
         return true;
+    }
+
+    private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
+                              DNASequence sequence,
+                              String header,
+                              String region,
+                              BufferedWriter bufferedWriter) throws IOException {
+        if (multipleLineSource(feature.getSource())) {
+            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
+            return;
+        }
+        if (containsMultipleJoins(feature.getSource())) {
+            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
+            return;
+        }
+
+        bufferedWriter.write(header);
+        bufferedWriter.newLine();
+
+        AbstractLocation loc = feature.getLocations();
+        List<Location> subLocations = loc.getSubLocations();
+        int n = subLocations.size();
+
+        if (n == 0) {
+            bufferedWriter.write(loc.getSubSequence(sequence).getSequenceAsString());
+            bufferedWriter.newLine();
+        } else {
+            for (int k = 0; k < n; k++) {
+                int codonNum = k;
+                if (loc.getStrand() == Strand.NEGATIVE)
+                    codonNum = n - k - 1;
+                Location subLocation = subLocations.get(codonNum);
+                bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
+            }
+            bufferedWriter.newLine();
+            for (int k = 0; k < n; k++) {
+                int codonNum = k;
+                if (loc.getStrand() == Strand.NEGATIVE)
+                    codonNum = n - k - 1;
+                bufferedWriter.write(header + " " + joinKeyWords.get(region) + " " + (k + 1));
+                bufferedWriter.newLine();
+                Location subLocation = subLocations.get(codonNum);
+                bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
+                bufferedWriter.newLine();
+            }
+        }
+    }
+
+    private String makeSequenceHeader(String region, String organism, String organelle, String accession, String source) {
+        return Stream.of(region, organism, organelle, accession)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.joining(" "))
+                + ": " + source;
+    }
+
+    private String makeFilePath(String directory, String region, String organism, String organelle, String accession) {
+        return directory +
+                Stream.of(region, organism, organelle, accession)
+                        .filter(s -> s != null && !s.isEmpty())
+                        .collect(Collectors.joining("_"))
+                        .replace(' ', '_')
+                + fileExtension;
     }
 
     @Override
