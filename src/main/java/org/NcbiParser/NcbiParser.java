@@ -41,15 +41,17 @@ public class NcbiParser {
         }
     }
 
-    /*public static HashMap<String, String> preparse_ncs(String raw_ncs) {
+    public static HashMap<String, String> preparse_ncs(String raw_ncs) {
         HashMap<String, String> ret = new HashMap<String, String>();
         var split_ncs = raw_ncs.split(";");
         for (var potential_nc : split_ncs) {
             var split_nc = potential_nc.split(":");
+            if (split_nc.length < 2)
+                continue;
             var split_id = split_nc[1].split("/");
-            if (split_id[1].length() != 0) // id
+            if (split_id.length == 2 && split_id[0].startsWith("NC_") && split_id[1].length() != 0) // id
                 ret.put(split_id[1], split_id[0]);
         }
         return ret;
-    }*/
+    }
 }

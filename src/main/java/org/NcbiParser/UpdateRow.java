@@ -1,6 +1,6 @@
 package org.NcbiParser;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class UpdateRow {
     private String kingdom;
@@ -11,15 +11,15 @@ public class UpdateRow {
 
     private String ncs;
 
-    public ArrayList<Boolean> getAreNcs() {
+    public HashMap<String, String> getAreNcs() {
         return areNcs;
     }
 
-    public void setAreNcs(ArrayList<Boolean> areNcs) {
+    public void setAreNcs(HashMap<String, String> areNcs) {
         this.areNcs = areNcs;
     }
 
-    private ArrayList<Boolean> areNcs;
+    private HashMap<String, String> areNcs;
 
     public UpdateRow(String kingdom, String group, String subGroup, String organism, String organelle, String gc, String ncs) {
         this.kingdom = kingdom;

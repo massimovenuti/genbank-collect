@@ -16,12 +16,12 @@ public class DLTask {
     private UpdateRow row;
 
     public boolean run(MultiTasker mt, Ncbi ncbi) throws IOException {
-        ArrayList<Boolean> is_nc = NcbiParser.preparse_ncs(row.getNcs());
-        if (is_nc.stream().allMatch(n -> !n)) {
+        var are_nc = NcbiParser.preparse_ncs(row.getNcs());
+        if (are_nc.size() == 0) {
             System.out.printf("No NC in %s, skipping download\n", row.getGc());
             return true;
         }
-        row.setAreNcs(is_nc);
+        row.setAreNcs(are_nc);
         System.out.printf("Downloading: %20s\n", row.getGc());
         File dl = null;
         if (row.getGc() == null && row.getKingdom().equalsIgnoreCase("virus")) {
