@@ -12,8 +12,7 @@ public class GUIVariables {
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove
-        trigger_remove = null;
-        trigger_add = null;
+
     }
 
     public ArrayList<String> getRegions() {

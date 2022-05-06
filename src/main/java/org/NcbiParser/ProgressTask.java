@@ -45,9 +45,6 @@ public class ProgressTask {
     public void addDone(int done) {
         this.done += done;
         GlobalGUIVariables.get().getAddTrigger().doClick();
-        if(done == todo)
-            GlobalGUIVariables.get().getRemoveTrigger().doClick();
-
 
     }
 

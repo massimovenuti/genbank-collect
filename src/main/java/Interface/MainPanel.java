@@ -68,9 +68,6 @@ public class MainPanel extends JFrame {
     private JButton stopButton;
     private JButton removeButton;
 
-    private GlobalProgress progress;
-
-    public GUIVariables gui_variables;
     private boolean active = true;
 
     public ArrayList<TreePath> treePaths;
@@ -186,15 +183,15 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-        for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
+        for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
             progBars.get(i).setMinimum(0);
-            progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
-            progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
-            barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName()
+            progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
+            progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
+            barLabels.get(i).setText("process: " + GlobalProgress.get().all_tasks().get(i).getName()
                     + " , estimated time: "
-                    + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
+                    + String.valueOf(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs()));
         }
     }
     public MainPanel(String title) {
@@ -203,7 +200,7 @@ public class MainPanel extends JFrame {
         this.setContentPane(mainPanel);
         this.pack();
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
-        GlobalGUIVariables.get().setAddTrigger(removeButton);
+        GlobalGUIVariables.get().setRemoveTrigger(removeButton);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -224,7 +221,7 @@ public class MainPanel extends JFrame {
             ArrayList<String> regions = new ArrayList<>();
             @Override
             public void mousePressed(MouseEvent event) {
-                super.mouseClicked(event);
+                super.mousePressed(event);
                 logArea.append("Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
@@ -238,8 +235,10 @@ public class MainPanel extends JFrame {
         triggerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                    show_bars();
-                System.out.println("triggered");
+                super.mouseClicked(e);
+
+                show_bars();
+                logArea.append("add\n");
 
             }
 
@@ -305,8 +304,5 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
-
-
-
     }
 }
