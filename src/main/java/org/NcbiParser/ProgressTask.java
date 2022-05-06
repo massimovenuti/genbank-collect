@@ -1,32 +1,34 @@
 package org.NcbiParser;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import Interface.MainPanel;
 
 // suivi d'une tache
 public class ProgressTask {
     private String name;
-    private int done;
+    private AtomicInteger done;
 
     public String getName() {
         return name;
     }
 
     public int getDone() {
-        return done;
+        return done.get();
     }
 
     public int getTodo() {
-        return todo;
+        return todo.get();
     }
 
-    private int todo;
+    private AtomicInteger todo;
     private long start_ms;
 
     public ProgressTask(String name) {
         this.name = name;
         this.start_ms = System.currentTimeMillis();
-        this.done = 0;
-        this.todo = 0;
+        this.done = new AtomicInteger(0);
+        this.todo = new AtomicInteger(0);
     }
 
     public long elapsedMs() {
@@ -38,11 +40,13 @@ public class ProgressTask {
     }
 
     public void addTodo(int todo) {
+        this.todo.addAndGet(todo);    }
         this.todo += todo;
         GlobalGUIVariables.get().getAddTrigger().doClick();
     }
 
     public void addDone(int done) {
+        this.done.addAndGet(done);
         this.done += done;
         GlobalGUIVariables.get().getAddTrigger().doClick();
 
