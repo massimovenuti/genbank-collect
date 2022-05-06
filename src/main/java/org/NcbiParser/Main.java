@@ -36,7 +36,7 @@ public class Main {
                 ncbi = new Ncbi();
             var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             var r = ncbi.index_to_db("eukaryotes.txt");
-            for (var line : r)
+            for (var line : r) // TODO: organnelle
                 mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc())));
             /*while (!GlobalGUIVariables.get().isStop()) {
                 Thread.sleep(150, 0);

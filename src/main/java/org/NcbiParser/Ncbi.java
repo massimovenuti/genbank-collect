@@ -14,7 +14,7 @@ public class Ncbi {
 
     public ArrayList<ArrayList<String>> rawOverview() throws IOException {
         var f = ftp.getFile(report_dir + "/overview.txt");
-        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name"};
+        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name", "Organelles"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
@@ -46,7 +46,7 @@ public class Ncbi {
         var raw = rawOverview();
         var ret = new ArrayList<OverviewData>();
         for (var s : raw) {
-            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3)));
+            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4)));
         }
         return ret;
     }
