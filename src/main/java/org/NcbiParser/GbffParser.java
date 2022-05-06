@@ -9,6 +9,7 @@ import org.biojava.nbio.core.sequence.features.FeatureInterface;
 import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenbankReader;
 import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
+import org.biojava.nbio.core.sequence.location.SimpleLocation;
 import org.biojava.nbio.core.sequence.location.template.AbstractLocation;
 import org.biojava.nbio.core.sequence.location.template.Location;
 import org.biojava.nbio.core.sequence.template.AbstractSequence;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GbffParser implements Parser {
-    private Map<String, String> joinKeyWords;
     InputStream inStream = null;
     GenbankReader<DNASequence, NucleotideCompound> dnaReader;
     String gbPath, fileExtension = ".txt";
@@ -41,10 +41,130 @@ public class GbffParser implements Parser {
         }
 
         dnaReader = new GenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+    }
 
-        joinKeyWords = new HashMap<String, String>();
-        joinKeyWords.put("CDS", "Exon");
-        joinKeyWords.put("intron", "Intron");
+    private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
+                              DNASequence sequence,
+                              String header,
+                              String region,
+                              BufferedWriter bufferedWriter) throws IOException {
+        if (multipleLineSource(feature.getSource())) {
+            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
+            return;
+        }
+        if (containsMultipleJoins(feature.getSource())) {
+            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
+            return;
+        }
+
+        AbstractLocation loc = feature.getLocations();
+
+        if (loc.getSubLocations().size() == 0) {
+            if (!region.equals("Intron")) {
+                bufferedWriter.write(header);
+                bufferedWriter.newLine();
+                bufferedWriter.write(loc.getSubSequence(sequence).getSequenceAsString());
+                bufferedWriter.newLine();
+            }
+        } else {
+            bufferedWriter.write(header);
+            bufferedWriter.newLine();
+            if (region.equals("Intron"))
+                writeIntron(loc, sequence, header, bufferedWriter);
+            else
+                writeCDS(loc, sequence, header, bufferedWriter);
+        }
+    }
+
+    private void writeCDS(AbstractLocation loc,
+                          DNASequence sequence,
+                          String header,
+                          BufferedWriter bufferedWriter) throws IOException {
+        int n = loc.getSubLocations().size();
+
+        for (int k = 0; k < n; k++) {
+            Location subLocation = getCorrectSubLocation(loc, k);
+            bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
+        }
+
+        bufferedWriter.newLine();
+
+        for (int k = 0; k < n; k++) {
+            bufferedWriter.write(header + " Exon " + (k + 1));
+            bufferedWriter.newLine();
+            Location subLocation = getCorrectSubLocation(loc, k);
+            bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
+            bufferedWriter.newLine();
+        }
+    }
+
+    private void writeIntron(AbstractLocation loc,
+                             DNASequence sequence,
+                             String header,
+                             BufferedWriter bufferedWriter) throws IOException {
+        int n = loc.getSubLocations().size();
+
+        for (int k = 0; k < n - 1; k ++) {
+            SimpleLocation intronLocation = getIntronLocation(loc, k);
+            bufferedWriter.write(intronLocation.getSubSequence(sequence).getSequenceAsString());
+        }
+
+        bufferedWriter.newLine();
+
+        for (int k = 0; k < n - 1; k ++) {
+            bufferedWriter.write(header + " Intron " + (k + 1));
+            bufferedWriter.newLine();
+            SimpleLocation intronLocation = getIntronLocation(loc, k);
+            bufferedWriter.write(intronLocation.getSubSequence(sequence).getSequenceAsString());
+            bufferedWriter.newLine();
+        }
+    }
+
+    private SimpleLocation getIntronLocation(Location location, int k) {
+        int n = location.getSubLocations().size();
+        assert k < n && k >= 0 && k + 1 < n;
+
+        int start, end;
+        List<Location> subLocations = location.getSubLocations();
+
+        if (location.getStrand() == Strand.POSITIVE) {
+            start = subLocations.get(k).getEnd().getPosition() + 1;
+            end = subLocations.get(k + 1).getStart().getPosition() - 1;
+        } else {
+            start = subLocations.get(n - k - 2).getEnd().getPosition() + 1;
+            end = subLocations.get(n - k - 1).getStart().getPosition() - 1;
+        }
+
+        return new SimpleLocation(start, end, location.getStrand());
+    }
+
+    private Location getCorrectSubLocation(Location location, int k) {
+        int n = location.getSubLocations().size();
+        assert k < n && k >= 0;
+        if (location.getStrand() == Strand.POSITIVE)
+            return location.getSubLocations().get(k);
+        return location.getSubLocations().get(n - k - 1);
+    }
+
+    private String makeSequenceHeader(String region, String organism, String organelle, String accession, String source) {
+        return Stream.of(region, organism, organelle, accession)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.joining(" "))
+                + ": " + source;
+    }
+
+    private String makeFilePath(String directory, String region, String organism, String organelle, String accession) {
+        return directory +
+                Stream.of(region, organism, organelle, accession)
+                        .filter(s -> s != null && !s.isEmpty())
+                        .collect(Collectors.joining("_"))
+                        .replace(' ', '_')
+                + fileExtension;
+    }
+
+    @Override
+    public boolean parse_into(String outDirectory) {
+        return false;
     }
 
     /**
@@ -82,7 +202,11 @@ public class GbffParser implements Parser {
         while (!dnaSequences.isEmpty()) {
             for (DNASequence sequence : dnaSequences.values()) {
                 for (String region : regions) {
-                    var features = sequence.getFeaturesByType(region);
+                    List<FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound>> features;
+                    if (region.equals("Intron"))
+                        features = sequence.getFeaturesByType("CDS");
+                    else
+                        features = sequence.getFeaturesByType(region);
                     if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty()) continue;
                     String filePath = makeFilePath(outDirectory, region, organism, organelle, sequence.getAccession().toString());
@@ -125,74 +249,7 @@ public class GbffParser implements Parser {
             throw e;
         }
 
-        System.out.printf("Parsing ended: %18s\n", gbPath);
+        System.out.printf("Parsing ended: %s\n", gbPath);
         return true;
-    }
-
-    private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
-                              DNASequence sequence,
-                              String header,
-                              String region,
-                              BufferedWriter bufferedWriter) throws IOException {
-        if (multipleLineSource(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
-            return;
-        }
-        if (containsMultipleJoins(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
-            return;
-        }
-
-        bufferedWriter.write(header);
-        bufferedWriter.newLine();
-
-        AbstractLocation loc = feature.getLocations();
-        List<Location> subLocations = loc.getSubLocations();
-        int n = subLocations.size();
-
-        if (n == 0) {
-            bufferedWriter.write(loc.getSubSequence(sequence).getSequenceAsString());
-            bufferedWriter.newLine();
-        } else {
-            for (int k = 0; k < n; k++) {
-                int codonNum = k;
-                if (loc.getStrand() == Strand.NEGATIVE)
-                    codonNum = n - k - 1;
-                Location subLocation = subLocations.get(codonNum);
-                bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
-            }
-            bufferedWriter.newLine();
-            for (int k = 0; k < n; k++) {
-                int codonNum = k;
-                if (loc.getStrand() == Strand.NEGATIVE)
-                    codonNum = n - k - 1;
-                bufferedWriter.write(header + " " + joinKeyWords.get(region) + " " + (k + 1));
-                bufferedWriter.newLine();
-                Location subLocation = subLocations.get(codonNum);
-                bufferedWriter.write(subLocation.getSubSequence(sequence).getSequenceAsString());
-                bufferedWriter.newLine();
-            }
-        }
-    }
-
-    private String makeSequenceHeader(String region, String organism, String organelle, String accession, String source) {
-        return Stream.of(region, organism, organelle, accession)
-                .filter(s -> s != null && !s.isEmpty())
-                .collect(Collectors.joining(" "))
-                + ": " + source;
-    }
-
-    private String makeFilePath(String directory, String region, String organism, String organelle, String accession) {
-        return directory +
-                Stream.of(region, organism, organelle, accession)
-                        .filter(s -> s != null && !s.isEmpty())
-                        .collect(Collectors.joining("_"))
-                        .replace(' ', '_')
-                + fileExtension;
-    }
-
-    @Override
-    public boolean parse_into(String outDirectory) {
-        return false;
     }
 }
