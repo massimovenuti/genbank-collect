@@ -25,7 +25,7 @@ public class ParsingTask implements Task {
             var dir = Config.organism_path(row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism());
             Files.createDirectories(Paths.get(dir));
             GbffParser parser = new GbffParser(gbFile);
-            return parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
+            return parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions, row.getAreNcs());
         } catch (IOException | CompoundNotFoundException e) {
             e.printStackTrace();
         }
