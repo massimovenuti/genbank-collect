@@ -4,12 +4,15 @@ import org.apache.commons.net.ftp.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Ftp {
     private FTPClient ftpClient;
     private HashMap<String, FTPFile> fileHashMap;
     private String server;
     private boolean logged;
+    private AtomicInteger sem = new AtomicInteger(0);
+    private long latest_reset = 0;
 
     private void connect() throws IOException {
         try {
@@ -42,24 +45,6 @@ public class Ftp {
             throw new IOException("Login failed");
     }
 
-    public boolean isConnected() {
-        var co = ftpClient.isConnected();
-        if (co)
-            logged = false;
-        return co;
-    }
-
-    public boolean isLogged() {
-        return logged;
-    }
-
-    private void prepare() throws IOException {
-        if (!isConnected())
-            connect();
-        if (!isLogged())
-            login();
-    }
-
     public String temp_directory() {
         return Config.data_directory() + "/" + server.replace(".", "_");
     }
@@ -81,46 +66,78 @@ public class Ftp {
         if (!dir.exists() || !dir.isDirectory())
             if (!dir.mkdirs())
                 throw new RuntimeException("Can't create temporary directory");
+
+        connect();
+        login();
+    }
+
+    public void restart() throws IOException {
+        if (System.currentTimeMillis() - latest_reset < 2 * 1000) // 1 reco per 2 second max
+            return;
+        if (sem.compareAndExchange(0, 1) == 0) {
+            close();
+            connect();
+            login();
+            latest_reset = System.currentTimeMillis();
+            sem.set(0);
+        } else {
+            while (sem.get() != 0) {
+                try {
+                    Thread.sleep(10, 0);
+                } catch (Exception e) {}
+            }
+        }
     }
 
     public void close() throws IOException {
-        if (isLogged())
             ftpClient.logout();
-        if (isConnected())
             ftpClient.disconnect();
     }
 
     public File getFile(String ftp_path) throws IOException {
-        prepare();
+        //prepare();
 
-        try {
-            File localFile = new File(temp_directory() + "/" + ftp_path);
-            File parentDirectory = localFile.getParentFile();
-            if (!parentDirectory.exists() || !parentDirectory.isDirectory())
-                if (!parentDirectory.mkdirs())
-                    throw new IOException("Cannot create directories for " + ftp_path);
+        for (int i = 0; i < 10; ++i) { // retries
+            try {
+                File localFile = new File(temp_directory() + "/" + ftp_path);
+                File parentDirectory = localFile.getParentFile();
+                if (!parentDirectory.exists() || !parentDirectory.isDirectory())
+                    if (!parentDirectory.mkdirs())
+                        throw new IOException("Cannot create directories for " + ftp_path);
 
-            if (!fileHashMap.containsKey(ftp_path)) {
-                FTPFile ftpFile = ftpClient.mlistFile(ftp_path);
-                if (ftpFile == null)
-                    throw new RuntimeException(ftp_path + " does not exist");
-                fileHashMap.put(ftp_path, ftpFile);
+                if (!fileHashMap.containsKey(ftp_path)) {
+                    FTPFile ftpFile = ftpClient.mlistFile(ftp_path);
+                    if (ftpFile == null)
+                        throw new RuntimeException(ftp_path + " does not exist");
+                    fileHashMap.put(ftp_path, ftpFile);
+                }
+
+                if ((!localFile.exists() && !localFile.isDirectory())
+                        || (localFile.lastModified() < fileHashMap.get(ftp_path).getTimestamp().getTimeInMillis())
+                        || (fileHashMap.get(ftp_path).getSize() != localFile.length())) { // remote is newer or local is corrupted
+                    var outs = new FileOutputStream(localFile);
+                    ftpClient.retrieveFile(ftp_path, outs);
+                }
+
+                if (fileHashMap.get(ftp_path).getSize() != localFile.length()) // error
+                    throw new IOException("File size doesn't match");
+
+                return localFile;
+            } catch (Throwable t) {
+                System.out.printf("Error while downloading %20s (%d): %20s\n", ftp_path, i + 1, t.getMessage());
+                //throw new IOException("Unable to download " + ftp_path, t);
             }
-
-            if ((!localFile.exists() && !localFile.isDirectory()) || (localFile.lastModified() < fileHashMap.get(ftp_path).getTimestamp().getTimeInMillis())) { // remote is newer
-                var outs = new FileOutputStream(localFile);
-                ftpClient.retrieveFile(ftp_path, outs);
+            try {
+                restart();
+                Thread.sleep(500 * i, 0);
+            } catch (Exception e) {
             }
-
-            return localFile;
-        } catch (Throwable t) {
-            throw new IOException("Unable to download " + ftp_path, t);
         }
+        throw new IOException("Unable to download " + ftp_path);
     }
 
-    public void cacheMetadata(String path) throws IOException {
-        prepare();
 
+    public void cacheMetadata(String path) throws IOException {
         var files = ftpClient.listFiles(path);
         for (var f : files) {
             fileHashMap.put(f.getName(), f);
