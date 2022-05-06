@@ -37,7 +37,7 @@ public class Main {
             var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             var r = ncbi.index_to_db("eukaryotes.txt");
             for (var line : r)
-                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc())));
+                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc(), line.getNcs())));
             /*while (!GlobalGUIVariables.get().isStop()) {
                 Thread.sleep(150, 0);
             }
@@ -58,7 +58,7 @@ public class Main {
         DataBase.updateFromOverview(od);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
         for (var idx : arr) {
-            System.out.printf("File: %20s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
+            System.out.printf("File: %s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
             DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
             task.addDone(1);
         }
