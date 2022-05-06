@@ -71,15 +71,22 @@ public class Ftp {
         login();
     }
 
-    public void restart() throws IOException {
+    public void restart() {
         if (System.currentTimeMillis() - latest_reset < 2 * 1000) // 1 reco per 2 second max
             return;
         if (sem.compareAndExchange(0, 1) == 0) {
-            close();
-            connect();
-            login();
-            latest_reset = System.currentTimeMillis();
-            sem.set(0);
+            try {
+                close();
+            } catch (Throwable t) {}
+            try {
+                connect();
+                login();
+                latest_reset = System.currentTimeMillis();
+            } catch (Throwable t) {
+                System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
+            } finally {
+                sem.set(0);
+            }
         } else {
             while (sem.get() != 0) {
                 try {
@@ -105,7 +112,7 @@ public class Ftp {
                     if (!parentDirectory.mkdirs())
                         throw new IOException("Cannot create directories for " + ftp_path);
 
-                if (!fileHashMap.containsKey(ftp_path)) {
+                if (!fileHashMap.containsKey(ftp_path) || i > 0) {
                     FTPFile ftpFile = ftpClient.mlistFile(ftp_path);
                     if (ftpFile == null)
                         throw new RuntimeException(ftp_path + " does not exist");
@@ -128,9 +135,11 @@ public class Ftp {
                 //throw new IOException("Unable to download " + ftp_path, t);
             }
             try {
-                restart();
+                if (i > 2)
+                    restart();
                 Thread.sleep(500 * i, 0);
             } catch (Exception e) {
+                System.err.printf("Error while retrying download: %20s\n%s", e.getMessage(), e.getStackTrace());
             }
         }
         throw new IOException("Unable to download " + ftp_path);
