@@ -105,7 +105,7 @@ public class GbffParser implements Parser {
         int n = loc.getSubLocations().size();
 
         for (int k = 0; k < n - 1; k ++) {
-            Location intronLocation = getIntronLocation(loc, k);
+            SimpleLocation intronLocation = getIntronLocation(loc, k);
             bufferedWriter.write(intronLocation.getSubSequence(sequence).getSequenceAsString());
         }
 
@@ -114,7 +114,7 @@ public class GbffParser implements Parser {
         for (int k = 0; k < n - 1; k ++) {
             bufferedWriter.write(header + " Intron " + (k + 1));
             bufferedWriter.newLine();
-            Location intronLocation = getIntronLocation(loc, k);
+            SimpleLocation intronLocation = getIntronLocation(loc, k);
             bufferedWriter.write(intronLocation.getSubSequence(sequence).getSequenceAsString());
             bufferedWriter.newLine();
         }
