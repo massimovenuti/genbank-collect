@@ -12,6 +12,7 @@ public class Ftp {
     private String server;
     private boolean logged;
     private AtomicInteger sem = new AtomicInteger(0);
+    private long latest_reset = 0;
 
     private void connect() throws IOException {
         try {
@@ -71,10 +72,14 @@ public class Ftp {
     }
 
     public void restart() throws IOException {
+        if (System.currentTimeMillis() - latest_reset < 2 * 1000) // 1 reco per 2 second max
+            return;
         if (sem.compareAndExchange(0, 1) == 0) {
             close();
             connect();
             login();
+            latest_reset = System.currentTimeMillis();
+            sem.set(0);
         } else {
             while (sem.get() != 0) {
                 try {
@@ -124,7 +129,7 @@ public class Ftp {
             }
             try {
                 restart();
-                Thread.sleep(500, 0);
+                Thread.sleep(500 * i, 0);
             } catch (Exception e) {
             }
         }
