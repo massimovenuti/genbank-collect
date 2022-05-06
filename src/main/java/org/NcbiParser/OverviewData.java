@@ -4,11 +4,18 @@ public class OverviewData implements Comparable<OverviewData> {
     private String kingdom;
     private String group;
 
-    public OverviewData(String kingdom, String group, String subgroup, String organism) {
+    public String getOrganelle() {
+        return organelle;
+    }
+
+    private String organelle;
+
+    public OverviewData(String kingdom, String group, String subgroup, String organism, String organelle) {
         this.kingdom = kingdom;
         this.group = group;
         this.subgroup = subgroup;
         this.organism = organism;
+        this.organelle = organelle;
     }
 
     public String getKingdom() {
