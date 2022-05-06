@@ -40,4 +40,14 @@ public class NcbiParser {
             throw new IOException("Bad NCBI file: " + e.getMessage());
         }
     }
+
+    public static ArrayList<Boolean> preparse_ncs(String raw_ncs) {
+        ArrayList<Boolean> ret = new ArrayList<Boolean>();
+        var split = raw_ncs.split(";");
+        ret.ensureCapacity(split.length);
+        for (var potential_nc : split) {
+            ret.add(potential_nc.contains("NC_"));
+        }
+        return ret;
+    }
 }
