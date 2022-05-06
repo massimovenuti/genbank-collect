@@ -128,8 +128,8 @@ public class GbffParser implements Parser {
         List<Location> subLocations = location.getSubLocations();
 
         if (location.getStrand() == Strand.POSITIVE) {
-            start = subLocations.get(k).getStart().getPosition() + 1;
-            end = subLocations.get(k + 1).getEnd().getPosition() - 1;
+            start = subLocations.get(k).getEnd().getPosition() + 1;
+            end = subLocations.get(k + 1).getStart().getPosition() - 1;
         } else {
             start = subLocations.get(n - k - 2).getEnd().getPosition() + 1;
             end = subLocations.get(n - k - 1).getStart().getPosition() - 1;
