@@ -20,7 +20,7 @@ public class DLThread extends Thread {
                 }
                 dlt.run(mt, ncbi);
             } catch (Throwable t) {
-                System.out.printf("Erreur de dl: %19s\n", t.getMessage());
+                System.out.printf("Download failed: %s\n", t.getMessage());
             }
         }
     }

@@ -146,16 +146,16 @@ public class GbffParser implements Parser {
         return location.getSubLocations().get(n - k - 1);
     }
 
-    private String makeSequenceHeader(String region, String organism, String organelle, String accession, String source) {
-        return Stream.of(region, organism, organelle, accession)
+    private String makeSequenceHeader(String region, String organism, String organelle, String nc, String source) {
+        return Stream.of(region, organism, organelle, nc)
                 .filter(s -> s != null && !s.isEmpty())
                 .collect(Collectors.joining(" "))
                 + ": " + source;
     }
 
-    private String makeFilePath(String directory, String region, String organism, String organelle, String accession) {
+    private String makeFilePath(String directory, String region, String organism, String organelle, String nc) {
         return directory +
-                Stream.of(region, organism, organelle, accession)
+                Stream.of(region, organism, organelle, nc)
                         .filter(s -> s != null && !s.isEmpty())
                         .collect(Collectors.joining("_"))
                         .replace(' ', '_')
@@ -174,6 +174,11 @@ public class GbffParser implements Parser {
         return source.indexOf('\n') >= 0;
     }
 
+    private void close() throws IOException {
+        if (inStream != null) inStream.close();
+        if (dnaReader != null) dnaReader.close();
+    }
+
     /**
      * Check if source contains multiple joins
      */
@@ -183,24 +188,28 @@ public class GbffParser implements Parser {
         return i >= 0;
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions) throws IOException, CompoundNotFoundException {
-        System.out.printf("Parsing: %24s\n", gbPath);
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
+        System.out.printf("Parsing: %s\n", gbPath);
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
 
-        try {
-            dnaSequences = dnaReader.process(1);
-        } catch (CompoundNotFoundException e) {
-            System.err.println("Found unexpected compound");
-            throw e;
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to read file : " + gbPath);
-            throw e;
-        }
-
-        while (!dnaSequences.isEmpty()) {
+        while (true) {
+            try {
+                dnaSequences = dnaReader.process(1);
+            } catch (CompoundNotFoundException e) {
+                System.err.println("Found unexpected compound");
+                close();
+                throw e;
+            } catch (Exception e) {
+                System.err.println("Failed to read file : " + gbPath);
+                close();
+                throw e;
+            }
+            if (dnaSequences.isEmpty()) break;
             for (DNASequence sequence : dnaSequences.values()) {
+                String nc = areNcs.get(sequence.getAccession().toString());
+                if (nc == null) continue;
                 for (String region : regions) {
                     List<FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound>> features;
                     if (region.equals("Intron"))
@@ -209,43 +218,31 @@ public class GbffParser implements Parser {
                         features = sequence.getFeaturesByType(region);
                     if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty()) continue;
-                    String filePath = makeFilePath(outDirectory, region, organism, organelle, sequence.getAccession().toString());
+                    String filePath = makeFilePath(outDirectory, region, organism, organelle, nc);
                     try {
                         writer = new FileWriter(filePath, false);
                         bufferedWriter = new BufferedWriter(writer);
                         for (var feature : features) {
-                            String header = makeSequenceHeader(region, organism, sequence.getAccession().toString(), organelle, feature.getSource());
+                            String header = makeSequenceHeader(region, organism, nc, organelle, feature.getSource());
                             writeFeature(feature, sequence, header, region, bufferedWriter);
                         }
                     } catch (Exception e) {
-                        System.err.println("[ERROR] Failed to write file " + filePath);
+                        System.err.println("Failed to write file " + filePath);
+                        if (inStream != null) inStream.close();
+                        if (dnaReader != null) dnaReader.close();
                         throw e;
                     } finally {
-                        try {
-                            if (bufferedWriter != null) bufferedWriter.close();
-                            if (writer != null) writer.close();
-                        } catch (IOException e) {
-                            System.err.println("[ERROR] Failed to close file " + filePath);
-                            throw e;
-                        }
+                        if (bufferedWriter != null) bufferedWriter.close();
+                        if (writer != null) writer.close();
                     }
                 }
             }
-            try {
-                dnaSequences = dnaReader.process(1);
-            } catch (CompoundNotFoundException e) {
-                System.err.println("Found unexpected compound");
-                throw e;
-            } catch (Exception e) {
-                System.err.println("[ERROR] Failed to read file : " + gbPath);
-                throw e;
-            }
         }
+
         try {
-            dnaReader.close();
-            inStream.close();
+            close();
         } catch (IOException e) {
-            System.err.println("[ERROR] Failed to close file " + gbPath);
+            System.err.println("Failed to close file " + gbPath);
             throw e;
         }
 
