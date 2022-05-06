@@ -49,8 +49,11 @@ public class NcbiParser {
             if (split_nc.length < 2)
                 continue;
             var split_id = split_nc[1].split("/");
-            if (split_id.length == 2 && split_id[0].startsWith("NC_") && split_id[1].length() != 0) // id
-                ret.put(split_id[1], split_id[0]);
+            if (split_id.length == 2 && split_id[0].startsWith("NC_") && split_id[1].length() != 0) {
+                var key = split_id[1].split("\\.");
+                var value = split_id[0].split("\\.");
+                ret.put(key[0], value[0]);
+            }
         }
         return ret;
     }
