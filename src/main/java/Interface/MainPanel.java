@@ -220,7 +220,7 @@ public class MainPanel extends JFrame {
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
             @Override
-            public void mousePressed(MouseEvent event) {
+            public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
                 logArea.append("Starting process...\n");
                 regions = create_region_array();
@@ -229,14 +229,12 @@ public class MainPanel extends JFrame {
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
                 Main.startParsing();
-
             }
         });
         triggerButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-
                 show_bars();
                 logArea.append("add\n");
 
