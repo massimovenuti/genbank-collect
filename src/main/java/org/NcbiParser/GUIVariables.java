@@ -10,7 +10,7 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 4;
+        this.nbThreadsDL = 1;
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove

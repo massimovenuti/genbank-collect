@@ -1,7 +1,5 @@
 package org.NcbiParser;
 
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,12 +34,15 @@ public class Main {
                 ncbi = new Ncbi();
             var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             var r = ncbi.index_to_db("eukaryotes.txt");
-            for (var line : r)
+            for (var line : r) {
+                if (GlobalGUIVariables.get().isStop())
+                    break;
                 mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc(), line.getNcs())));
+            }
             while (!GlobalGUIVariables.get().isStop()) {
                 Thread.sleep(150, 0);
             }
-            mt.stopEverything();
+            mt.stopParsing();
         } catch (Exception e) {
             e.printStackTrace();
         }
