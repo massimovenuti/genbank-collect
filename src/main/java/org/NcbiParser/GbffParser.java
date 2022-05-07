@@ -253,8 +253,7 @@ public class GbffParser implements Parser {
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
-                        if (inStream != null) inStream.close();
-                        if (dnaReader != null) dnaReader.close();
+                        end();
                         throw e;
                     } finally {
                         if (bufferedWriter != null) bufferedWriter.close();
