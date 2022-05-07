@@ -27,55 +27,8 @@ import java.util.Comparator;
 public class DataBase {
 
     private static ArrayList<UpdateRow> globalRegroupedData;
-    /*
-        Met à jour la base avec les dernières données d'overview, viruses.txt, x.ids, etc.
-     */
-    public static void updateFromOverview(ArrayList<OverviewData> overview_parsed) throws SQLException {
-        if(DataBaseManager.getConnection_() != null){
-            try{
-                ArrayList<String> kingdomNames = new ArrayList<String>();
-                ArrayList<String> groupNames = new ArrayList<String>();
-                ArrayList<String> subgroupNames = new ArrayList<String>();
-                ArrayList<String> organismNames = new ArrayList<String>();
-
-                for (var data : overview_parsed) {
-                    kingdomNames.add(data.getKingdom());
-                    groupNames.add(data.getGroup());
-                    subgroupNames.add(data.getSubgroup());
-                    organismNames.add(data.getOrganism());
-                }
-                DataBaseManager.insertOverviewTable(kingdomNames,groupNames,subgroupNames,organismNames);
-
-            }catch(Exception eio){
-                throw new RuntimeException("Error while putting the overview in db");
-            }
-        }
-    }
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
-    public static void updateFromIndexFile(ArrayList<IndexData> index_parsed) {
-        if(DataBaseManager.getConnection_() != null){
-            try{
-                ArrayList<String> groupNames = new ArrayList<String>();
-                ArrayList<String> subgroupNames = new ArrayList<String>();
-                ArrayList<String> organismNames = new ArrayList<String>();
-                ArrayList<String> GC = new ArrayList<String>();
-                ArrayList<String> lastModify = new ArrayList<String>();
 
-                for (var data : index_parsed) {
-                    groupNames.add(data.getGroup());
-                    subgroupNames.add(data.getSubgroup());
-                    organismNames.add(data.getOrganism());
-                    GC.add(data.getGc());
-                    lastModify.add(data.getModifyDate());
-                }
-                DataBaseManager.insertIndexesTables(groupNames,subgroupNames,organismNames,GC,lastModify);
-
-            }catch(Exception eio){
-
-            }
-        }
-
-    }
 
     public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<IndexData> index_parsed){
         globalRegroupedData = new ArrayList<UpdateRow>();
@@ -111,7 +64,7 @@ public class DataBase {
         System.out.println();
     }
 
-    public static ArrayList<UpdateRow> allOrganismNeedingUpdate(ArrayList<OverviewData> userNeeds){
+    public static ArrayList<UpdateRow> allOrganismNeedingUpdate(ArrayList<OverviewData> userNeeds,ArrayList<Region> neededRegions){
         ArrayList<UpdateRow> ur = new ArrayList<UpdateRow>();
         int beg = 0;
         if(userNeeds.get(0).getKingdom() == null){ // cas ou on veut tester pour tous
@@ -164,9 +117,8 @@ public class DataBase {
         // ici on à ce que l'utilisateur VEUT, reste à prendre ce qu'on DOIT mettre a jour seulement
         for(var row : ur){
             //on retire si elle n'a pas besion d'être mise à jour
-            if(!DataBaseManager.needAnUpdate(row)){
+            if(!DataBaseManager.needAnUpdate(row,neededRegions)){
                 dontNeedModif.add(row);
-                //ur.remove(row);
             }
         }
         ur.removeAll(dontNeedModif);
@@ -174,6 +126,13 @@ public class DataBase {
         return ur;
     }
 
+    public static void updateFilesTable(UpdateRow ur,Region reg){
+        DataBaseManager.insertFilesTable(ur,reg);
+    }
+
+    public static void updateFilesTableMutipleRegions(UpdateRow ur, ArrayList<Region> regs){
+        DataBaseManager.multipleInsertFilesTable(ur, regs);
+    }
 
 
     /*
@@ -204,12 +163,15 @@ public class DataBase {
 
         DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS FILES (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "Type TEXT," +
-                "ncs TEXT," +
+                "kingdom TEXT," +
+                "groupe TEXT," +
+                "subGroup TEXT," +
                 "organism TEXT," +
+                "organelle TEXT," +
+                "gc TEXT," +
+                "type TEXT," +
                 "date TEXT," +
-                "UNIQUE (ncs,organism))");
-
+                "UNIQUE (kingdom,group,subgroup,organism,organelle,type,date))");
 
     }
 

@@ -3,6 +3,7 @@ package org.NcbiParser;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public final class DataBaseManager {
     private static String path_;
@@ -45,23 +46,52 @@ public final class DataBaseManager {
 
     }
 
-    public static boolean needAnUpdate(UpdateRow row){
+    /**
+     *
+     * @param row ligne que l'on veut verifier
+     * @param regs regions que l'on considère, on ne traite pas le cas ou il n'y a aucune région
+     * @return vrai si la ligne doit être mise à jour pour les region selectionnées
+     */
+    public static boolean needAnUpdate(UpdateRow row,ArrayList<Region> regs){
         Statement s;
         try{
             String req = "SELECT * FROM FILES " +
-                    "WHERE ncs = \"" + row.getNcs() + "\" AND organism = \"" + row.getOrganism() + "\";";
+                    "WHERE kingdom = \"" + row.getKingdom() + "\" AND group = \"" + row.getGroup() + "\" AND " +
+                    "subGroup = \"" + row.getSubGroup() + "\" AND organism = \"" + row.getOrganism() + "\"" +
+                    "AND organelle = \"" + row.getOrganelle() + "\";";
             s = connection_.createStatement();
             ResultSet rs = s.executeQuery(req);
 
-            if(!rs.isBeforeFirst()){ // résultat vide donc pas à jour forcément
+            if(!rs.isBeforeFirst()){ // résultat vide donc forcément pas à jour
                 return true;
             }
 
-            String parseTexteDate = rs.getString("date");
-            java.util.Date prevParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(parseTexteDate);
             java.util.Date newParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(row.getModifyDate());
+            java.util.Date prevParseDate;
+            boolean isIn;
+            //pour toutes les lignes -> regarder si chaque region selectionnée est à jour
+            for(var reg : regs){
+                isIn = false;
+                rs.first();
+                //chercher la colonne correspondant à ce type
+                do{
+                    String currentReg = rs.getString("type");
+                    if(currentReg.equalsIgnoreCase(reg.toString())){
+                        //si le type à déja été parser regarder si il est à jour
+                        String parseTexteDate = rs.getString("date");
+                        prevParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(parseTexteDate);
+                        isIn = true;
+                        if(prevParseDate.before(newParseDate) && !prevParseDate.equals(newParseDate))
+                            return true;
+                    }
+                }while(rs.next());
+                //si il n'est pas dans la table, alors il n'est pas à jour
+                if(!isIn)
+                    return true;
 
-            return (prevParseDate.before(newParseDate) && !prevParseDate.equals(newParseDate));
+            }
+            //retourne faux car on à trouver aucune région pour laquelle ce n'est pas à jour
+            return false;
         }catch(Exception eio){
             System.out.println(eio.getMessage());
             return false;
@@ -78,60 +108,60 @@ public final class DataBaseManager {
     }
 
 
-    public static void insertOverviewTable(ArrayList<String> kindomNames,ArrayList<String> GroupNames,ArrayList<String> subGroupNames,
-                                           ArrayList<String> organismNames) throws SQLException {
+
+
+    public static void insertFilesTable(UpdateRow ur, Region reg) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO OVERVIEW (kingdom, groupe, subgroup, organisme, organelle)" +
-                    " VALUES" + "(?, ?, ?, ?, ?)";
+            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
-
-            for(int i = 0; i <kindomNames.size(); i++) {
-                ps.setString(1, kindomNames.get(i));
-                ps.setString(2, GroupNames.get(i));
-                ps.setString(3, subGroupNames.get(i));
-                ps.setString(4, organismNames.get(i));
-                ps.setString(5, null);
-                ps.addBatch();
-            }
-
-            ps.executeBatch();
-
+            ps.setString(1,ur.getKingdom());
+            ps.setString(2,ur.getGroup());
+            ps.setString(3, ur.getSubGroup());
+            ps.setString(4,ur.getOrganism());
+            ps.setString(5,ur.getOrganelle());
+            ps.setString(6,ur.getGc());
+            ps.setString(7, reg.toString());
+            SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd");
+            Calendar calendar = Calendar.getInstance();
+            java.util.Date dateObj = calendar.getTime();
+            ps.setString(8,dtf.format(dateObj));
+            ps.executeUpdate();
         }catch(Exception eio){
-            throw new RuntimeException("Error batch");
+            throw new RuntimeException("error inserting a parsed files");
         }
-
-
     }
 
-    public static void insertIndexesTables(ArrayList<String> GroupNames,ArrayList<String> subGroupNames,
-                                           ArrayList<String> organismNames,ArrayList<String> gcc,
-                                           ArrayList<String> lastModify){
+    public static void multipleInsertFilesTable(UpdateRow ur, ArrayList<Region> regs) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO INDEXES (groupe, subgroup,organisme, GC, last_modify)" +
-                    " VALUES" + "(?, ?, ?, ?, ?)";
+            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
-
-            for(int i = 0; i <GroupNames.size(); i++) {
-                ps.setString(1, GroupNames.get(i));
-                ps.setString(2, subGroupNames.get(i));
-                ps.setString(3, organismNames.get(i));
-                ps.setString(4, gcc.get(i));
-                ps.setString(5, lastModify.get(i));
+            for(var reg : regs){
+                ps.setString(1,ur.getKingdom());
+                ps.setString(2,ur.getGroup());
+                ps.setString(3, ur.getSubGroup());
+                ps.setString(4,ur.getOrganism());
+                ps.setString(5,ur.getOrganelle());
+                ps.setString(6,ur.getGc());
+                ps.setString(7, reg.toString());
+                SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd");
+                Calendar calendar = Calendar.getInstance();
+                java.util.Date dateObj = calendar.getTime();
+                ps.setString(8,dtf.format(dateObj));
                 ps.addBatch();
             }
-
             ps.executeBatch();
-
         }catch(Exception eio){
-            throw new RuntimeException("Error batch");
+            throw new RuntimeException("error inserting a parsed files");
         }
-
     }
 
 
     public static Connection getConnection_(){
         return connection_;
     }
+
 }
