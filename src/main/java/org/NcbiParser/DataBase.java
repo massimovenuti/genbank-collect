@@ -171,7 +171,7 @@ public class DataBase {
                 "gc TEXT," +
                 "type TEXT," +
                 "date TEXT," +
-                "UNIQUE (kingdom,groupe,subgroup,organism,organelle,type,date))");
+                "UNIQUE (kingdom,groupe,subgroup,organism,organelle,type))");
 
     }
 
