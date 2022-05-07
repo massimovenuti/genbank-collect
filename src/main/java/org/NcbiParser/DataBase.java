@@ -113,7 +113,7 @@ public class DataBase {
 
             }
         }
-        ArrayList<UpdateRow> dontNeedModif = new ArrayList<UpdateRow>();
+        ArrayList<UpdateRow> dontNeedModif = new ArrayList<>();
         // ici on à ce que l'utilisateur VEUT, reste à prendre ce qu'on DOIT mettre a jour seulement
         for(var row : ur){
             //on retire si elle n'a pas besion d'être mise à jour
@@ -171,7 +171,7 @@ public class DataBase {
                 "gc TEXT," +
                 "type TEXT," +
                 "date TEXT," +
-                "UNIQUE (kingdom,group,subgroup,organism,organelle,type,date))");
+                "UNIQUE (kingdom,groupe,subgroup,organism,organelle,type,date))");
 
     }
 
