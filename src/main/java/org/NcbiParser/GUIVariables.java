@@ -1,9 +1,12 @@
 package org.NcbiParser;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
+
+    private JTextArea logArea;
 
     public GUIVariables() {
         this.stop = false;
@@ -11,6 +14,8 @@ public class GUIVariables {
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove
+        this.logArea = null;
+
     }
 
     public ArrayList<String> getRegions() {
@@ -29,6 +34,14 @@ public class GUIVariables {
         this.regions = regions;
     }
 
+    public void setAddTrigger(JButton trigger) {
+        this.trigger_add = trigger;
+    }
+
+    public void setLogArea(JTextArea log) { this.logArea = log; }
+
+
+
     public int getNbThreadsDL() {
         return nbThreadsDL;
     }
@@ -41,6 +54,11 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
+    public JButton getAddTrigger() { return this.trigger_add; }
+    public JTextArea getLogArea() { return this.logArea; }
+
+
+
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
     }
@@ -52,6 +70,8 @@ public class GUIVariables {
     private ArrayList<String> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
+
+    private JButton trigger_add;
 
     private boolean stop;
 }
