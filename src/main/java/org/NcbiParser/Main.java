@@ -38,10 +38,10 @@ public class Main {
             var r = ncbi.index_to_db("eukaryotes.txt");
             for (var line : r)
                 mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc(), line.getNcs())));
-            /*while (!GlobalGUIVariables.get().isStop()) {
+            while (!GlobalGUIVariables.get().isStop()) {
                 Thread.sleep(150, 0);
             }
-            mt.stopEverything();*/
+            mt.stopEverything();
         } catch (Exception e) {
             e.printStackTrace();
         }
