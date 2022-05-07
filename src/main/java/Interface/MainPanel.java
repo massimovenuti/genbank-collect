@@ -290,6 +290,15 @@ public class MainPanel extends JFrame {
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
+                try {
+                    stopButton.setEnabled(false);
+                    Main.getMt().stopParsing();
+                    stopButton.setVisible(false);
+                    parseButton.setVisible(true);
+                    Main.atProgStart();
+                } catch (IOException ex) {
+                    GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
+                }
             }
         });
         triggerButton.addActionListener(new ActionListener() {
