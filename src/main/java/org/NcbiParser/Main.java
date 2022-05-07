@@ -51,19 +51,22 @@ public class Main {
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException, SQLException, ClassNotFoundException {
         Progress gl = new Progress();
+        ArrayList<IndexData> idxDatas= new ArrayList<IndexData>();
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(4);
         var od = ncbi.overview_to_db();
         GlobalGUIVariables.get().setTree(createHierarchy(od));
         task.addDone(1);
         DataBase.createOrOpenDataBase(System.getProperty("user.dir") + "/Results/test.db");
-        DataBase.updateFromOverview(od);
+        //DataBase.updateFromOverview(od);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
         for (var idx : arr) {
             System.out.printf("file : %20s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
-            DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
+            //DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
+            idxDatas.addAll(ncbi.index_to_db(idx));
             task.addDone(1);
         }
+        DataBase.updateFromIndexAndOverview(od,idxDatas);
         gl.remove_task(task);
     }
 

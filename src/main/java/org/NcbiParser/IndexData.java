@@ -37,4 +37,15 @@ public class IndexData {
     }
 
     private String gc;
+
+    public int compareTo(IndexData indexData) {
+        int cmp = group.compareTo(indexData.group);
+        if (cmp != 0)
+            return cmp;
+        cmp = subgroup.compareTo(indexData.subgroup);
+        if (cmp != 0)
+            return cmp;
+        return organism.compareTo(indexData.organism);
+    }
+
 }

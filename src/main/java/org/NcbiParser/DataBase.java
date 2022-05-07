@@ -2,6 +2,8 @@ package org.NcbiParser;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /* Tables (id non écrits mais présents dabs chaque table, quand une table est mentionnée à droite de ":", c'est une CE
     sur cette table)
@@ -72,6 +74,26 @@ public class DataBase {
         }
 
     }
+
+    public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<IndexData> index_parsed){
+        Collections.sort(overview_parsed, new Comparator<OverviewData>() {
+            @Override
+            public int compare(OverviewData o1, OverviewData o2) {
+                return o1.compareToGroupVersion(o2);
+            }
+        });
+
+        Collections.sort(index_parsed, new Comparator<IndexData>() {
+            @Override
+            public int compare(IndexData o1, IndexData o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+
+
+    }
+
 
     /**
      *
