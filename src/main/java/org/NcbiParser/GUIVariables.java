@@ -1,11 +1,13 @@
 package org.NcbiParser;
 
 import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
-    private JTextArea logArea;
+    private StyledDocument logArea;
 
     public GUIVariables() {
         this.stop = false;
@@ -32,7 +34,7 @@ public class GUIVariables {
         this.regions = regions;
     }
 
-    public void setLogArea(JTextArea log) {
+    public void setLogArea(StyledDocument log) {
         this.logArea = log;
     }
 
@@ -52,7 +54,7 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
-    public JTextArea getLogArea()
+    public StyledDocument getLogArea()
     {
         return this.logArea;
     }
@@ -67,6 +69,17 @@ public class GUIVariables {
 
     public TreeNode getTree() {return this.tree;}
 
+    public void insert_text(Color color, String text){
+        StyleContext cont = StyleContext.getDefaultStyleContext();
+        Style style = cont.addStyle("col", null);
+        StyleConstants.setForeground(style, color);
+
+        try {
+            logArea.insertString(logArea.getLength(), text, style);
+        } catch (BadLocationException erro){
+            System.err.println(erro.getMessage());
+        }
+    }
     private ArrayList<String> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;

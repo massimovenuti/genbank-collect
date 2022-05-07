@@ -1,5 +1,6 @@
 package org.NcbiParser;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class ParsingThread extends Thread {
@@ -19,7 +20,7 @@ public class ParsingThread extends Thread {
                 pt.run(mt);
             } catch (Throwable t) {
                 System.out.printf("Parsing failed: %s\n", t.getMessage());
-                GlobalGUIVariables.get().getLogArea().append("Parsing failed: " + t.getMessage() + "%s\n");
+                GlobalGUIVariables.get().insert_text(Color.RED,"Parsing failed: " + t.getMessage() + "%s\n");
             }
         }
     }

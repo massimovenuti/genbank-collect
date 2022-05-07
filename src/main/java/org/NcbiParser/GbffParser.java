@@ -15,6 +15,7 @@ import org.biojava.nbio.core.sequence.location.template.Location;
 import org.biojava.nbio.core.sequence.template.AbstractSequence;
 import org.biojava.nbio.core.util.InputStreamProvider;
 
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,8 @@ public class GbffParser implements Parser {
             inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file : " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "[ERROR] Failed to open file : " + gbPath);
+
             throw e;
         }
 
@@ -49,11 +52,17 @@ public class GbffParser implements Parser {
                               String region,
                               BufferedWriter bufferedWriter) throws IOException {
         if (multipleLineSource(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
+            if (false) {
+                System.err.println("[DEBUG] Wrong format : multiple lines source");
+                GlobalGUIVariables.get().insert_text(Color.BLACK, "[DEBUG] Wrong format : multiple lines source");
+            }
             return;
         }
         if (containsMultipleJoins(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
+            if (false){
+                System.err.println("[DEBUG] Wrong format : multiple joins");
+                GlobalGUIVariables.get().insert_text(Color.BLACK, "[DEBUG] Wrong format : multiple joins");
+            }
             return;
         }
 
@@ -190,7 +199,7 @@ public class GbffParser implements Parser {
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
-        GlobalGUIVariables.get().getLogArea().append("Parsing: " + gbPath + "\n");
+        GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing: " + gbPath + "\n");
 
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
@@ -205,6 +214,7 @@ public class GbffParser implements Parser {
                 throw e;
             } catch (Exception e) {
                 System.err.println("Failed to read file : " + gbPath);
+                GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath);
                 close();
                 throw e;
             }
@@ -218,7 +228,10 @@ public class GbffParser implements Parser {
                         features = sequence.getFeaturesByType("CDS");
                     else
                         features = sequence.getFeaturesByType(region);
-                    if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
+                    if (false) {
+                        System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
+                        GlobalGUIVariables.get().insert_text(Color.RED, "[DEBUG] " + region + " : " + features.size() + " features");
+                    }
                     if (features.isEmpty()) continue;
                     String filePath = makeFilePath(outDirectory, region, organism, organelle, nc);
                     try {
@@ -230,6 +243,7 @@ public class GbffParser implements Parser {
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
+                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath);
                         if (inStream != null) inStream.close();
                         if (dnaReader != null) dnaReader.close();
                         throw e;
@@ -245,11 +259,12 @@ public class GbffParser implements Parser {
             close();
         } catch (IOException e) {
             System.err.println("Failed to close file " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath);
             throw e;
         }
 
         System.out.printf("Parsing ended: %s\n", gbPath);
-        GlobalGUIVariables.get().getLogArea().append("Parsing ended: " + gbPath + "\n");
+        GlobalGUIVariables.get().insert_text(Color.GREEN,"Parsing ended: " + gbPath + "\n");
         return true;
     }
 }
