@@ -113,7 +113,7 @@ public final class DataBaseManager {
     public static void insertFilesTable(UpdateRow ur, Region reg) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+            String compiledQuery = "INSERT OR REPLACE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
             ps.setString(1,ur.getKingdom());
@@ -136,7 +136,7 @@ public final class DataBaseManager {
     public static void multipleInsertFilesTable(UpdateRow ur, ArrayList<Region> regs) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+            String compiledQuery = "INSERT OR REPLACE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
             for(var reg : regs){
