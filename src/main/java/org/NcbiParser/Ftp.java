@@ -72,8 +72,11 @@ public class Ftp {
     public void restart() {
             try {
                 close();
+                Thread.sleep(1000, 0);
                 connect();
+                Thread.sleep(100, 0);
                 login();
+                Thread.sleep(100, 0);
             } catch (Throwable t) {
                 System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
             }
