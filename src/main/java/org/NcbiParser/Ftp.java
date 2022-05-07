@@ -11,8 +11,6 @@ public class Ftp {
     private HashMap<String, FTPFile> fileHashMap;
     private String server;
     private boolean logged;
-    private AtomicInteger sem = new AtomicInteger(0);
-    private long latest_reset = 0;
 
     private void connect() throws IOException {
         try {
@@ -72,28 +70,13 @@ public class Ftp {
     }
 
     public void restart() {
-        if (System.currentTimeMillis() - latest_reset < 2 * 1000) // 1 reco per 2 second max
-            return;
-        if (sem.compareAndExchange(0, 1) == 0) {
             try {
                 close();
-            } catch (Throwable t) {}
-            try {
                 connect();
                 login();
-                latest_reset = System.currentTimeMillis();
             } catch (Throwable t) {
                 System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
-            } finally {
-                sem.set(0);
             }
-        } else {
-            while (sem.get() != 0) {
-                try {
-                    Thread.sleep(10, 0);
-                } catch (Exception e) {}
-            }
-        }
     }
 
     public void close() throws IOException {
@@ -126,8 +109,10 @@ public class Ftp {
                     ftpClient.retrieveFile(ftp_path, outs);
                 }
 
-                if (fileHashMap.get(ftp_path).getSize() != localFile.length()) // error
+                if (fileHashMap.get(ftp_path).getSize() != localFile.length()) { // error
+                    localFile.delete();
                     throw new IOException("File size doesn't match");
+                }
 
                 return localFile;
             } catch (Throwable t) {
@@ -137,6 +122,8 @@ public class Ftp {
             try {
                 if (i > 2)
                     restart();
+                if (i > 4)
+                    fileHashMap.clear();
                 Thread.sleep(500 * i, 0);
             } catch (Exception e) {
                 System.err.printf("Error while retrying download: %20s\n%s", e.getMessage(), e.getStackTrace());

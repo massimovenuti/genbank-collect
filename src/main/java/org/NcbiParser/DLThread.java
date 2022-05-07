@@ -15,12 +15,13 @@ public class DLThread extends Thread {
         while (true) {
             DLTask dlt = null;
             try {
-                while( (dlt = mt.popDLTask()) == null) {
+                while((dlt = mt.popDLTask()) == null) {
                     Thread.sleep(10, 0);
                 }
                 dlt.run(mt, ncbi);
             } catch (Throwable t) {
                 System.out.printf("Download failed: %s\n", t.getMessage());
+                mt.pushTask(dlt); // retry
             }
         }
     }
