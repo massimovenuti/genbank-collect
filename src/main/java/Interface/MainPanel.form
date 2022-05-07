@@ -18,12 +18,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="2afc" class="javax.swing.JTextArea" binding="logArea">
+          <component id="55443" class="javax.swing.JTextPane" binding="logArea">
             <constraints/>
-            <properties>
-              <text value=""/>
-              <toolTipText value="Logs"/>
-            </properties>
+            <properties/>
           </component>
         </children>
       </scrollpane>
