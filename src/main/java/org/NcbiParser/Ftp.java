@@ -129,7 +129,7 @@ public class Ftp {
                     fileHashMap.clear();
                 Thread.sleep(500 * i, 0);
             } catch (Exception e) {
-                System.err.printf("Error while retrying download: %20s\n%s", e.getMessage(), e.getStackTrace());
+                System.err.printf("Error while restarting: %20s\n%s", e.getMessage(), e.getStackTrace());
             }
         }
         throw new IOException("Unable to download " + ftp_path);
