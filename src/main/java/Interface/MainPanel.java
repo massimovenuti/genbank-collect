@@ -5,6 +5,8 @@ import org.NcbiParser.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -68,9 +70,6 @@ public class MainPanel extends JFrame {
     private JButton stopButton;
     private JButton removeButton;
 
-    private GlobalProgress progress;
-
-    public GUIVariables gui_variables;
     private boolean active = true;
 
     public ArrayList<TreePath> treePaths;
@@ -183,24 +182,54 @@ public class MainPanel extends JFrame {
             }
         }
     }
-
+    public JButton get_trigger(){
+        return triggerButton;
+    }
     public void show_bars(){
-        for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
+        for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
             progBars.get(i).setMinimum(0);
-            progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
-            progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
-            barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName()
-                    + " , estimated time: "
-                    + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
+            progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
+            progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
+            barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
+                    + " estimated time: "
+                    + String.valueOf(Math.round(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs() / 1000 )) + "s");
         }
+        if(GlobalProgress.get().all_tasks().size() == 0)
+            set_bars_invisible();
     }
+
+    public void tree_selection(Boolean active)
+    {
+        if(active) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+            TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
+            quadruplets = init_quadruplet(tree_node, node.getLevel());
+            if (!treePaths.contains(path)) {
+                treePaths.add(path);
+                selectedNodes.add(quadruplets);
+            } else {
+                treePaths.remove(path);
+                selectedNodes.remove(quadruplets);
+            }
+
+            active = false;
+            tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+            active = true;
+        }
+
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+        GlobalGUIVariables.get().setAddTrigger(triggerButton);
+        triggerButton.setVisible(false);
+
         GlobalGUIVariables.get().setLogArea(logArea);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
@@ -212,17 +241,14 @@ public class MainPanel extends JFrame {
         stopButton.setVisible(false);
         Main.atProgStart();
         root = GlobalGUIVariables.get().getTree();
-        /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
-        * du reste il ne faut initialiser le root qui est une variable globale TreeNode
-        */
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<String> regions = new ArrayList<>();
             @Override
-            public void mousePressed(MouseEvent event) {
-                super.mouseClicked(event);
+            public void mousePressed(MouseEvent event){
+                super.mousePressed(event);
                 logArea.append("Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
@@ -232,42 +258,14 @@ public class MainPanel extends JFrame {
                 new Thread() {
                     public void run() { Main.startParsing(); }
                 }.start();
-
-
             }
         });
-        triggerButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                    for ( TreePath path : treePaths)
-                    {
-                        path.toString();
-                    }
-                    show_bars();
-            }
 
-        });
         /*tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                if(active) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-                    TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
-                    TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
-                    quadruplets = init_quadruplet(tree_node, node.getLevel());
-                    if (!treePaths.contains(path)) {
-                        treePaths.add(path);
-                        selectedNodes.add(quadruplets);
-                    } else {
-                        treePaths.remove(path);
-                        selectedNodes.remove(quadruplets);
-                    }
-
-                    active = false;
-                    tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
-                    active = true;
-                }
+                tree_selection(active);
 
             }
         });*/
@@ -275,10 +273,16 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-
                 parseButton.setEnabled(true);
+                set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
 
+            }
+        });
+        triggerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                show_bars();
             }
         });
     }
@@ -300,7 +304,6 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
-
 
     }
 }

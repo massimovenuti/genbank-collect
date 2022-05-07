@@ -36,6 +36,10 @@ public class GUIVariables {
         this.logArea = log;
     }
 
+    public void setAddTrigger(JButton trigger) {
+        this.trigger_add = trigger;
+    }
+
     public int getNbThreadsDL() {
         return nbThreadsDL;
     }
@@ -53,6 +57,8 @@ public class GUIVariables {
         return this.logArea;
     }
 
+    public JButton getAddTrigger() { return this.trigger_add; }
+
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
     }
@@ -64,6 +70,8 @@ public class GUIVariables {
     private ArrayList<String> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
+
+    private JButton trigger_add;
 
     private boolean stop;
 }
