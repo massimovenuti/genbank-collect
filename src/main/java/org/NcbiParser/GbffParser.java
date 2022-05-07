@@ -52,12 +52,8 @@ public class GbffParser implements Parser {
                               String header,
                               String region,
                               BufferedWriter bufferedWriter) throws IOException {
-        if (multipleLineSource(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
-            return;
-        }
-        if (containsMultipleJoins(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
+        if (wrongSourceFormat(feature.getSource())) {
+            if (false) System.err.println("Wrong source format : " + feature.getSource());
             return;
         }
 
@@ -171,13 +167,6 @@ public class GbffParser implements Parser {
         return false;
     }
 
-    /**
-     * Check if source is on multiple lines
-     */
-    private boolean multipleLineSource(String source) {
-        return source.indexOf('\n') >= 0;
-    }
-
     private void end() throws IOException {
         if (dnaReader != null) dnaReader.close();
         if (inStream != null) inStream.close();
@@ -209,13 +198,18 @@ public class GbffParser implements Parser {
         return getNextNc(areNcs);
     }
 
-    /**
-     * Check if source contains multiple joins
-     */
-    private boolean containsMultipleJoins(String source) {
-        int i = source.indexOf("join");
-        if (i >= 0) i = source.indexOf("join", i + 4);
-        return i >= 0;
+    private boolean wrongSourceFormat(String source) {
+        int nJoin = 0;
+        for (int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+            if (c == '\n' || c == '<' || c == '>')
+                return true;
+            if (c == '.' && i < source.length() - 1 && i > 0 && source.charAt(i-1) != '.' && source.charAt(i+1) != '.')
+                return true;
+            if (c == 'j' && ++nJoin >= 2)
+                return true;
+        }
+        return false;
     }
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
