@@ -37,9 +37,7 @@ public class GUIVariables {
     public void setAddTrigger(JButton trigger) {
         this.trigger_add = trigger;
     }
-    public void setRemoveTrigger(JButton trigger) {
-        this.trigger_remove = trigger;
-    }
+
     public void setLogArea(JTextArea log) { this.logArea = log; }
 
 
@@ -59,7 +57,6 @@ public class GUIVariables {
     public JButton getAddTrigger() { return this.trigger_add; }
     public JTextArea getLogArea() { return this.logArea; }
 
-    public JButton getRemoveTrigger() { return this.trigger_remove; }
 
 
     public void setNbThreadsParsing(int nbThreadsParsing) {
@@ -75,8 +72,6 @@ public class GUIVariables {
     private int nbThreadsParsing;
 
     private JButton trigger_add;
-
-    private JButton trigger_remove;
 
     private boolean stop;
 }

@@ -5,6 +5,8 @@ import org.NcbiParser.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-
+import javax.swing.SwingWorker;
 
 public class MainPanel extends JFrame {
     private JTree tree;
@@ -171,6 +173,8 @@ public class MainPanel extends JFrame {
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
                 c.setVisible(false);
+                c.setMaximumSize(new Dimension(150, 20));
+                c.setMinimumSize(new Dimension(150, 20));
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
@@ -189,18 +193,44 @@ public class MainPanel extends JFrame {
             progBars.get(i).setMinimum(0);
             progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
             progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
-            barLabels.get(i).setText("process: " + GlobalProgress.get().all_tasks().get(i).getName()
+            barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
                     + " , estimated time: "
                     + String.valueOf(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs()));
         }
+        if(GlobalProgress.get().all_tasks().size() == 0)
+            set_bars_invisible();
     }
+
+    public void tree_selection(Boolean active)
+    {
+        if(active) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+            TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
+            quadruplets = init_quadruplet(tree_node, node.getLevel());
+            if (!treePaths.contains(path)) {
+                treePaths.add(path);
+                selectedNodes.add(quadruplets);
+            } else {
+                treePaths.remove(path);
+                selectedNodes.remove(quadruplets);
+            }
+
+            active = false;
+            tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+            active = true;
+        }
+
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
-        GlobalGUIVariables.get().setRemoveTrigger(removeButton);
+        triggerButton.setVisible(false);
+
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -228,40 +258,17 @@ public class MainPanel extends JFrame {
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                Main.startParsing();
+                new Thread() {
+                    public void run() { Main.startParsing(); }
+                }.start();
             }
         });
-        triggerButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                show_bars();
-                logArea.append("add\n");
 
-            }
-
-        });
         /*tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                if(active) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-                    TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
-                    TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
-                    quadruplets = init_quadruplet(tree_node, node.getLevel());
-                    if (!treePaths.contains(path)) {
-                        treePaths.add(path);
-                        selectedNodes.add(quadruplets);
-                    } else {
-                        treePaths.remove(path);
-                        selectedNodes.remove(quadruplets);
-                    }
-
-                    active = false;
-                    tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
-                    active = true;
-                }
+                tree_selection(active);
 
             }
         });*/
@@ -275,12 +282,10 @@ public class MainPanel extends JFrame {
 
             }
         });
-        removeButton.addMouseListener(new MouseAdapter() {
+        triggerButton.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                set_bars_invisible();
-
+            public void actionPerformed(ActionEvent e) {
+                show_bars();
             }
         });
     }
@@ -302,5 +307,6 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
+
     }
 }

@@ -24,5 +24,6 @@ public class Progress {
 
     public void remove_task(ProgressTask t) {
         progressTasks.remove(t);
+        GlobalGUIVariables.get().getAddTrigger().doClick();
     }
 }
