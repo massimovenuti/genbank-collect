@@ -311,7 +311,6 @@ public class MainPanel extends JFrame {
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
-
     }
 
     private void createUIComponents() {
@@ -322,6 +321,5 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
-
     }
 }

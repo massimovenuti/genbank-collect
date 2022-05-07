@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 public class Main {
     public static Ncbi ncbi;
+    public static MultiThreading mt;
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
         atProgStart();
@@ -32,7 +33,14 @@ public class Main {
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
-            update(ncbi);
+            if (mt == null)
+                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+
+            mt.getMt().pushTask(new GenericTask(() -> {
+                try {
+                    update(ncbi);
+                } catch(IOException e) {}}));
+            //update(ncbi);
 //            test();
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +51,6 @@ public class Main {
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
-            var mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing());
             var r = ncbi.index_to_db("eukaryotes.txt");
             for (var line : r) {
                 if (GlobalGUIVariables.get().isStop())
@@ -61,11 +68,10 @@ public class Main {
 
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
-        Progress gl = new Progress();
+        Progress gl = GlobalProgress.get();
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(4);
         var od = ncbi.overview_to_db();
-        GlobalGUIVariables.get().setTree(createHierarchy(od));
         task.addDone(1);
         DataBase.updateFromOverview(od);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
@@ -75,10 +81,20 @@ public class Main {
             task.addDone(1);
         }
         gl.remove_task(task);
+        mt.getMt().pushTask(new GenericTask(() ->{
+            var t = gl.registerTask("Création de l'arborescence");
+            t.addTodo(1);
+            var new_tree = createHierarchy(od, t);
+            t.addDone(1);
+            GlobalGUIVariables.get().setTree(new_tree);
+            gl.remove_task(t);
+        }));
     }
 
-    public static TreeNode createHierarchy(ArrayList<OverviewData> data) {
+    public static TreeNode createHierarchy(ArrayList<OverviewData> data, ProgressTask task) {
         Collections.sort(data);
+
+        //task.addTodo(data.size());
 
         Iterator iter = data.iterator();
 
@@ -90,6 +106,7 @@ public class Main {
         String prevKingdom = "", prevGroup = "", prevSubGroup = "";
 
         while (iter.hasNext()) {
+            //task.addDone(1);
             OverviewData od = (OverviewData) iter.next();
 
             if (!od.getKingdom().equals(prevKingdom)) {
