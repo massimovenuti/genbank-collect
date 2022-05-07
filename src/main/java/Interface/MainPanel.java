@@ -5,12 +5,17 @@ import org.NcbiParser.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -21,7 +26,10 @@ public class MainPanel extends JFrame {
     private JTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
-    private JTextArea logArea;
+    private JTextPane logArea;
+
+    private StyledDocument document;
+
     private JScrollPane scrollPanel;
 
     private JProgressBar downloadBar;
@@ -66,11 +74,9 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
     private JButton stopButton;
+    private JTextPane textPane1;
     private JButton removeButton;
 
-    private GlobalProgress progress;
-
-    public GUIVariables gui_variables;
     private boolean active = true;
 
     public ArrayList<TreePath> treePaths;
@@ -93,18 +99,22 @@ public class MainPanel extends JFrame {
     ImageIcon obsoleteIcon;
     ImageIcon up_to_dateIcon;
 
-    public ArrayList<String> create_region_array(){
-        ArrayList<String> checked = new ArrayList<>();
+    public ArrayList<Region> create_region_array(){
+        ArrayList<Region> checked = new ArrayList<Region>();
         for (Component c : regionPanel.getComponents())
         {
             if(c instanceof JCheckBox){
                 if(((JCheckBox) c).isSelected()){
-                    checked.add(((JCheckBox) c).getText());
+                    Region region = Region.get(((JCheckBox) c).getText());
+                    assert region != null;
+                    checked.add(region);
                 }
             }
         }
-        if(!choixTextField.equals(""))
-            checked.add(choixTextField.getText());
+        if(!choixTextField.getText().equals("")) {
+            Region.OTHER.setStringRepresentation(choixTextField.getText());
+            checked.add(Region.OTHER);
+        }
         return checked;
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
@@ -183,25 +193,55 @@ public class MainPanel extends JFrame {
             }
         }
     }
-
+    public JButton get_trigger(){
+        return triggerButton;
+    }
     public void show_bars(){
-        for (int i = 0; i < progress.get().all_tasks().size() ; i++) {
+        for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
             progBars.get(i).setMinimum(0);
-            progBars.get(i).setMaximum(progress.get().all_tasks().get(i).getTodo());
-            progBars.get(i).setValue(progress.get().all_tasks().get(i).getDone());
-            barLabels.get(i).setText("process: " + progress.get().all_tasks().get(i).getName()
-                    + " , estimated time: "
-                    + String.valueOf(progress.get().all_tasks().get(i).estimatedTimeLeftMs()));
+            progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
+            progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
+            barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
+                    + " estimated time: "
+                    + String.valueOf(Math.round(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs() / 1000 )) + "s");
         }
+        if(GlobalProgress.get().all_tasks().size() == 0)
+            set_bars_invisible();
     }
+
+    public void tree_selection(Boolean active)
+    {
+        if(active) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+            TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+            TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
+            quadruplets = init_quadruplet(tree_node, node.getLevel());
+            if (!treePaths.contains(path)) {
+                treePaths.add(path);
+                selectedNodes.add(quadruplets);
+            } else {
+                treePaths.remove(path);
+                selectedNodes.remove(quadruplets);
+            }
+
+            active = false;
+            tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+            active = true;
+        }
+
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
-
+        GlobalGUIVariables.get().setAddTrigger(triggerButton);
+        triggerButton.setVisible(false);
+        document = (StyledDocument) logArea.getDocument();
+        GlobalGUIVariables.get().setLogArea(document);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -216,11 +256,11 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
         parseButton.addMouseListener(new MouseAdapter() {
-            ArrayList<String> regions = new ArrayList<>();
+            ArrayList<Region> regions = new ArrayList<>();
             @Override
-            public void mousePressed(MouseEvent event) {
-                super.mouseClicked(event);
-                logArea.append("Starting process...\n");
+            public void mousePressed(MouseEvent event){
+                super.mousePressed(event);
+                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);
@@ -229,41 +269,14 @@ public class MainPanel extends JFrame {
                 new Thread() {
                     public void run() { Main.startParsing(); }
                 }.start();
-
             }
         });
-        triggerButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                    for ( TreePath path : treePaths)
-                    {
-                        path.toString();
-                    }
-                    show_bars();
-            }
 
-        });
         tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                if(active) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-                    TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
-                    TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
-                    quadruplets = init_quadruplet(tree_node, node.getLevel());
-                    if (!treePaths.contains(path)) {
-                        treePaths.add(path);
-                        selectedNodes.add(quadruplets);
-                    } else {
-                        treePaths.remove(path);
-                        selectedNodes.remove(quadruplets);
-                    }
-
-                    active = false;
-                    tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
-                    active = true;
-                }
+                tree_selection(active);
 
             }
         });
@@ -273,8 +286,16 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
 
                 parseButton.setEnabled(true);
+                set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
 
+            }
+        });
+        triggerButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                show_bars();
             }
         });
     }

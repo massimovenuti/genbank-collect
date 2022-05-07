@@ -1,6 +1,7 @@
 package org.NcbiParser;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import Interface.MainPanel;
 
 // suivi d'une tache
 public class ProgressTask {
@@ -38,9 +39,14 @@ public class ProgressTask {
     }
 
     public void addTodo(int todo) {
-        this.todo.addAndGet(todo);    }
+        this.todo.addAndGet(todo);
+        GlobalGUIVariables.get().getAddTrigger().doClick();
+    }
 
     public void addDone(int done) {
         this.done.addAndGet(done);
+        GlobalGUIVariables.get().getAddTrigger().doClick();
+
     }
+
 }

@@ -2,6 +2,7 @@ package org.NcbiParser;
 
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.MyGenbankReader;
 import org.biojava.nbio.core.sequence.Strand;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
@@ -15,7 +16,12 @@ import org.biojava.nbio.core.sequence.location.template.Location;
 import org.biojava.nbio.core.sequence.template.AbstractSequence;
 import org.biojava.nbio.core.util.InputStreamProvider;
 
+import java.awt.*;
 import java.io.*;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -26,7 +32,7 @@ import java.util.stream.Stream;
 
 public class GbffParser implements Parser {
     InputStream inStream = null;
-    GenbankReader<DNASequence, NucleotideCompound> dnaReader;
+    MyGenbankReader<DNASequence, NucleotideCompound> dnaReader;
     String gbPath, fileExtension = ".txt";
 
     public GbffParser(File gbFile) throws IOException {
@@ -37,30 +43,32 @@ public class GbffParser implements Parser {
             inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file : " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "[ERROR] Failed to open file : " + gbPath + "\n");
+
             throw e;
         }
 
-        dnaReader = new GenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+        dnaReader = new MyGenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
     }
 
     private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
                               DNASequence sequence,
                               String header,
-                              String region,
+                              Region region,
                               BufferedWriter bufferedWriter) throws IOException {
-        if (multipleLineSource(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple lines source");
-            return;
-        }
-        if (containsMultipleJoins(feature.getSource())) {
-            if (false) System.err.println("[DEBUG] Wrong format : multiple joins");
+        if (wrongSourceFormat(feature.getSource())) {
+            if (false){
+                System.err.println("Wrong source format : " + feature.getSource());
+                GlobalGUIVariables.get().insert_text(Color.RED, "Wrong source format : " + feature.getSource() + "\n");
+
+            }
             return;
         }
 
         AbstractLocation loc = feature.getLocations();
 
         if (loc.getSubLocations().size() == 0) {
-            if (!region.equals("Intron")) {
+            if (region != Region.INTRON) {
                 bufferedWriter.write(header);
                 bufferedWriter.newLine();
                 bufferedWriter.write(loc.getSubSequence(sequence).getSequenceAsString());
@@ -69,7 +77,7 @@ public class GbffParser implements Parser {
         } else {
             bufferedWriter.write(header);
             bufferedWriter.newLine();
-            if (region.equals("Intron"))
+            if (region == Region.INTRON)
                 writeIntron(loc, sequence, header, bufferedWriter);
             else
                 writeCDS(loc, sequence, header, bufferedWriter);
@@ -104,14 +112,14 @@ public class GbffParser implements Parser {
                              BufferedWriter bufferedWriter) throws IOException {
         int n = loc.getSubLocations().size();
 
-        for (int k = 0; k < n - 1; k ++) {
+        for (int k = 0; k < n - 1; k++) {
             SimpleLocation intronLocation = getIntronLocation(loc, k);
             bufferedWriter.write(intronLocation.getSubSequence(sequence).getSequenceAsString());
         }
 
         bufferedWriter.newLine();
 
-        for (int k = 0; k < n - 1; k ++) {
+        for (int k = 0; k < n - 1; k++) {
             bufferedWriter.write(header + " Intron " + (k + 1));
             bufferedWriter.newLine();
             SimpleLocation intronLocation = getIntronLocation(loc, k);
@@ -167,69 +175,99 @@ public class GbffParser implements Parser {
         return false;
     }
 
-    /**
-     * Check if source is on multiple lines
-     */
-    private boolean multipleLineSource(String source) {
-        return source.indexOf('\n') >= 0;
-    }
-
-    private void close() throws IOException {
-        if (inStream != null) inStream.close();
+    private void end() throws IOException {
         if (dnaReader != null) dnaReader.close();
+        if (inStream != null) inStream.close();
+        Files.deleteIfExists(Paths.get(gbPath));
     }
 
-    /**
-     * Check if source contains multiple joins
-     */
-    private boolean containsMultipleJoins(String source) {
-        int i = source.indexOf("join");
-        if (i >= 0) i = source.indexOf("join", i + 4);
-        return i >= 0;
+    private String getNextNc(HashMap<String, String> areNcs) throws IOException {
+        BufferedReader bufferedReader = dnaReader.getBufferedReader();
+        bufferedReader.mark(1000);
+
+        String line = bufferedReader.readLine();
+        if (line == null)
+            return null;
+
+        String accession = line.split("\\s+")[1];
+        String nc = areNcs.get(accession);
+
+        if (nc != null) {
+            bufferedReader.reset();
+            return nc;
+        }
+
+        while (line != null && line.charAt(0) != '/')
+            line = bufferedReader.readLine();
+
+        if (line == null)
+            return null;
+
+        return getNextNc(areNcs);
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
+    private boolean wrongSourceFormat(String source) {
+        int nJoin = 0;
+        for (int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+            if (c == '\n' || c == '<' || c == '>')
+                return true;
+            if (c == '.' && i < source.length() - 1 && i > 0 && source.charAt(i-1) != '.' && source.charAt(i+1) != '.')
+                return true;
+            if (c == 'j' && ++nJoin >= 2)
+                return true;
+        }
+        return false;
+    }
+
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
+        GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing: " + gbPath + "\n");
+
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
 
         while (true) {
+            String nc = null;
             try {
+                nc = getNextNc(areNcs);
+                if (nc == null) break;
                 dnaSequences = dnaReader.process(1);
             } catch (CompoundNotFoundException e) {
                 System.err.println("Found unexpected compound");
-                close();
+                end();
                 throw e;
             } catch (Exception e) {
                 System.err.println("Failed to read file : " + gbPath);
-                close();
+                GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath + "\n");
+
+                end();
                 throw e;
             }
             if (dnaSequences.isEmpty()) break;
             for (DNASequence sequence : dnaSequences.values()) {
-                String nc = areNcs.get(sequence.getAccession().toString());
-                if (nc == null) continue;
-                for (String region : regions) {
+                for (Region region : regions) {
                     List<FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound>> features;
-                    if (region.equals("Intron"))
-                        features = sequence.getFeaturesByType("CDS");
+                    if (region == Region.INTRON)
+                        features = sequence.getFeaturesByType(Region.CDS.toString());
                     else
-                        features = sequence.getFeaturesByType(region);
+                        features = sequence.getFeaturesByType(region.toString());
                     if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty()) continue;
-                    String filePath = makeFilePath(outDirectory, region, organism, organelle, nc);
+                    String filePath = makeFilePath(outDirectory, region.toString(), organism, organelle, nc);
                     try {
                         writer = new FileWriter(filePath, false);
                         bufferedWriter = new BufferedWriter(writer);
                         for (var feature : features) {
-                            String header = makeSequenceHeader(region, organism, nc, organelle, feature.getSource());
+                            String header = makeSequenceHeader(region.toString(), organism, nc, organelle, feature.getSource());
                             writeFeature(feature, sequence, header, region, bufferedWriter);
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
-                        if (inStream != null) inStream.close();
-                        if (dnaReader != null) dnaReader.close();
+                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
+                        end();
+
                         throw e;
                     } finally {
                         if (bufferedWriter != null) bufferedWriter.close();
@@ -240,13 +278,15 @@ public class GbffParser implements Parser {
         }
 
         try {
-            close();
+            end();
         } catch (IOException e) {
             System.err.println("Failed to close file " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
             throw e;
         }
 
         System.out.printf("Parsing ended: %s\n", gbPath);
+        GlobalGUIVariables.get().insert_text(Color.GREEN,"Parsing ended: " + gbPath + "\n");
         return true;
     }
 }
