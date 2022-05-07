@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -146,19 +147,25 @@ public class MainPanel extends JFrame {
         }
         return root_node;
     }
-
-    public ArrayList<TreeNode> init_quadruplet(TreeNode node, int depth)
+    public ArrayList<TreeNode> init_quadruplet(TreePath path , int depth)
     {
+        DefaultMutableTreeNode node_temp;
+
         ArrayList<TreeNode> out = new ArrayList<>();
-        for(int i = 0; i < 4 ; i++)
+        String[] strArray = null;
+        String stringArray= path.toString();
+
+        stringArray = stringArray.replace("[", "");
+        stringArray = stringArray.replace("]", "");
+
+        strArray = stringArray.split(",");
+        //pas de depth -1 depth compte le root aussi
+        for(int i = 1; i <= 4 ; i++)
         {
-            if(i == depth -1){
-                out.add(node);
-            }
-            else{
-                out.add(null);
-            }
+            if(i <= depth) out.add(find_by_name(root,strArray[i]));
+            else out.add(null);
         }
+
         return out;
     }
 
@@ -211,13 +218,14 @@ public class MainPanel extends JFrame {
             set_bars_invisible();
     }
 
-    public void tree_selection(Boolean active)
+    public void tree_selection()
     {
         if(active) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
             TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
+
             TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
-            quadruplets = init_quadruplet(tree_node, node.getLevel());
+            quadruplets = init_quadruplet(path, node.getLevel());
             if (!treePaths.contains(path)) {
                 treePaths.add(path);
                 selectedNodes.add(quadruplets);
@@ -276,7 +284,7 @@ public class MainPanel extends JFrame {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                tree_selection(active);
+                tree_selection();
 
             }
         });
