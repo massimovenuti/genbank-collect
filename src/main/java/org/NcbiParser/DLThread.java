@@ -20,6 +20,7 @@ public class DLThread extends Thread {
                     Thread.sleep(10, 0);
                 }
                 dlt.run(mt, ncbi);
+                mt.getDlTask().addDone(1);
             } catch (Throwable t) {
                 System.out.printf("Download failed: %s\n", t.getMessage());
                 GlobalGUIVariables.get().insert_text(Color.RED,"Download failed: " + t.getMessage() + "\n");
