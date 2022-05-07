@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import javax.swing.event.TreeSelectionEvent;
@@ -272,9 +273,11 @@ public class MainPanel extends JFrame {
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                new Thread() {
-                    public void run() { Main.startParsing(); }
-                }.start();
+                try {
+                    Main.getMt().getMt().pushTask(new GenericTask(Main::startParsing));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -311,7 +314,6 @@ public class MainPanel extends JFrame {
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
-
     }
 
     private void createUIComponents() {
@@ -322,6 +324,5 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
-
     }
 }

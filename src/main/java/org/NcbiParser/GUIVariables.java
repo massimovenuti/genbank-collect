@@ -15,7 +15,7 @@ public class GUIVariables {
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<Region>();
         this.logArea = null;
-
+        this.tree = new TreeNode("CHARGEMENT...");
     }
 
     public ArrayList<Region> getRegions() {
