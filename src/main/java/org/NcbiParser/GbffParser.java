@@ -265,7 +265,7 @@ public class GbffParser implements Parser {
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
-                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
+                        GlobalGUIVariables.get().insert_text(Color.RED, "Failed to close file " + gbPath + "\n");
                         end();
 
                         throw e;

@@ -18,6 +18,7 @@ public class ParsingThread extends Thread {
                 while ((pt = mt.popParsingTask()) == null)
                     Thread.sleep(10);
                 pt.run(mt);
+                mt.getParsingTask().addDone(1);
             } catch (Throwable t) {
                 System.out.printf("Parsing failed: %s\n", t.getMessage());
                 GlobalGUIVariables.get().insert_text(Color.RED,"Parsing failed: " + t.getMessage() + "\n");

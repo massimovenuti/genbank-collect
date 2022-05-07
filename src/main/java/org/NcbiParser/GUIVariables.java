@@ -9,13 +9,20 @@ public class GUIVariables {
     private TreeNode tree;
     private StyledDocument logArea;
 
+    public void setOnTreeChanged(GenericTask onTreeChanged) {
+        this.onTreeChanged = onTreeChanged;
+    }
+
+    private GenericTask onTreeChanged;
+
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 4;
+        this.nbThreadsDL = 1;
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<Region>();
         this.logArea = null;
-
+        this.tree = new TreeNode("CHARGEMENT...");
+        this.setOnTreeChanged(new GenericTask(()->{}));
     }
 
     public ArrayList<Region> getRegions() {
@@ -65,7 +72,8 @@ public class GUIVariables {
         this.nbThreadsParsing = nbThreadsParsing;
     }
 
-    public void setTree(TreeNode tree) {this.tree = tree;}
+    public void setTree(TreeNode tree) {this.tree = tree;
+    onTreeChanged.run();}
 
     public TreeNode getTree() {return this.tree;}
 

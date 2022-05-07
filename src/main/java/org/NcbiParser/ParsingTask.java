@@ -28,6 +28,8 @@ public class ParsingTask implements Task {
             return parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions, row.getAreNcs());
         } catch (IOException | CompoundNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            DataBaseManager.multipleInsertFilesTable(row, regions);
         }
         return false;
     }
