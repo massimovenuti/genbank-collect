@@ -147,4 +147,10 @@ public class Main {
 
         return top;
     }
+
+    public static MultiThreading getMt() throws IOException {
+        if (mt == null)
+            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+        return mt;
+    }
 }
