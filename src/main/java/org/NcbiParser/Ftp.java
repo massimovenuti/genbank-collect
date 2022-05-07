@@ -2,6 +2,7 @@ package org.NcbiParser;
 
 import org.apache.commons.net.ftp.*;
 
+import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,12 +21,16 @@ public class Ftp {
 
             if (!FTPReply.isPositiveCompletion(reply)) {
                 ftpClient.disconnect();
+                GlobalGUIVariables.get().insert_text(Color.RED,"FTP server refused connection. \n");
                 throw new IOException("FTP server refused connection.");
+
             }
 
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
 
         } catch (Throwable e) {
+            GlobalGUIVariables.get().insert_text(Color.RED,"Unable to connnect to ftp server: " + e.getMessage() + "\n");
+
             throw new IOException("Unable to connnect to ftp server: " + e.getMessage(), e);
         }
     }
@@ -62,8 +67,10 @@ public class Ftp {
 
         var dir = new File(temp_directory());
         if (!dir.exists() || !dir.isDirectory())
-            if (!dir.mkdirs())
+            if (!dir.mkdirs()) {
+                GlobalGUIVariables.get().insert_text(Color.RED,"Can't create temporary directory\n");
                 throw new RuntimeException("Can't create temporary directory");
+            }
 
         connect();
         login();
@@ -79,6 +86,7 @@ public class Ftp {
                 Thread.sleep(100, 0);
             } catch (Throwable t) {
                 System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting FTP: " + t.getMessage() + "\n" + t.getStackTrace() + "\n");
             }
     }
 
@@ -95,13 +103,17 @@ public class Ftp {
                 File localFile = new File(temp_directory() + "/" + ftp_path);
                 File parentDirectory = localFile.getParentFile();
                 if (!parentDirectory.exists() || !parentDirectory.isDirectory())
-                    if (!parentDirectory.mkdirs())
+                    if (!parentDirectory.mkdirs()) {
+                        GlobalGUIVariables.get().insert_text(Color.RED,"Cannot create directories for " + ftp_path + "\n");
                         throw new IOException("Cannot create directories for " + ftp_path);
+                    }
 
                 if (!fileHashMap.containsKey(ftp_path) || i > 0) {
                     FTPFile ftpFile = ftpClient.mlistFile(ftp_path);
-                    if (ftpFile == null)
+                    if (ftpFile == null) {
+                        GlobalGUIVariables.get().insert_text(Color.RED,ftp_path + " does not exist\n");
                         throw new RuntimeException(ftp_path + " does not exist");
+                    }
                     fileHashMap.put(ftp_path, ftpFile);
                 }
 
@@ -120,6 +132,8 @@ public class Ftp {
                 return localFile;
             } catch (Throwable t) {
                 System.out.printf("Error while downloading %20s (%d): %20s\n", ftp_path, i + 1, t.getMessage());
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while downloading " + ftp_path + "(" + String.valueOf(i + 1) + "): " + t.getMessage() + "\n");
+
                 //throw new IOException("Unable to download " + ftp_path, t);
             }
             try {
@@ -130,8 +144,11 @@ public class Ftp {
                 Thread.sleep(500 * i, 0);
             } catch (Exception e) {
                 System.err.printf("Error while restarting: %20s\n%s", e.getMessage(), e.getStackTrace());
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting " + e.getMessage() + "\n" + e.getStackTrace() + "\n");
+
             }
         }
+        GlobalGUIVariables.get().insert_text(Color.RED,"Unable to download " + ftp_path + "\n");
         throw new IOException("Unable to download " + ftp_path);
     }
 

@@ -1,5 +1,6 @@
 package org.NcbiParser;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class DLThread extends Thread {
@@ -21,6 +22,8 @@ public class DLThread extends Thread {
                 dlt.run(mt, ncbi);
             } catch (Throwable t) {
                 System.out.printf("Download failed: %s\n", t.getMessage());
+                GlobalGUIVariables.get().insert_text(Color.RED,"Download failed: " + t.getMessage() + "\n");
+
                 mt.pushTask(dlt); // retry
             }
         }

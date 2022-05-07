@@ -16,6 +16,7 @@ import org.biojava.nbio.core.sequence.location.template.Location;
 import org.biojava.nbio.core.sequence.template.AbstractSequence;
 import org.biojava.nbio.core.util.InputStreamProvider;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +43,8 @@ public class GbffParser implements Parser {
             inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file : " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "[ERROR] Failed to open file : " + gbPath + "\n");
+
             throw e;
         }
 
@@ -53,7 +57,11 @@ public class GbffParser implements Parser {
                               Region region,
                               BufferedWriter bufferedWriter) throws IOException {
         if (wrongSourceFormat(feature.getSource())) {
-            if (false) System.err.println("Wrong source format : " + feature.getSource());
+            if (false){
+                System.err.println("Wrong source format : " + feature.getSource());
+                GlobalGUIVariables.get().insert_text(Color.RED, "Wrong source format : " + feature.getSource() + "\n");
+
+            }
             return;
         }
 
@@ -214,6 +222,8 @@ public class GbffParser implements Parser {
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
+        GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing: " + gbPath + "\n");
+
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -230,6 +240,8 @@ public class GbffParser implements Parser {
                 throw e;
             } catch (Exception e) {
                 System.err.println("Failed to read file : " + gbPath);
+                GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath + "\n");
+
                 end();
                 throw e;
             }
@@ -253,7 +265,9 @@ public class GbffParser implements Parser {
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
+                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
                         end();
+
                         throw e;
                     } finally {
                         if (bufferedWriter != null) bufferedWriter.close();
@@ -267,10 +281,12 @@ public class GbffParser implements Parser {
             end();
         } catch (IOException e) {
             System.err.println("Failed to close file " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
             throw e;
         }
 
         System.out.printf("Parsing ended: %s\n", gbPath);
+        GlobalGUIVariables.get().insert_text(Color.GREEN,"Parsing ended: " + gbPath + "\n");
         return true;
     }
 }

@@ -10,20 +10,30 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.logging.Logger;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+
 public class MainPanel extends JFrame {
     private JTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
-    private JTextArea logArea;
+    private JTextPane logArea;
+
+    private StyledDocument document;
+
     private JScrollPane scrollPanel;
 
     private JProgressBar downloadBar;
+    private JButton triggerButton;
     private JPanel progressBarContainer;
     private JCheckBox cdsCheckBox;
     private JCheckBox centromereCheckBox;
@@ -63,8 +73,8 @@ public class MainPanel extends JFrame {
     private JLabel label11;
     private JLabel label12;
     private JLabel label13;
-    private JButton triggerButton;
     private JButton stopButton;
+    private JTextPane textPane1;
     private JButton removeButton;
 
     private boolean active = true;
@@ -127,6 +137,7 @@ public class MainPanel extends JFrame {
             }
         }
     }
+
     public DefaultMutableTreeNode build_tree() {
         root_node = new DefaultMutableTreeNode("Root");
         ArrayList<TreeNode> children = root.getChildren();
@@ -174,12 +185,10 @@ public class MainPanel extends JFrame {
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
                 c.setVisible(false);
-
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
                 c.setVisible(false);
-
                 barLabels.add((JLabel) c);
             }
         }
@@ -231,7 +240,8 @@ public class MainPanel extends JFrame {
         this.pack();
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
-
+        document = (StyledDocument) logArea.getDocument();
+        GlobalGUIVariables.get().setLogArea(document);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -245,15 +255,12 @@ public class MainPanel extends JFrame {
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
-
-
-
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
-                logArea.append("Starting process...\n");
+                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);
@@ -284,6 +291,7 @@ public class MainPanel extends JFrame {
             }
         });
         triggerButton.addActionListener(new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();
