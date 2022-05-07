@@ -1,24 +1,24 @@
 package org.NcbiParser;
 
 import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
-
-    private JTextArea logArea;
+    private StyledDocument logArea;
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 4;
+        this.nbThreadsDL = 1;
         this.nbThreadsParsing = 4;
-        this.regions = new ArrayList<String>();
-        regions.add("CDS"); //TODO: remove
+        this.regions = new ArrayList<Region>();
         this.logArea = null;
 
     }
 
-    public ArrayList<String> getRegions() {
+    public ArrayList<Region> getRegions() {
         return regions;
     }
 
@@ -30,17 +30,17 @@ public class GUIVariables {
         this.stop = stop;
     }
 
-    public void setRegions(ArrayList<String> regions) {
+    public void setRegions(ArrayList<Region> regions) {
         this.regions = regions;
+    }
+
+    public void setLogArea(StyledDocument log) {
+        this.logArea = log;
     }
 
     public void setAddTrigger(JButton trigger) {
         this.trigger_add = trigger;
     }
-
-    public void setLogArea(JTextArea log) { this.logArea = log; }
-
-
 
     public int getNbThreadsDL() {
         return nbThreadsDL;
@@ -54,10 +54,12 @@ public class GUIVariables {
         return nbThreadsParsing;
     }
 
+    public StyledDocument getLogArea()
+    {
+        return this.logArea;
+    }
+
     public JButton getAddTrigger() { return this.trigger_add; }
-    public JTextArea getLogArea() { return this.logArea; }
-
-
 
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
@@ -67,7 +69,18 @@ public class GUIVariables {
 
     public TreeNode getTree() {return this.tree;}
 
-    private ArrayList<String> regions;
+    public void insert_text(Color color, String text){
+        StyleContext cont = StyleContext.getDefaultStyleContext();
+        Style style = cont.addStyle("col", null);
+        StyleConstants.setForeground(style, color);
+
+        try {
+            logArea.insertString(logArea.getLength(), text, style);
+        } catch (BadLocationException erro){
+            System.err.println(erro.getMessage());
+        }
+    }
+    private ArrayList<Region> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
 

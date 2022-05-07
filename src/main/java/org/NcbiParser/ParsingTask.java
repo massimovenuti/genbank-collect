@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class ParsingTask implements Task {
     File gbFile;
     UpdateRow row;
-    ArrayList<String> regions;
+    ArrayList<Region> regions;
 
     public ParsingTask(File gbFile, UpdateRow row) {
         this.gbFile = gbFile;

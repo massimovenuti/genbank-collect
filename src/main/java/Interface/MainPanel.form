@@ -18,12 +18,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="2afc" class="javax.swing.JTextArea" binding="logArea">
+          <component id="55443" class="javax.swing.JTextPane" binding="logArea">
             <constraints/>
-            <properties>
-              <text value=""/>
-              <toolTipText value="Logs"/>
-            </properties>
+            <properties/>
           </component>
         </children>
       </scrollpane>
@@ -285,7 +282,7 @@
               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Centromere"/>
+              <text value="centromere"/>
             </properties>
           </component>
           <component id="29e1b" class="javax.swing.JCheckBox" binding="intronCheckBox" default-binding="true">
@@ -293,7 +290,7 @@
               <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Intron"/>
+              <text value="intron"/>
             </properties>
           </component>
           <component id="5500d" class="javax.swing.JCheckBox" binding="mobile_elementCheckBox" default-binding="true">
@@ -301,7 +298,7 @@
               <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Mobile_element"/>
+              <text value="mobile_element"/>
             </properties>
           </component>
           <component id="de07" class="javax.swing.JCheckBox" binding="ncrnaCheckBox">
@@ -317,7 +314,7 @@
               <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Telomere"/>
+              <text value="telomere"/>
             </properties>
           </component>
           <component id="a6e35" class="javax.swing.JCheckBox" binding="trnaCheckBox">
