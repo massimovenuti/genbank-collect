@@ -260,7 +260,7 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
-                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...");
+                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);

@@ -20,7 +20,7 @@ public class DLTask {
         var are_nc = NcbiParser.preparse_ncs(row.getNcs());
         if (are_nc.size() == 0) {
             System.out.printf("No NC in %s, skipping download\n", row.getGc());
-            GlobalGUIVariables.get().insert_text(Color.BLACK,"No NC in "+ row.getGc()+", skipping download\n" );
+            GlobalGUIVariables.get().insert_text(Color.ORANGE,"No NC in "+ row.getGc()+", skipping download\n" );
             return true;
         }
         row.setAreNcs(are_nc);

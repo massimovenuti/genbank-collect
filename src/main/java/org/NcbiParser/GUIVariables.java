@@ -80,7 +80,7 @@ public class GUIVariables {
             System.err.println(erro.getMessage());
         }
     }
-    private ArrayList<String> regions;
+    private ArrayList<Region> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
 

@@ -43,7 +43,7 @@ public class GbffParser implements Parser {
             inStream = inputStreamProvider.getInputStream(gbFile);
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to open file : " + gbPath);
-            GlobalGUIVariables.get().insert_text(Color.BLACK, "[ERROR] Failed to open file : " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "[ERROR] Failed to open file : " + gbPath + "\n");
 
             throw e;
         }
@@ -59,7 +59,7 @@ public class GbffParser implements Parser {
         if (wrongSourceFormat(feature.getSource())) {
             if (false){
                 System.err.println("Wrong source format : " + feature.getSource());
-                GlobalGUIVariables.get().insert_text(Color.RED, "Wrong source format : " + feature.getSource());
+                GlobalGUIVariables.get().insert_text(Color.RED, "Wrong source format : " + feature.getSource() + "\n");
 
             }
             return;
@@ -240,7 +240,7 @@ public class GbffParser implements Parser {
                 throw e;
             } catch (Exception e) {
                 System.err.println("Failed to read file : " + gbPath);
-                GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath);
+                GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath + "\n");
 
                 end();
                 throw e;
@@ -265,7 +265,7 @@ public class GbffParser implements Parser {
                         }
                     } catch (Exception e) {
                         System.err.println("Failed to write file " + filePath);
-                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath);
+                        GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
                         end();
 
                         throw e;
@@ -281,7 +281,7 @@ public class GbffParser implements Parser {
             end();
         } catch (IOException e) {
             System.err.println("Failed to close file " + gbPath);
-            GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath);
+            GlobalGUIVariables.get().insert_text(Color.RED,"Failed to close file " + gbPath + "\n");
             throw e;
         }
 
