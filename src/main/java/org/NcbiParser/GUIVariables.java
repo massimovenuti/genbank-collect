@@ -1,9 +1,12 @@
 package org.NcbiParser;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
+
+    private JTextArea logArea;
 
     public GUIVariables() {
         this.stop = false;
@@ -29,6 +32,10 @@ public class GUIVariables {
         this.regions = regions;
     }
 
+    public void setLogArea(JTextArea log) {
+        this.logArea = log;
+    }
+
     public int getNbThreadsDL() {
         return nbThreadsDL;
     }
@@ -39,6 +46,11 @@ public class GUIVariables {
 
     public int getNbThreadsParsing() {
         return nbThreadsParsing;
+    }
+
+    public JTextArea getLogArea()
+    {
+        return this.logArea;
     }
 
     public void setNbThreadsParsing(int nbThreadsParsing) {
