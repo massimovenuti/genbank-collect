@@ -6,6 +6,9 @@ data/
 Results/
 
 ### IntelliJ IDEA ###
+.idea/dataSources.local.xml
+.idea/dataSources/
+.idea/dataSources.xml
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
