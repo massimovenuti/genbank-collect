@@ -253,7 +253,7 @@ public class MainPanel extends JFrame {
         treePaths = new ArrayList<>();
         obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
         up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
-
+        selectedNodes = new ArrayList<>();
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
@@ -278,18 +278,19 @@ public class MainPanel extends JFrame {
             }
         });
 
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 tree_selection(active);
 
             }
-        });*/
+        });
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
@@ -322,6 +323,7 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
+
 
     }
 }
