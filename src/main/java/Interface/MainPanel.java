@@ -173,12 +173,12 @@ public class MainPanel extends JFrame {
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
                 c.setVisible(false);
-                c.setMaximumSize(new Dimension(150, 20));
-                c.setMinimumSize(new Dimension(150, 20));
+
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
                 c.setVisible(false);
+
                 barLabels.add((JLabel) c);
             }
         }
@@ -195,7 +195,7 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
             barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
                     + " , estimated time: "
-                    + String.valueOf(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs()));
+                    + String.valueOf(Math.round(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs() / 1000 )) + "s");
         }
         if(GlobalProgress.get().all_tasks().size() == 0)
             set_bars_invisible();
