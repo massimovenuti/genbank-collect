@@ -198,17 +198,23 @@ public class MainPanel extends JFrame {
     }
     public void show_bars(){
         for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
+            var progressTask = GlobalProgress.get().all_tasks().get(i);
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
             progBars.get(i).setMinimum(0);
-            progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
-            progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
-            barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
-                    + " estimated time: "
-                    + String.valueOf(Math.round(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs() / 1000 )) + "s");
+            progBars.get(i).setMaximum(progressTask.getTodo());
+            progBars.get(i).setValue(progressTask.getDone());
+            barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
         if(GlobalProgress.get().all_tasks().size() == 0)
             set_bars_invisible();
+    }
+
+    public String formatMs(float millis) {
+        long sec = (long)millis/1000;
+        long min = sec / 60;
+        long hou = min / 60;
+        return String.format("%3dh%2dm%2ds", hou, min % 60, sec % 60);
     }
 
     public void tree_selection(Boolean active)
