@@ -55,9 +55,16 @@ public class UpdateRow {
         return gc;
     }
 
+    public String getModifyDate(){ return modifyDate; }
+
+    public void setModifyDate(String modifyDate) {
+        this.modifyDate = modifyDate;
+    }
+
     private String group;
     private String subGroup;
     private String organism;
     private String organelle;
     private String gc;
+    private String modifyDate;
 }
