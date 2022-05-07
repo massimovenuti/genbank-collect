@@ -4,6 +4,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+//import org.sqlite.JDBC;
 
 public final class DataBaseManager {
     private static String path_;
@@ -17,8 +18,7 @@ public final class DataBaseManager {
         path_ = "jdbc:sqlite:/" + path;
     }
 
-    public static void connectionToDb() throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
+    public static void connectionToDb() {
         connection_ = null;
         try{
             connection_ = DriverManager.getConnection(path_);
@@ -33,8 +33,8 @@ public final class DataBaseManager {
         }
     }
 
-    public static void createTableDb(String sql) throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
+    public static void createTableDb(String sql)/* throws ClassNotFoundException */{
+        //Class.forName("org.sqlite.JDBC");
         Statement st = null;
         try{
             st = connection_.createStatement();

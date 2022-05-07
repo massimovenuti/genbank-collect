@@ -155,7 +155,7 @@ public class DataBase {
     /*
         Création de toutes les tables nécessaires
      */
-    public static void createOrOpenDataBase(String path) throws ClassNotFoundException {
+    public static void createOrOpenDataBase(String path) {
         DataBaseManager.setDataBase(path);
         //Ouverture de la base ou création si inéxistante
         DataBaseManager.connectionToDb();
