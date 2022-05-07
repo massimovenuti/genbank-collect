@@ -1,6 +1,7 @@
 package org.NcbiParser;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public final class DataBaseManager {
@@ -44,17 +45,26 @@ public final class DataBaseManager {
 
     }
 
-    public static String kingdomFromOverview(String groupe, String subGroup, String organism){
+    public static boolean needAnUpdate(UpdateRow row){
         Statement s;
         try{
-            String req = "SELECT kingdom FROM OVERVIEW " +
-                    "WHERE groupe = \"" + groupe + "\" AND subgroup = \"" + subGroup + "\" AND organisme = \"" + organism + "\"" ;
+            String req = "SELECT * FROM FILES " +
+                    "WHERE ncs = \"" + row.getNcs() + "\" AND organism = \"" + row.getOrganism() + "\";";
             s = connection_.createStatement();
             ResultSet rs = s.executeQuery(req);
-            return rs.getString("kingdom");
+
+            if(!rs.isBeforeFirst()){ // résultat vide donc pas à jour forcément
+                return true;
+            }
+
+            String parseTexteDate = rs.getString("date");
+            java.util.Date prevParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(parseTexteDate);
+            java.util.Date newParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(row.getModifyDate());
+
+            return (prevParseDate.before(newParseDate) && !prevParseDate.equals(newParseDate));
         }catch(Exception eio){
             System.out.println(eio.getMessage());
-            return null;
+            return false;
         }
     }
 

@@ -25,6 +25,8 @@ import java.util.Comparator;
  */
 
 public class DataBase {
+
+    private static ArrayList<UpdateRow> globalRegroupedData;
     /*
         Met à jour la base avec les dernières données d'overview, viruses.txt, x.ids, etc.
      */
@@ -76,6 +78,7 @@ public class DataBase {
     }
 
     public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<IndexData> index_parsed){
+        globalRegroupedData = new ArrayList<UpdateRow>();
         Collections.sort(overview_parsed, new Comparator<OverviewData>() {
             @Override
             public int compare(OverviewData o1, OverviewData o2) {
@@ -90,21 +93,88 @@ public class DataBase {
             }
         });
 
+        int i = 0, j = 0;
+         while(i < index_parsed.size() && j < overview_parsed.size()){
+            if(index_parsed.get(i).getGroup().equalsIgnoreCase(overview_parsed.get(j).getGroup())
+                    && index_parsed.get(i).getSubgroup().equalsIgnoreCase(overview_parsed.get(j).getSubgroup())){
 
+                globalRegroupedData.add(new UpdateRow(overview_parsed.get(j).getKingdom(),index_parsed.get(i).getGroup()
+                        ,index_parsed.get(i).getSubgroup(),index_parsed.get(i).getOrganism(),null,index_parsed.get(i).getGc()
+                        ,index_parsed.get(i).getNcs()));
+                globalRegroupedData.get(globalRegroupedData.size()-1).setModifyDate(index_parsed.get(i).getModifyDate());
+                ++i;
+            }else{
+                //cherche le kingdom qui correspond à l'index courant
+                ++j;
+            }
+         }
+        System.out.println();
+    }
 
+    public static ArrayList<UpdateRow> allOrganismNeedingUpdate(ArrayList<OverviewData> userNeeds){
+        ArrayList<UpdateRow> ur = new ArrayList<UpdateRow>();
+        int beg = 0;
+        if(userNeeds.get(0).getKingdom() == null){ // cas ou on veut tester pour tous
+            ur = globalRegroupedData;
+        }
+        else{
+            Collections.sort(userNeeds, new Comparator<OverviewData>() {
+                @Override
+                public int compare(OverviewData o1, OverviewData o2) {
+                    return o1.compareToGroupVersion(o2);
+                }
+            });
+            for(var row : userNeeds){
+                if(row.getGroup() == null){
+                    //recup toutes les lignes kingdom = row.kingdom
+                    for(var gr : globalRegroupedData){
+                        if(gr.getKingdom().equalsIgnoreCase(row.getKingdom())){
+                            ur.add(gr);
+                        }
+                    }
+                }
+                else if(row.getSubgroup() == null){
+                    //recup toutes les lignes pour un kingdom et un groupe
+                    for(var gr : globalRegroupedData){
+                        if(gr.getKingdom().equalsIgnoreCase(row.getKingdom()) && gr.getGroup().equalsIgnoreCase(row.getGroup())){
+                            ur.add(gr);
+                        }
+                    }
+                }
+                else if (row.getOrganism() == null) {
+                    for(var gr : globalRegroupedData){
+                        if(gr.getKingdom().equalsIgnoreCase(row.getKingdom()) && gr.getGroup().equalsIgnoreCase(row.getGroup())
+                                && gr.getSubGroup().equalsIgnoreCase(row.getSubgroup())){
+                            ur.add(gr);
+                        }
+                    }
+                }
+                else {
+                    for(var gr : globalRegroupedData){
+                        if(gr.getKingdom().equalsIgnoreCase(row.getKingdom()) && gr.getGroup().equalsIgnoreCase(row.getGroup())
+                                && gr.getSubGroup().equalsIgnoreCase(row.getSubgroup()) && gr.getOrganism().equalsIgnoreCase(row.getOrganism())){
+                            ur.add(gr);
+                        }
+                    }
+                }
+
+            }
+        }
+        ArrayList<UpdateRow> dontNeedModif = new ArrayList<UpdateRow>();
+        // ici on à ce que l'utilisateur VEUT, reste à prendre ce qu'on DOIT mettre a jour seulement
+        for(var row : ur){
+            //on retire si elle n'a pas besion d'être mise à jour
+            if(!DataBaseManager.needAnUpdate(row)){
+                dontNeedModif.add(row);
+                //ur.remove(row);
+            }
+        }
+        ur.removeAll(dontNeedModif);
+
+        return ur;
     }
 
 
-    /**
-     *
-     * @param group
-     * @param subGroup
-     * @param organism
-     * @return le kingdom en fonction du group, sous groupe et organisme
-     */
-    public static String getKindom(String group,String subGroup, String organism){
-        return DataBaseManager.kingdomFromOverview(group, subGroup, organism);
-    }
 
     /*
         à partir de la base mise à jour, donne les ids des organismes pour
@@ -131,29 +201,14 @@ public class DataBase {
         //Ouverture de la base ou création si inéxistante
         DataBaseManager.connectionToDb();
 
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS OVERVIEW (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "kingdom TEXT," +
-                "groupe TEXT," +
-                "subgroup TEXT," +
-                "organisme TEXT," +
-                "organelle TEXT)");
-
-        DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS INDEXES (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "groupe TEXT," +
-                "subgroup TEXT," +
-                "organisme TEXT," +
-                "GC TEXT," +
-                "last_modify TEXT)");
 
         DataBaseManager.createTableDb("CREATE TABLE IF NOT EXISTS FILES (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "Type TEXT," +
-                "indexes_id INTEGER," +
-                "FOREIGN KEY (indexes_id) REFERENCES INDEXES (id)" +
-                "   ON UPDATE CASCADE ON REMOVE CASCADE," +
-                "date TEXT)");
+                "ncs TEXT," +
+                "organism TEXT," +
+                "date TEXT," +
+                "UNIQUE (ncs,organism))");
 
 
     }
