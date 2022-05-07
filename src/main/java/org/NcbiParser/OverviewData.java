@@ -42,4 +42,15 @@ public class OverviewData implements Comparable<OverviewData> {
             return cmp;
         return getOrganism().compareTo(overviewData.getOrganism());
     }
+
+    public int compareToGroupVersion(OverviewData overviewData){
+        int cmp = group.compareTo(overviewData.group);
+        if (cmp != 0)
+            return cmp;
+        cmp = subgroup.compareTo(overviewData.subgroup);
+        if (cmp != 0)
+            return cmp;
+        return organism.compareTo(overviewData.organism);
+
+    }
 }
