@@ -6,12 +6,15 @@ import java.util.ArrayList;
 public class GUIVariables {
     private TreeNode tree;
 
+    private JTextArea logArea;
+
     public GUIVariables() {
         this.stop = false;
         this.nbThreadsDL = 4;
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove
+        this.logArea = null;
 
     }
 
@@ -37,6 +40,7 @@ public class GUIVariables {
     public void setRemoveTrigger(JButton trigger) {
         this.trigger_remove = trigger;
     }
+    public void setLogArea(JTextArea log) { this.logArea = log; }
 
 
 
@@ -53,6 +57,7 @@ public class GUIVariables {
     }
 
     public JButton getAddTrigger() { return this.trigger_add; }
+    public JTextArea getLogArea() { return this.logArea; }
 
     public JButton getRemoveTrigger() { return this.trigger_remove; }
 
