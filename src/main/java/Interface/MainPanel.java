@@ -10,14 +10,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.Position;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.SwingWorker;
 
 public class MainPanel extends JFrame {
     private JTree tree;
@@ -194,7 +191,7 @@ public class MainPanel extends JFrame {
             progBars.get(i).setMaximum(GlobalProgress.get().all_tasks().get(i).getTodo());
             progBars.get(i).setValue(GlobalProgress.get().all_tasks().get(i).getDone());
             barLabels.get(i).setText(GlobalProgress.get().all_tasks().get(i).getName()
-                    + " , estimated time: "
+                    + " estimated time: "
                     + String.valueOf(Math.round(GlobalProgress.get().all_tasks().get(i).estimatedTimeLeftMs() / 1000 )) + "s");
         }
         if(GlobalProgress.get().all_tasks().size() == 0)
