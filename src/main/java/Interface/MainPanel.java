@@ -11,10 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -258,10 +254,8 @@ public class MainPanel extends JFrame {
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
-        root = GlobalGUIVariables.get().getTree();
-        arbo = build_tree();
-        treeModel = new DefaultTreeModel(arbo);
-        tree.setModel(treeModel);
+        update_tree_from_root();
+        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -296,7 +290,6 @@ public class MainPanel extends JFrame {
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
-
             }
         });
         triggerButton.addActionListener(new ActionListener() {
@@ -306,6 +299,13 @@ public class MainPanel extends JFrame {
                 show_bars();
             }
         });
+    }
+
+    public void update_tree_from_root() {
+        root = GlobalGUIVariables.get().getTree();
+        arbo = build_tree();
+        treeModel = new DefaultTreeModel(arbo);
+        tree.setModel(treeModel);
     }
 
     public static void main(String[] args) {
