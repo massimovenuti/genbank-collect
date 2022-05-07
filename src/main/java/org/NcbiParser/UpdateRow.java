@@ -1,15 +1,34 @@
 package org.NcbiParser;
 
+import java.util.HashMap;
+
 public class UpdateRow {
     private String kingdom;
 
-    public UpdateRow(String kingdom, String group, String subGroup, String organism, String organelle, String gc) {
+    public String getNcs() {
+        return ncs;
+    }
+
+    private String ncs;
+
+    public HashMap<String, String> getAreNcs() {
+        return areNcs;
+    }
+
+    public void setAreNcs(HashMap<String, String> areNcs) {
+        this.areNcs = areNcs;
+    }
+
+    private HashMap<String, String> areNcs;
+
+    public UpdateRow(String kingdom, String group, String subGroup, String organism, String organelle, String gc, String ncs) {
         this.kingdom = kingdom;
         this.group = group;
         this.subGroup = subGroup;
         this.organism = organism;
         this.organelle = organelle;
         this.gc = gc;
+        this.ncs = ncs;
     }
 
     public String getKingdom() {

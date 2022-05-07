@@ -18,7 +18,7 @@ public class ParsingThread extends Thread {
                     Thread.sleep(10);
                 pt.run(mt);
             } catch (Throwable t) {
-                System.out.printf("Erreur de parsing: %26s\n", t.getMessage());
+                System.out.printf("Parsing failed: %s\n", t.getMessage());
             }
         }
     }
