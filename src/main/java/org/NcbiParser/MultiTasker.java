@@ -8,6 +8,15 @@ public class MultiTasker {
     private ConcurrentLinkedQueue<ParsingTask> parsings;
 
     private ProgressTask dlTask;
+
+    public ProgressTask getDlTask() {
+        return dlTask;
+    }
+
+    public ProgressTask getParsingTask() {
+        return parsingTask;
+    }
+
     private ProgressTask parsingTask;
 
     public MultiTasker() {
@@ -25,6 +34,16 @@ public class MultiTasker {
         parsings.add(task); parsingTask.addTodo(1);
     }
 
-    public DLTask popDLTask() {dlTask.addDone(1);return downloads.poll();}
-    public ParsingTask popParsingTask() {parsingTask.addDone(1);return parsings.poll();}
+    public DLTask popDLTask() {return downloads.poll();}
+    public ParsingTask popParsingTask() {return parsings.poll();}
+
+    public void clearDl() {
+        GlobalProgress.get().remove_task(dlTask);
+        downloads.clear();
+    }
+
+    public void clearParsing() {
+        GlobalProgress.get().remove_task(parsingTask);
+        parsings.clear();
+    }
 }
