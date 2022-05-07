@@ -190,6 +190,8 @@ public class GbffParser implements Parser {
 
     public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
+        GlobalGUIVariables.get().getLogArea().append("Parsing: " + gbPath + "\n");
+
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         LinkedHashMap<String, DNASequence> dnaSequences = null;
@@ -247,6 +249,7 @@ public class GbffParser implements Parser {
         }
 
         System.out.printf("Parsing ended: %s\n", gbPath);
+        GlobalGUIVariables.get().getLogArea().append("Parsing ended: " + gbPath + "\n");
         return true;
     }
 }

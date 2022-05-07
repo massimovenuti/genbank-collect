@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 public class GUIVariables {
     private TreeNode tree;
-
     private JTextArea logArea;
 
     public GUIVariables() {
@@ -14,6 +13,7 @@ public class GUIVariables {
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<String>();
         regions.add("CDS"); //TODO: remove
+        logArea = null;
     }
 
     public ArrayList<String> getRegions() {

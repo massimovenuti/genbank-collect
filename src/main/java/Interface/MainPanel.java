@@ -201,7 +201,7 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
-
+        GlobalGUIVariables.get().setLogArea(logArea);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
@@ -229,7 +229,10 @@ public class MainPanel extends JFrame {
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                Main.startParsing();
+                new Thread() {
+                    public void run() { Main.startParsing(); }
+                }.start();
+
 
             }
         });

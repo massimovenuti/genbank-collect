@@ -19,6 +19,7 @@ public class ParsingThread extends Thread {
                 pt.run(mt);
             } catch (Throwable t) {
                 System.out.printf("Parsing failed: %s\n", t.getMessage());
+                GlobalGUIVariables.get().getLogArea().append("Parsing failed: " + t.getMessage() + "%s\n");
             }
         }
     }
