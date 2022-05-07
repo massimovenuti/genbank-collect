@@ -15,16 +15,27 @@ public class Main {
         startParsing();
     }
 
+    public static void test() {
+        try {
+            var r = ncbi.index_to_db("eukaryotes.txt");
+            var row = r.get(3);
+            File gbffFile = ncbi.getGbffFromGc(row.getGc());
+            GbffParser parser = new GbffParser(gbffFile);
+            ArrayList<Region> regions = new ArrayList<>();
+            regions.add(Region.CDS);
+            var ncs = NcbiParser.preparse_ncs(row.getNcs());
+            parser.parse_into("Results/", "Homo Sapiens", "", regions, ncs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void atProgStart() {
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
             update(ncbi);
-            //ncbi.getGbffFromGc("GCA_012011025.1");
-            //ncbi.getGbkFromVirus("Acholeplasma virus L2");
-            // File gbffFile = ncbi.getGbffFromGc("GCA_012011025.1");
-            // GbffParser parser = new GbffParser(gbffFile.getPath());
-            // parser.parse_in`to("Results/", "²Homo Sapiens", "", new String[]{"CDS"});
+//            test();
         } catch (Exception e) {
             e.printStackTrace();
         }

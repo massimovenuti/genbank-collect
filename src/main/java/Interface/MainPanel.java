@@ -89,18 +89,22 @@ public class MainPanel extends JFrame {
     ImageIcon obsoleteIcon;
     ImageIcon up_to_dateIcon;
 
-    public ArrayList<String> create_region_array(){
-        ArrayList<String> checked = new ArrayList<>();
+    public ArrayList<Region> create_region_array(){
+        ArrayList<Region> checked = new ArrayList<Region>();
         for (Component c : regionPanel.getComponents())
         {
             if(c instanceof JCheckBox){
                 if(((JCheckBox) c).isSelected()){
-                    checked.add(((JCheckBox) c).getText());
+                    Region region = Region.get(((JCheckBox) c).getText());
+                    assert region != null;
+                    checked.add(region);
                 }
             }
         }
-        if(!choixTextField.equals(""))
-            checked.add(choixTextField.getText());
+        if(!choixTextField.getText().equals("")) {
+            Region.OTHER.setStringRepresentation(choixTextField.getText());
+            checked.add(Region.OTHER);
+        }
         return checked;
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
@@ -245,7 +249,7 @@ public class MainPanel extends JFrame {
 
 
         parseButton.addMouseListener(new MouseAdapter() {
-            ArrayList<String> regions = new ArrayList<>();
+            ArrayList<Region> regions = new ArrayList<>();
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
