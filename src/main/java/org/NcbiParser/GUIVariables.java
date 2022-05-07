@@ -13,12 +13,12 @@ public class GUIVariables {
         this.stop = false;
         this.nbThreadsDL = 4;
         this.nbThreadsParsing = 4;
-        this.regions = new ArrayList<String>();
-        regions.add("CDS"); //TODO: remove
-        logArea = null;
+        this.regions = new ArrayList<Region>();
+        this.logArea = null;
+
     }
 
-    public ArrayList<String> getRegions() {
+    public ArrayList<Region> getRegions() {
         return regions;
     }
 
@@ -30,7 +30,7 @@ public class GUIVariables {
         this.stop = stop;
     }
 
-    public void setRegions(ArrayList<String> regions) {
+    public void setRegions(ArrayList<Region> regions) {
         this.regions = regions;
     }
 

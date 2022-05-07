@@ -54,7 +54,7 @@ public class GbffParser implements Parser {
     private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
                               DNASequence sequence,
                               String header,
-                              String region,
+                              Region region,
                               BufferedWriter bufferedWriter) throws IOException {
         if (wrongSourceFormat(feature.getSource())) {
             if (false){
@@ -68,7 +68,7 @@ public class GbffParser implements Parser {
         AbstractLocation loc = feature.getLocations();
 
         if (loc.getSubLocations().size() == 0) {
-            if (!region.equals("Intron")) {
+            if (region != Region.INTRON) {
                 bufferedWriter.write(header);
                 bufferedWriter.newLine();
                 bufferedWriter.write(loc.getSubSequence(sequence).getSequenceAsString());
@@ -77,7 +77,7 @@ public class GbffParser implements Parser {
         } else {
             bufferedWriter.write(header);
             bufferedWriter.newLine();
-            if (region.equals("Intron"))
+            if (region == Region.INTRON)
                 writeIntron(loc, sequence, header, bufferedWriter);
             else
                 writeCDS(loc, sequence, header, bufferedWriter);
@@ -220,7 +220,7 @@ public class GbffParser implements Parser {
         return false;
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<String> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing: " + gbPath + "\n");
 
@@ -247,23 +247,20 @@ public class GbffParser implements Parser {
             }
             if (dnaSequences.isEmpty()) break;
             for (DNASequence sequence : dnaSequences.values()) {
-                for (String region : regions) {
+                for (Region region : regions) {
                     List<FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound>> features;
-                    if (region.equals("Intron"))
-                        features = sequence.getFeaturesByType("CDS");
+                    if (region == Region.INTRON)
+                        features = sequence.getFeaturesByType(Region.CDS.toString());
                     else
-                        features = sequence.getFeaturesByType(region);
-                    if (false) {
-                        System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
-                        GlobalGUIVariables.get().insert_text(Color.RED, "[DEBUG] " + region + " : " + features.size() + " features");
-                    }
+                        features = sequence.getFeaturesByType(region.toString());
+                    if (false) System.err.println("[DEBUG] " + region + " : " + features.size() + " features");
                     if (features.isEmpty()) continue;
-                    String filePath = makeFilePath(outDirectory, region, organism, organelle, nc);
+                    String filePath = makeFilePath(outDirectory, region.toString(), organism, organelle, nc);
                     try {
                         writer = new FileWriter(filePath, false);
                         bufferedWriter = new BufferedWriter(writer);
                         for (var feature : features) {
-                            String header = makeSequenceHeader(region, organism, nc, organelle, feature.getSource());
+                            String header = makeSequenceHeader(region.toString(), organism, nc, organelle, feature.getSource());
                             writeFeature(feature, sequence, header, region, bufferedWriter);
                         }
                     } catch (Exception e) {
