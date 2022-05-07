@@ -207,14 +207,11 @@ public class MainPanel extends JFrame {
         treePaths = new ArrayList<>();
         obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
         up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
-
+        selectedNodes = new ArrayList<>();
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
         root = GlobalGUIVariables.get().getTree();
-        /* ajouter ici la fct qui crée l'hierarchie la fonction build_tree s'en occupe
-        * du reste il ne faut initialiser le root qui est une variable globale TreeNode
-        */
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
@@ -229,7 +226,9 @@ public class MainPanel extends JFrame {
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                Main.startParsing();
+                new Thread() {
+                    public void run() { Main.startParsing(); }
+                }.start();
 
             }
         });
@@ -244,7 +243,7 @@ public class MainPanel extends JFrame {
             }
 
         });
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent e) {
@@ -267,7 +266,7 @@ public class MainPanel extends JFrame {
                 }
 
             }
-        });*/
+        });
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
