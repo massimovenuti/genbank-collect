@@ -355,6 +355,8 @@ public class MainPanel extends JFrame {
         optionsButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!optionsButton.isEnabled())
+                    return;
                 super.mousePressed(e);
                 toggleContainer.setVisible(false);
                 optionsContainer.setVisible(true);
@@ -368,8 +370,7 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                 Config.setPriority(priorityCB.getSelectedItem().toString());
-                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
-
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardées, veuillez relancer le processus");
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
