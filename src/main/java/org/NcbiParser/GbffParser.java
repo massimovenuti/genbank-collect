@@ -51,7 +51,7 @@ public class GbffParser implements Parser {
                               DNASequence sequence,
                               String header,
                               Region region,
-                              BufferedWriter bufferedWriter) throws IOException {
+                              BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         if (wrongSourceFormat(feature.getSource())) {
             if (false) {
                 System.err.println("Wrong source format : " + feature.getSource());
@@ -85,7 +85,7 @@ public class GbffParser implements Parser {
     private void writeCDS(AbstractLocation loc,
                           DNASequence sequence,
                           String header,
-                          BufferedWriter bufferedWriter) throws IOException {
+                          BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         int n = loc.getSubLocations().size();
         String exon = null;
 
@@ -113,7 +113,7 @@ public class GbffParser implements Parser {
     private void writeIntron(AbstractLocation loc,
                              DNASequence sequence,
                              String header,
-                             BufferedWriter bufferedWriter) throws IOException {
+                             BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         int n = loc.getSubLocations().size();
         String intron = null;
 
@@ -275,7 +275,7 @@ public class GbffParser implements Parser {
                                String nc,
                                DNASequence sequence,
                                Region region,
-                               String filePath) throws IOException {
+                               String filePath) throws IllegalStateException, IOException {
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         try {
@@ -285,6 +285,9 @@ public class GbffParser implements Parser {
                 String header = makeSequenceHeader(region.toString(), organism, nc, organelle, feature.getSource());
                 writeFeature(feature, sequence, header, region, bufferedWriter);
             }
+        } catch (IllegalStateException e) {
+            close();
+            throw e;
         } catch (IOException e) {
             System.err.println("Failed to write file " + filePath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to write file " + gbPath + "\n");
