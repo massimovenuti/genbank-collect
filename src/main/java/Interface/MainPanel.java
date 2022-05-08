@@ -262,16 +262,18 @@ public class MainPanel extends JFrame {
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
                 GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
+                Processing.getChecked(tree);
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
+                /*
                 try {
                     Main.getMt().getMt().pushTask(new GenericTask(Main::startParsing));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
             }
         });
 

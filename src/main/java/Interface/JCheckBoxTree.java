@@ -179,7 +179,7 @@ public class JCheckBoxTree extends JTree {
                 }
                 boolean checkMode = ! nodesCheckingState.get(tp).isSelected;
                 checkSubTree(tp, checkMode);
-                updatePredecessorsWithCheckMode(tp, checkMode);
+                //updatePredecessorsWithCheckMode(tp, checkMode);
                 // Firing the check change event
                 fireCheckChangeEvent(new CheckChangeEvent(new Object()));
                 // Repainting tree after the data structures were updated
@@ -234,11 +234,11 @@ public class JCheckBoxTree extends JTree {
     protected void checkSubTree(TreePath tp, boolean check) {
         CheckedNode cn = nodesCheckingState.get(tp);
         cn.isSelected = check;
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
+        /*DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
         for (int i = 0 ; i < node.getChildCount() ; i++) {
             checkSubTree(tp.pathByAddingChild(node.getChildAt(i)), check);
         }
-        cn.allChildrenSelected = check;
+        cn.allChildrenSelected = check;*/
         if (check) {
             checkedPaths.add(tp);
         } else {
