@@ -57,13 +57,20 @@ public final class DataBaseManager {
         try{
             String req = "SELECT * FROM FILES " +
                     "WHERE kingdom = \"" + row.getKingdom() + "\" AND groupe = \"" + row.getGroup() + "\" AND " +
-                    "subGroup = \"" + row.getSubGroup() + "\" AND organism = \"" + row.getOrganism() + "\"" +
-                    "AND organelle = \"" + row.getOrganelle() + "\";";
+                    "subGroup = \"" + row.getSubGroup() + "\" AND organism = \"" + row.getOrganism() + "\";";
             s = connection_.createStatement();
             ResultSet rs = s.executeQuery(req);
 
             if(!rs.isBeforeFirst()){ // résultat vide donc forcément pas à jour
                 return true;
+            }
+
+            // fetching result to arrays
+            ArrayList<String> types = new ArrayList<>();
+            ArrayList<String> dates = new ArrayList<>();
+            while (rs.next()) {
+                types.add(rs.getString("type"));
+                dates.add(rs.getString("date"));
             }
 
             java.util.Date newParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(row.getModifyDate());
@@ -72,23 +79,19 @@ public final class DataBaseManager {
             //pour toutes les lignes -> regarder si chaque region selectionnée est à jour
             for(var reg : regs){
                 isIn = false;
-                rs.first();
                 //chercher la colonne correspondant à ce type
-                do{
-                    String currentReg = rs.getString("type");
-                    if(currentReg.equalsIgnoreCase(reg.toString())){
-                        //si le type à déja été parser regarder si il est à jour
-                        String parseTexteDate = rs.getString("date");
+                for (int i = 0; i < types.size(); ++i) {
+                    String currentReg = types.get(i);
+                    if (currentReg.equalsIgnoreCase(reg.toString())) {
+                        String parseTexteDate = dates.get(i);
                         prevParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(parseTexteDate);
                         isIn = true;
                         if(prevParseDate.before(newParseDate) && !prevParseDate.equals(newParseDate))
                             return true;
                     }
-                }while(rs.next());
-                //si il n'est pas dans la table, alors il n'est pas à jour
+                }
                 if(!isIn)
                     return true;
-
             }
             //retourne faux car on à trouver aucune région pour laquelle ce n'est pas à jour
             return false;
