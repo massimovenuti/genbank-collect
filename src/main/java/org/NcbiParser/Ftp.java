@@ -130,7 +130,7 @@ public class Ftp {
                 }
 
                 return localFile;
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 System.out.printf("Error while downloading %20s (%d): %20s\n", ftp_path, i + 1, t.getMessage());
                 GlobalGUIVariables.get().insert_text(Color.RED,"Error while downloading " + ftp_path + "(" + String.valueOf(i + 1) + "): " + t.getMessage() + "\n");
 
