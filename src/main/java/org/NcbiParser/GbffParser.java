@@ -299,7 +299,7 @@ public class GbffParser implements Parser {
         }
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IllegalStateException, IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
