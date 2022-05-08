@@ -3,12 +3,12 @@ package Interface;
 
 import org.NcbiParser.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -269,8 +269,8 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+        obsoleteIcon = new ImageIcon("assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
 
         set_bars_invisible();
         stopButton.setVisible(false);
@@ -379,6 +379,7 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
             }
         });
+
     }
 
     public void update_tree_from_root() {
@@ -407,10 +408,20 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 4, 1);
-        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 4, 1);
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 1000, 1);
+        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 1000, 1);
 
         downloadSpinner = new JSpinner(model_dl);
         paringSpinner = new JSpinner(model_parse);
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File("assets/settings.png"));
+        } catch (IOException e) {
+        }
+        ImageIcon icon = new ImageIcon(img);
+        Image image = icon.getImage();
+        Image newimg = image.getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH);
+        icon = new ImageIcon(newimg);
+        optionsButton = new JButton("options",icon);
     }
 }
