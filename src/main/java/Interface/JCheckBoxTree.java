@@ -1,7 +1,6 @@
 package Interface;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EventListener;
@@ -129,6 +128,7 @@ public class JCheckBoxTree extends JTree {
             checkBox = new JCheckBox();
             add(checkBox, BorderLayout.CENTER);
             setOpaque(false);
+            //checkBox.setMinimumSize(new Dimension(800, 50));
         }
 
         @Override
@@ -142,8 +142,11 @@ public class JCheckBoxTree extends JTree {
             if (cn == null) {
                 return this;
             }
+            //checkBox.setMaximumSize(new Dimension(800, 100));
+            //checkBox.set
             checkBox.setSelected(cn.isSelected);
             checkBox.setOpaque(cn.isSelected && cn.hasChildren && !cn.allChildrenSelected);
+            checkBox.setEnabled(false);
             return this;
         }
     }
