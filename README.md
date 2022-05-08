@@ -5,7 +5,7 @@
 **Auteurs :** *Cheneau Léo*, *Venuti Massimo*, *Damoi Neiko*, *Bangard Jules*
 
 ## Points importants :
-- Ne pas supprimer les fichiers à la main cas nous utilisons la base de données pour la mise à jour de ces derniers.
+- Ne pas supprimer les fichiers à la main car nous utilisons la base de données pour la mise à jour de ces derniers.
 - Veillez à bien sélectionner des kingdom, groupe, sous-groupe et/ou organisme dans la hiérarchie.
 - De même pour les régions à parser (CDS, Introns, etc.). 
 - L'interface graphique permet de configurer plusieurs choses dont le nombre de thread à partir du menu config situé en haut à droite. On peut également choisir de prioriser au choix les parsings ou les téléchargements, nous conseillons de garder la priorité au parsing (cf. Config).
