@@ -5,6 +5,7 @@ import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.MyGenbankReader;
 import org.biojava.nbio.core.sequence.Strand;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.features.FeatureInterface;
 import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
@@ -43,7 +44,7 @@ public class GbffParser implements Parser {
             throw e;
         }
 
-        dnaReader = new MyGenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+        dnaReader = new MyGenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
     }
 
     private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,

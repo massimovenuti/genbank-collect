@@ -12,10 +12,10 @@ public class Processing {
         for (var p : cPaths) {
             /* Note: 0 = root, 1= Kingdom, 2= Group, 3= SGroup, 4=Organism */
             var pcount = p.getPathCount();
-            var kingdom = pcount > 1 ? p.getPathComponent(1).toString() : null;
-            var group = pcount > 2 ? p.getPathComponent(2).toString() : null;
-            var sgroup = pcount > 3 ? p.getPathComponent(3).toString() : null;
-            var og = pcount > 4 ? p.getPathComponent(4).toString() : null;
+            var kingdom = pcount > 1 ? p.getPathComponent(1).toString().split(";")[0] : null;
+            var group = pcount > 2 ? p.getPathComponent(2).toString().split(";")[0] : null;
+            var sgroup = pcount > 3 ? p.getPathComponent(3).toString().split(";")[0] : null;
+            var og = pcount > 4 ? p.getPathComponent(4).toString().split(";")[0] : null;
             var od = new OverviewData(kingdom, group, sgroup, og);
             //System.out.printf("%2d -> %40s\n", p.getPathCount(), p.toString());
             //System.out.printf("%10s - %10s - %10s - %10s\n", od.getKingdom(), od.getGroup(), od.getSubgroup(), od.getOrganism());

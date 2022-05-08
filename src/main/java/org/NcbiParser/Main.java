@@ -1,6 +1,8 @@
 package org.NcbiParser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,6 +37,7 @@ public class Main {
         var ini = GlobalProgress.get().registerTask("Initialisation");
         ini.addTodo(1);
         try {
+            Files.createDirectories(Paths.get(Config.result_directory()));
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
