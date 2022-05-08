@@ -9,8 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -74,6 +72,13 @@ public class MainPanel extends JFrame {
     private JLabel label13;
     private JButton stopButton;
     private JCheckBox toutCheckBox;
+    private JPanel optionsContainer;
+    private JSpinner downloadSpinner;
+    private JSpinner paringSpinner;
+    private JButton appliquerButton;
+    private JButton annulerButton;
+    private JButton optionsButton;
+    private JPanel toggleContainer;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -255,6 +260,8 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+        optionsContainer.setVisible(false);
+        toggleContainer.setVisible(false);
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
         document = (StyledDocument) logArea.getDocument();
@@ -270,6 +277,8 @@ public class MainPanel extends JFrame {
         Main.atProgStart();
         update_tree_from_root();
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
+
+
         var frame = this;
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
@@ -339,6 +348,32 @@ public class MainPanel extends JFrame {
                     modifiy_all_boxes(false);
             }
         });
+        optionsButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(false);
+                optionsContainer.setVisible(true);
+            }
+        });
+        appliquerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+                GlobalGUIVariables.get().setNbThreadsDL((Integer)downloadSpinner.getValue());
+                GlobalGUIVariables.get().setNbThreadsParsing((Integer)paringSpinner.getValue());
+            }
+        });
+        annulerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+            }
+        });
     }
 
     public void update_tree_from_root() {
@@ -346,6 +381,7 @@ public class MainPanel extends JFrame {
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
+        toggleContainer.setVisible(true);
     }
 
     public static void main(String[] args) {
@@ -365,5 +401,11 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
+
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 4, 1.0);
+        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 4, 1.0);
+
+        downloadSpinner = new JSpinner(model_dl);
+        paringSpinner = new JSpinner(model_parse);
     }
 }
