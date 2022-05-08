@@ -1,54 +1,59 @@
 package org.NcbiParser;
 
+import java.util.concurrent.ConcurrentLinkedDeque; // fin = premier sorti
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MultiTasker {
-    private ConcurrentLinkedQueue<DLTask> downloads;
-    private ConcurrentLinkedQueue<ParsingTask> parsings;
-
-    private ConcurrentLinkedQueue<GenericTask> gtasks;
-
-    private ProgressTask dlTask;
+    private ConcurrentLinkedDeque<ParsingTask> parsings;
 
     public ProgressTask getDlTask() {
         return dlTask;
     }
 
+    private ConcurrentLinkedQueue<GenericTask> gtasks;
+
+    private ProgressTask dlTask;
+
     public ProgressTask getParsingTask() {
+        if (parsingTask == null)
+            parsingTask = GlobalProgress.get().registerTask("Parsing");
         return parsingTask;
     }
 
     private ProgressTask parsingTask;
 
     public MultiTasker() {
-        downloads = new ConcurrentLinkedQueue<DLTask>();
-        parsings = new ConcurrentLinkedQueue<ParsingTask>();
+        parsings = new ConcurrentLinkedDeque<ParsingTask>();
         gtasks = new ConcurrentLinkedQueue<GenericTask>();
     }
 
-    public void pushTask(DLTask task) {
-        if (dlTask == null)
-            dlTask = GlobalProgress.get().registerTask("Téléchargements");
-        downloads.add(task); dlTask.addTodo(1);
-    }
-
     public void pushTask(ParsingTask task) {
-        if (parsingTask == null)
-            parsingTask = GlobalProgress.get().registerTask("Parsing");
-        parsings.add(task); parsingTask.addTodo(1);
+        if (task.isDl()) {
+            if (dlTask == null)
+                dlTask = GlobalProgress.get().registerTask("Téléchargements");
+            if (Config.parsingPriority()) {
+                parsings.addFirst(task);
+            } else {
+                parsings.addLast(task);
+            }
+            dlTask.addTodo(1);
+        }else {
+            if (parsingTask == null)
+                parsingTask = GlobalProgress.get().registerTask("Parsing");
+            if (Config.parsingPriority()) {
+                parsings.addLast(task);
+            } else {
+                parsings.addFirst(task);
+            }
+            parsingTask.addTodo(1);
+        }
     }
 
     public void pushTask(GenericTask task) {
         gtasks.add(task);
     }
 
-    public DLTask popDLTask() {return downloads.poll();}
-    public ParsingTask popParsingTask() {return parsings.poll();}
-
-    public void clearDl() {
-        GlobalProgress.get().remove_task(dlTask);
-        downloads.clear();
-    }
+    public ParsingTask popParsingTask() {return parsings.pollLast();}
 
     public void clearParsing() {
         GlobalProgress.get().remove_task(parsingTask);

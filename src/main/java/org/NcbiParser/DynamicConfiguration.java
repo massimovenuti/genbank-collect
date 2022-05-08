@@ -36,12 +36,11 @@ public class DynamicConfiguration {
             f.createNewFile();
         var of = new FileOutputStream(f);
         var maxThreads = Runtime.getRuntime().availableProcessors();
-        var ratio = 2;
-        prop.setProperty("nbDLThreads", String.valueOf(Math.max(maxThreads / 2, 1)));
-        prop.setProperty("nbParsingThreads", String.valueOf(Math.max(maxThreads / 2, 1)));
+        prop.setProperty("nbThreads", Integer.toString(maxThreads));
         prop.setProperty("resultDirectory", "Results");
         prop.setProperty("cacheDirectory", "cache");
-        prop.setProperty("removeParsedFiles", "1");
+        prop.setProperty("removeParsedFiles", "true");
+        prop.setProperty("priority", "parsing");
         prop.storeToXML(of, "Genebank configuration");
         of.close();
     }

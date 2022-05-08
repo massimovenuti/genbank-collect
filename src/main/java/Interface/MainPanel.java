@@ -73,8 +73,8 @@ public class MainPanel extends JFrame {
     private JButton stopButton;
     private JCheckBox toutCheckBox;
     private JPanel optionsContainer;
-    private JSpinner downloadSpinner;
-    private JSpinner paringSpinner;
+    private JSpinner threadSpinner;
+    private JComboBox priorityCB;
     private JButton appliquerButton;
     private JButton annulerButton;
     private JButton optionsButton;
@@ -286,6 +286,8 @@ public class MainPanel extends JFrame {
             tree.updateUI();
             frame.enableParsing();}));
 
+        priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1);
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -369,11 +371,8 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
-                int dl, pars;
-                dl = (Integer)downloadSpinner.getValue();
-                pars = (Integer)paringSpinner.getValue();
-                GlobalGUIVariables.get().setNbThreadsDL(dl);
-                GlobalGUIVariables.get().setNbThreadsParsing(pars);
+                GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
+                Config.setPriority(priorityCB.getSelectedItem().toString());
                 JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
 
             }
@@ -416,11 +415,10 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 1000, 1);
-        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 1000, 1);
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
 
-        downloadSpinner = new JSpinner(model_dl);
-        paringSpinner = new JSpinner(model_parse);
+        threadSpinner = new JSpinner(model_threads);
+
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File("assets/settings.png"));

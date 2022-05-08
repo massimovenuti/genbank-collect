@@ -4,36 +4,33 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class MultiThreading {
-    private ArrayList<Thread> pThreads;
-    private ArrayList<Thread> gThreads;
+    private ArrayList<Thread> parsingThreads;
+    private ArrayList<Thread> guiThreads;
     private MultiTasker mt;
 
     public MultiTasker getMt() {
         return mt;
     }
 
-    MultiThreading(int nbDlThreads, int nbParsingThreads, int nbbGenericThreads) throws IOException {
+    MultiThreading(int nbParsingThreads, int nbbGenericThreads) throws IOException {
         mt = new MultiTasker();
-        pThreads = new ArrayList<Thread>();
-        gThreads = new ArrayList<Thread>();
+        parsingThreads = new ArrayList<Thread>();
+        guiThreads = new ArrayList<Thread>();
 
-        for (int i = 0; i < nbDlThreads; ++i)
-            pThreads.add(new DLThread(mt));
         for (int i = 0; i < nbParsingThreads; ++i)
-            pThreads.add(new ParsingThread(mt));
+            parsingThreads.add(new ParsingThread(mt));
         for (int i = 0; i < nbbGenericThreads; ++i)
-            gThreads.add(new GenericThread(mt));
+            guiThreads.add(new GenericThread(mt));
 
-        for (var t : pThreads)
+        for (var t : parsingThreads)
             t.start();
-        for (var t : gThreads)
+        for (var t : guiThreads)
             t.start();
     }
 
     public void stopParsing() {
-        mt.clearDl();
         mt.clearParsing();
-        for (var t : pThreads) {
+        for (var t : parsingThreads) {
             t.interrupt();
         }
     }

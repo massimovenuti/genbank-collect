@@ -32,4 +32,15 @@ public class Config {
     public static void setDynamicConfiguration(String key, String newValue) {
         dconf.setProperty(key, newValue);
     }
+
+    public static boolean parsingPriority() {
+        return fromDynamicConfiguration("priority", "parsing").contentEquals("parsing");
+    }
+    public static boolean downloadPriority() {
+        return !parsingPriority();
+    }
+
+    public static void setPriority(String toString) {
+        setDynamicConfiguration("priority", toString);
+    }
 }
