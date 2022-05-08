@@ -55,6 +55,8 @@ public class Ncbi {
         var raw = rawIndex(name);
         var ret = new ArrayList<IndexData>();
         for (var s : raw) {
+            if (!s.get(s.size()-1).contains("NC"))
+                continue;
             if (name.contains("virus")) {
                 ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), null, s.get(4)));
             } else {
