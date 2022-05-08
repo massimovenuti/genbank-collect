@@ -112,7 +112,10 @@ public class ParsingTask {
             DataBaseManager.multipleInsertFilesTable(row, regions);
             mt.getParsingTask().addDone(1);
             return ret;
-        } catch (IOException | CompoundNotFoundException e) {
+        } catch (CompoundNotFoundException e) {
+            GlobalGUIVariables.get().insert_text(Color.RED, "File is ill-formed, skipping...\n");
+            DataBaseManager.multipleInsertFilesTable(row, regions);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         mt.getParsingTask().addDone(1);

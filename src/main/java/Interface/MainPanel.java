@@ -114,7 +114,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
-                    System.out.println(region);
+                    //System.out.println(region);
                 }
             }
         }
