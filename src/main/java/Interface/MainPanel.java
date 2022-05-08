@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -71,6 +73,7 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
     private JButton stopButton;
+    private JCheckBox toutCheckBox;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -105,6 +108,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
+                    System.out.println(region);
                 }
             }
         }
@@ -113,6 +117,16 @@ public class MainPanel extends JFrame {
             checked.add(Region.OTHER);
         }
         return checked;
+    }
+
+    public void modifiy_all_boxes(Boolean selected)
+    {
+        for (Component c : regionPanel.getComponents())
+        {
+            if(c instanceof JCheckBox){
+                ((JCheckBox) c).setSelected(selected);
+            }
+        }
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
@@ -279,14 +293,6 @@ public class MainPanel extends JFrame {
             }
         });
 
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                tree_selection(active);
-
-            }
-        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -314,6 +320,16 @@ public class MainPanel extends JFrame {
                 show_bars();
             }
         });
+
+        toutCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(toutCheckBox.isSelected())
+                    modifiy_all_boxes(true);
+                else
+                    modifiy_all_boxes(false);
+            }
+        });
     }
 
     public void update_tree_from_root() {
@@ -335,8 +351,9 @@ public class MainPanel extends JFrame {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
+
         tree = new JCheckBoxTree();
-        tree.setMinimumSize(new Dimension(700, 500));
+        tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
     }
