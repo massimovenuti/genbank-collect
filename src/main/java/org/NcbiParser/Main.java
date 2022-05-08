@@ -76,7 +76,7 @@ public class Main {
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
         ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
-        var task = gl.registerTask("Mise \u00e1 jour des indexes");
+        var task = gl.registerTask("Mise \u00e0 jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
         task.addDone(1);
