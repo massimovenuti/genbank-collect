@@ -8,6 +8,11 @@ public class ProgressTask {
     private String name;
     private AtomicInteger done;
 
+    public void setOnFinished(GenericTask onFinished) {
+        this.onFinished = onFinished;
+    }
+
+    private GenericTask onFinished;
     public String getName() {
         return name;
     }
@@ -44,7 +49,9 @@ public class ProgressTask {
     }
 
     public void addDone(int done) {
-        this.done.addAndGet(done);
+        var t = this.done.addAndGet(done);
+        if (onFinished != null && t == getTodo())
+            onFinished.run();
         GlobalGUIVariables.get().getAddTrigger().doClick();
     }
 

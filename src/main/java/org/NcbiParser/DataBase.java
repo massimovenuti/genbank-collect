@@ -18,6 +18,7 @@ import java.util.Comparator;
     - ParsingResult : Organism, Date (celle des fichiers locaux, ou bien la même que celle dans overview à ce moment là), nb_files_parsed (int)
     [- NC : Organism, NC (String)] pas nécessaire ?
     [- SeqType : nom (CDS, Codon, etc.) ] nécessaire ?]
+    - ParsingResult : Organism, Date (celle des fichiers locaux, ou bien la même que celle dans overview à ce moment là), nb_files_parsed (int)
     [[- Files : (NC ou Organism ?), Date de création)] pas franchement nécessaire]
 
   Vues:
@@ -155,7 +156,7 @@ public class DataBase {
     /*
         Création de toutes les tables nécessaires
      */
-    public static void createOrOpenDataBase(String path) throws ClassNotFoundException {
+    public static void createOrOpenDataBase(String path) {
         DataBaseManager.setDataBase(path);
         //Ouverture de la base ou création si inéxistante
         DataBaseManager.connectionToDb();
@@ -171,7 +172,7 @@ public class DataBase {
                 "gc TEXT," +
                 "type TEXT," +
                 "date TEXT," +
-                "UNIQUE (kingdom,groupe,subgroup,organism,organelle,type,date))");
+                "UNIQUE (kingdom,groupe,subgroup,organism,organelle,type))");
 
     }
 

@@ -9,11 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,7 +20,7 @@ import javax.swing.tree.TreePath;
 
 
 public class MainPanel extends JFrame {
-    private JTree tree;
+    private JCheckBoxTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
     private JTextPane logArea;
@@ -257,10 +254,8 @@ public class MainPanel extends JFrame {
         set_bars_invisible();
         stopButton.setVisible(false);
         Main.atProgStart();
-        root = GlobalGUIVariables.get().getTree();
-        arbo = build_tree();
-        treeModel = new DefaultTreeModel(arbo);
-        tree.setModel(treeModel);
+        update_tree_from_root();
+        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -272,9 +267,11 @@ public class MainPanel extends JFrame {
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                new Thread() {
-                    public void run() { Main.startParsing(); }
-                }.start();
+                try {
+                    Main.getMt().getMt().pushTask(new GenericTask(Main::startParsing));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -293,7 +290,15 @@ public class MainPanel extends JFrame {
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
-
+                try {
+                    stopButton.setEnabled(false);
+                    Main.getMt().stopParsing();
+                    stopButton.setVisible(false);
+                    parseButton.setVisible(true);
+                    Main.atProgStart();
+                } catch (IOException ex) {
+                    GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
+                }
             }
         });
         triggerButton.addActionListener(new ActionListener() {
@@ -305,23 +310,28 @@ public class MainPanel extends JFrame {
         });
     }
 
+    public void update_tree_from_root() {
+        root = GlobalGUIVariables.get().getTree();
+        arbo = build_tree();
+        treeModel = new DefaultTreeModel(arbo);
+        tree.setModel(treeModel);
+    }
+
     public static void main(String[] args) {
         JFrame frame = new MainPanel("GeneBank");
         frame.setPreferredSize(new Dimension(10000, 10000));
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
-
     }
 
     private void createUIComponents() {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
-        tree = new JTree(treeModel);
+        tree = new JCheckBoxTree();
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
-
     }
 }

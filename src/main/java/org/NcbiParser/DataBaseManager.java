@@ -4,6 +4,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+//import org.sqlite.JDBC;
 
 public final class DataBaseManager {
     private static String path_;
@@ -17,8 +18,7 @@ public final class DataBaseManager {
         path_ = "jdbc:sqlite:/" + path;
     }
 
-    public static void connectionToDb() throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
+    public static void connectionToDb() {
         connection_ = null;
         try{
             connection_ = DriverManager.getConnection(path_);
@@ -33,8 +33,8 @@ public final class DataBaseManager {
         }
     }
 
-    public static void createTableDb(String sql) throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
+    public static void createTableDb(String sql)/* throws ClassNotFoundException */{
+        //Class.forName("org.sqlite.JDBC");
         Statement st = null;
         try{
             st = connection_.createStatement();
@@ -56,7 +56,7 @@ public final class DataBaseManager {
         Statement s;
         try{
             String req = "SELECT * FROM FILES " +
-                    "WHERE kingdom = \"" + row.getKingdom() + "\" AND group = \"" + row.getGroup() + "\" AND " +
+                    "WHERE kingdom = \"" + row.getKingdom() + "\" AND groupe = \"" + row.getGroup() + "\" AND " +
                     "subGroup = \"" + row.getSubGroup() + "\" AND organism = \"" + row.getOrganism() + "\"" +
                     "AND organelle = \"" + row.getOrganelle() + "\";";
             s = connection_.createStatement();
@@ -113,7 +113,7 @@ public final class DataBaseManager {
     public static void insertFilesTable(UpdateRow ur, Region reg) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+            String compiledQuery = "INSERT OR REPLACE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
             ps.setString(1,ur.getKingdom());
@@ -136,7 +136,7 @@ public final class DataBaseManager {
     public static void multipleInsertFilesTable(UpdateRow ur, ArrayList<Region> regs) {
         PreparedStatement ps;
         try{
-            String compiledQuery = "INSERT OR IGNORE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
+            String compiledQuery = "INSERT OR REPLACE INTO FILES (kingdom ,groupe ,subGroup ,organism ,organelle ,gc ,type ,date)" +
                     "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             ps = connection_.prepareStatement(compiledQuery);
             for(var reg : regs){
