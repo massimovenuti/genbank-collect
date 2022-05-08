@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.sql.*;
 
 public class Main {
     public static Ncbi ncbi;
     public static MultiThreading mt;
+
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
         atProgStart();
@@ -41,7 +41,9 @@ public class Main {
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
                     update(ncbi);
-                } catch(IOException e) {}}));
+                } catch (IOException e) {
+                }
+            }));
             //update(ncbi);
 //            test();
         } catch (Exception e) {
@@ -72,8 +74,8 @@ public class Main {
 
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
-            Progress gl = GlobalProgress.get();
-            ArrayList<IndexData> idxDatas= new ArrayList<IndexData>();
+        Progress gl = GlobalProgress.get();
+        ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
@@ -86,13 +88,13 @@ public class Main {
             task.addDone(1);
         }
         DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
-        DataBase.updateFromIndexAndOverview(od,idxDatas);
+        DataBase.updateFromIndexAndOverview(od, idxDatas);
         task.addDone(1);
         //ArrayList<OverviewData> test = new ArrayList<OverviewData>();
         //test.add(new OverviewData("Archaea",null,null,null));
         //DataBase.allOrganismNeedingUpdate(test);
         gl.remove_task(task);
-        mt.getMt().pushTask(new GenericTask(() ->{
+        mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Création de l'arborescence");
             t.addTodo(1);
             var new_tree = createHierarchy(od, t);
@@ -103,31 +105,35 @@ public class Main {
     }
 
     public static TreeNode createHierarchy(ArrayList<OverviewData> data, ProgressTask task) {
-        Collections.sort(data);
-
         //task.addTodo(data.size());
 
         ArrayList<OverviewData> need = new ArrayList<>();
         need.add(new OverviewData(null, null, null, null));
         ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
 
+        long start = System.currentTimeMillis();
         ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
 
-//        System.out.println(String.join(" ", data.get(0).getKingdom(), data.get(0).getGroup(), data.get(0).getSubgroup(), data.get(0).getOrganism()));
-//        System.out.println(String.join(" ", dataNeedingUpdate.get(0).getKingdom(), dataNeedingUpdate.get(0).getGroup(), dataNeedingUpdate.get(0).getSubGroup(), dataNeedingUpdate.get(0).getOrganism()));
+//        System.out.println((System.currentTimeMillis() - start)/1000);
 
-        Iterator iter = data.iterator();
+        Collections.sort(data);
+        Collections.sort(dataNeedingUpdate);
+
+        Iterator<OverviewData> dataIterator = data.iterator();
+        Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
         TreeNode top = new TreeNode("");
         TreeNode kingdom = null;
-        TreeNode group  = null;
-        TreeNode subGroup  = null;
+        TreeNode group = null;
+        TreeNode subGroup = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "";
+        UpdateRow row = null;
+        if (dataNeedingUpdateIterator.hasNext()) row = dataNeedingUpdateIterator.next();
 
-        while (iter.hasNext()) {
+        while (dataIterator.hasNext()) {
             //task.addDone(1);
-            OverviewData od = (OverviewData) iter.next();
+            OverviewData od = (OverviewData) dataIterator.next();
 
             if (!od.getKingdom().equals(prevKingdom)) {
                 if (kingdom != null) {
@@ -145,6 +151,7 @@ public class Main {
             if (!od.getGroup().equals(prevGroup)) {
                 if (group != null) {
                     group.push_node(subGroup);
+                    assert kingdom != null;
                     kingdom.push_node(group);
                 }
                 group = new TreeNode(od.getGroup());
@@ -153,17 +160,36 @@ public class Main {
                 prevSubGroup = od.getSubgroup();
             }
             if (!od.getSubgroup().equals(prevSubGroup)) {
-                if (subGroup != null)
+                if (subGroup != null) {
+                    assert group != null;
                     group.push_node(subGroup);
+                }
                 subGroup = new TreeNode(od.getSubgroup());
                 prevSubGroup = od.getSubgroup();
             }
-            subGroup.push_node(new TreeLeaf(od.getOrganism(), false));
+
+            boolean needAnUpdate = false;
+            if (row != null && row.getOrganism().equalsIgnoreCase(od.getOrganism())) {
+                needAnUpdate = true;
+                while (dataNeedingUpdateIterator.hasNext() && row.getOrganism().equalsIgnoreCase(od.getOrganism()))
+                    row = dataNeedingUpdateIterator.next();
+            }
+            // For debug
+//            else {
+//                System.out.println("Don't need update");
+//            }
+
+            assert subGroup != null;
+            subGroup.push_node(new TreeLeaf(od.getOrganism(), needAnUpdate));
         }
 
+        assert group != null;
         group.push_node(subGroup);
+        assert kingdom != null;
         kingdom.push_node(group);
         top.push_node(kingdom);
+
+//        System.out.println((System.currentTimeMillis() - start)/1000);
 
         return top;
     }
