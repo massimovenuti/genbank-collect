@@ -265,13 +265,15 @@ public class MainPanel extends JFrame {
         obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
         up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
 
+
         set_bars_invisible();
         stopButton.setVisible(false);
-        Main.atProgStart();
-        update_tree_from_root();
+        tree = new JCheckBoxTree();
+        //update_tree_from_root();
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
         tree.updateUI();}));
         var frame = this;
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -323,6 +325,7 @@ public class MainPanel extends JFrame {
                 }
             }
         });
+
         triggerButton.addActionListener(new ActionListener() {
 
             @Override
@@ -355,6 +358,7 @@ public class MainPanel extends JFrame {
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
+        Main.atProgStart();
     }
 
     private void createUIComponents() {
