@@ -13,10 +13,10 @@ public class ParsingTask implements Task {
     UpdateRow row;
     ArrayList<Region> regions;
 
-    public ParsingTask(File gbFile, UpdateRow row) {
+    public ParsingTask(File gbFile, UpdateRow row, ArrayList<Region> regions) {
         this.gbFile = gbFile;
         this.row = row;
-        this.regions = GlobalGUIVariables.get().getRegions();
+        this.regions = regions;
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -71,6 +73,7 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
     private JButton stopButton;
+    private JCheckBox toutCheckBox;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -105,6 +108,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
+                    System.out.println(region);
                 }
             }
         }
@@ -113,6 +117,16 @@ public class MainPanel extends JFrame {
             checked.add(Region.OTHER);
         }
         return checked;
+    }
+
+    public void modifiy_all_boxes(Boolean selected)
+    {
+        for (Component c : regionPanel.getComponents())
+        {
+            if(c instanceof JCheckBox){
+                ((JCheckBox) c).setSelected(selected);
+            }
+        }
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
         DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
@@ -236,6 +250,10 @@ public class MainPanel extends JFrame {
 
     }
 
+    public void enableParsing() {
+        parseButton.setEnabled(true);
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -251,42 +269,52 @@ public class MainPanel extends JFrame {
         obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
         up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
 
+
         set_bars_invisible();
         stopButton.setVisible(false);
-        Main.atProgStart();
         update_tree_from_root();
-        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
+        parseButton.setEnabled(false);
+        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
+        tree.updateUI();}));
+        var frame = this;
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
-                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
+                if (!parseButton.isEnabled())
+                    return;
+
+                var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
-                GlobalGUIVariables.get().setRegions(regions);
-                GlobalGUIVariables.get().setStop(false);
-                parseButton.setVisible(false);
-                stopButton.setVisible(true);
-                try {
-                    Main.getMt().getMt().pushTask(new GenericTask(Main::startParsing));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+
+                if (checkeds.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins un item", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else if (regions.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins une région", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    GlobalGUIVariables.get().setStop(false);
+                    parseButton.setVisible(false);
+                    stopButton.setVisible(true);
+                    GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing started...\n");
+                    try {
+                        Main.getMt().getMt().pushTask(new GenericTask(() -> {
+                            Main.startParsing(checkeds, regions);
+                        }));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
 
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                tree_selection(active);
-
-            }
-        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+                if (!stopButton.isEnabled())
+                    return;
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
@@ -301,11 +329,22 @@ public class MainPanel extends JFrame {
                 }
             }
         });
+
         triggerButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();
+            }
+        });
+
+        toutCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(toutCheckBox.isSelected())
+                    modifiy_all_boxes(true);
+                else
+                    modifiy_all_boxes(false);
             }
         });
     }
@@ -318,19 +357,22 @@ public class MainPanel extends JFrame {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new MainPanel("GeneBank");
+        var frame = new MainPanel("GeneBank");
         frame.setPreferredSize(new Dimension(10000, 10000));
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
+        Main.atProgStart();
+        frame.enableParsing();
     }
 
     private void createUIComponents() {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
+
         tree = new JCheckBoxTree();
-        tree.setMinimumSize(new Dimension(700, 500));
+        tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
     }

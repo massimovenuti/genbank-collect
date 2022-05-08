@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
         atProgStart();
-        startParsing();
+        //startParsing(new OverviewData());
     }
 
     public static void test() {
@@ -51,15 +51,15 @@ public class Main {
         }
     }
 
-    public static void startParsing() {
+    public static void startParsing(ArrayList<OverviewData> selected, ArrayList<Region> regions) {
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
-            var r = ncbi.index_to_db("eukaryotes.txt");
+            var r = DataBase.allOrganismNeedingUpdate(selected, regions);
             for (var line : r) {
                 if (GlobalGUIVariables.get().isStop())
                     break;
-                mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc(), line.getNcs())));
+                mt.getMt().pushTask(new DLTask(line, regions));
             }
             mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
                 if (mt.getMt().getDlTask().getDone() >= r.size()) {
