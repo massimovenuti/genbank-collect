@@ -121,7 +121,7 @@ public class Main {
         Iterator<UpdateRow> dataIterator = data.iterator();
         Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
-        TreeNode top = new TreeNode("");
+        TreeNode top = new TreeNode("All");
         TreeNode kingdom = null, group = null, subGroup = null, organism = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "", prevOrganism = "";
