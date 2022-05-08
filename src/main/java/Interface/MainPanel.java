@@ -114,7 +114,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
-                    System.out.println(region);
+                    //System.out.println(region);
                 }
             }
         }
@@ -214,8 +214,13 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
-        if(GlobalProgress.get().all_tasks().size() == 0)
+        if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
+            if (stopButton.isVisible()) {
+                stopButton.setVisible(false);
+                parseButton.setVisible(true);
+            }
+        }
     }
 
     public String formatMs(float millis) {
@@ -267,9 +272,6 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
-
         var frame = this;
 
         set_bars_invisible();
@@ -353,6 +355,8 @@ public class MainPanel extends JFrame {
         optionsButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!optionsButton.isEnabled())
+                    return;
                 super.mousePressed(e);
                 toggleContainer.setVisible(false);
                 optionsContainer.setVisible(true);
@@ -366,8 +370,7 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                 Config.setPriority(priorityCB.getSelectedItem().toString());
-                JOptionPane.showMessageDialog(null, "Changements sauvegardés, veuillez relancer le programme");
-
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardées, veuillez relancer le processus");
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
