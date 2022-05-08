@@ -46,9 +46,11 @@ build/
 .DS_Store
 
 data/
+cache/
 .attach_pid*
 
 ### JAR ###
 out/
 *.jar
 META-INF/
+config.xml
