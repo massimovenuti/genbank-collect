@@ -97,6 +97,7 @@ public class ParsingTask {
                 mt.pushTask(this); // retry
             } else {
                 System.err.println("Too many retries");
+                GlobalGUIVariables.get().insert_text(Color.RED,"Aborting " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ": too many retries" + "\n");
             }
         }
         return false;

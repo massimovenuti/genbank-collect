@@ -272,9 +272,6 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
-
         var frame = this;
 
         set_bars_invisible();
