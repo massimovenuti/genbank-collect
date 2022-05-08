@@ -2,7 +2,7 @@ package org.NcbiParser;
 
 import java.util.HashMap;
 
-public class UpdateRow {
+public class UpdateRow implements Comparable<UpdateRow> {
     private String kingdom;
 
     public String getNcs() {
@@ -59,6 +59,19 @@ public class UpdateRow {
 
     public void setModifyDate(String modifyDate) {
         this.modifyDate = modifyDate;
+    }
+
+    public int compareTo(UpdateRow updateRow) {
+        int cmp = getKingdom().compareToIgnoreCase(updateRow.getKingdom());
+        if (cmp != 0)
+            return cmp;
+        cmp = getGroup().compareToIgnoreCase(updateRow.getGroup());
+        if (cmp != 0)
+            return cmp;
+        cmp = getSubGroup().compareToIgnoreCase(updateRow.getSubGroup());
+        if (cmp != 0)
+            return cmp;
+        return getOrganism().compareToIgnoreCase(updateRow.getOrganism());
     }
 
     private String group;

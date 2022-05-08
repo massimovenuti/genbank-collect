@@ -2,9 +2,9 @@ package org.NcbiParser;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.sql.*;
 
 public class Main {
     public static Ncbi ncbi;
@@ -97,66 +97,108 @@ public class Main {
         mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Cr\u00e9ation de l'arborescence");
             t.addTodo(1);
-            var new_tree = createHierarchy(od, t);
+            var new_tree = createHierarchy(t);
             t.addDone(1);
             GlobalGUIVariables.get().setTree(new_tree);
             gl.remove_task(t);
         }));
     }
 
-    public static TreeNode createHierarchy(ArrayList<OverviewData> data, ProgressTask task) {
-        Collections.sort(data);
-
+    public static TreeNode createHierarchy(ProgressTask task) {
         //task.addTodo(data.size());
 
-        Iterator iter = data.iterator();
+        ArrayList<OverviewData> need = new ArrayList<>();
+        need.add(new OverviewData(null, null, null, null));
+        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.CDS));
+
+        long start = System.currentTimeMillis();
+        ArrayList<UpdateRow> data = DataBase.getGlobalRegroupedData();
+        ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
+
+//        System.out.println((System.currentTimeMillis() - start)/1000);
+
+        Collections.sort(data);
+        Collections.sort(dataNeedingUpdate);
+
+        Iterator<UpdateRow> dataIterator = data.iterator();
+        Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
         TreeNode top = new TreeNode("");
-        TreeNode kingdom = null;
-        TreeNode group = null;
-        TreeNode subGroup = null;
+        TreeNode kingdom = null, group = null, subGroup = null, organism = null;
 
-        String prevKingdom = "", prevGroup = "", prevSubGroup = "";
+        String prevKingdom = "", prevGroup = "", prevSubGroup = "", prevOrganism = "";
 
-        while (iter.hasNext()) {
+        UpdateRow updateRow = null;
+        if (dataNeedingUpdateIterator.hasNext()) updateRow = dataNeedingUpdateIterator.next();
+
+        while (dataIterator.hasNext()) {
             //task.addDone(1);
-            OverviewData od = (OverviewData) iter.next();
+            UpdateRow row = dataIterator.next();
 
-            if (!od.getKingdom().equals(prevKingdom)) {
+            if (!row.getKingdom().equals(prevKingdom)) {
                 if (kingdom != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
+                    assert group != null;
                     group.push_node(subGroup);
                     kingdom.push_node(group);
                     top.push_node(kingdom);
                 }
-                kingdom = new TreeNode(od.getKingdom());
-                prevKingdom = od.getKingdom();
-                group = new TreeNode(od.getGroup());
-                prevGroup = od.getGroup();
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                kingdom = new TreeNode(row.getKingdom());
+                prevKingdom = row.getKingdom();
+                group = subGroup = organism = null;
+                prevGroup = prevSubGroup = prevOrganism = "";
             }
-            if (!od.getGroup().equals(prevGroup)) {
+            if (!row.getGroup().equals(prevGroup)) {
                 if (group != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
                     group.push_node(subGroup);
+                    assert kingdom != null;
                     kingdom.push_node(group);
                 }
-                group = new TreeNode(od.getGroup());
-                prevGroup = od.getGroup();
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                group = new TreeNode(row.getGroup());
+                prevGroup = row.getGroup();
+                subGroup = organism = null;
+                prevSubGroup = prevOrganism ="";
             }
-            if (!od.getSubgroup().equals(prevSubGroup)) {
-                if (subGroup != null)
+            if (!row.getSubGroup().equals(prevSubGroup)) {
+                if (subGroup != null) {
+                    subGroup.push_node(organism);
+                    assert group != null;
                     group.push_node(subGroup);
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                }
+                subGroup = new TreeNode(row.getSubGroup());
+                prevSubGroup = row.getSubGroup();
+                organism = null;
+                prevOrganism = "";
             }
-            subGroup.push_node(new TreeLeaf(od.getOrganism(), false));
+            if (!row.getOrganism().equals(prevOrganism)) {
+                if (organism != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
+                }
+                boolean needAnUpdate = false;
+                if (updateRow != null && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism())) {
+                    needAnUpdate = true;
+                    while (dataNeedingUpdateIterator.hasNext() && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism()))
+                        updateRow = dataNeedingUpdateIterator.next();
+                }
+                else { // For debug
+                    System.out.println("Don't need update");
+                }
+                organism = new TreeLeaf(row.getOrganism(), needAnUpdate);
+                prevOrganism = row.getOrganism();
+            }
         }
 
+        assert group != null;
         group.push_node(subGroup);
+        assert kingdom != null;
         kingdom.push_node(group);
         top.push_node(kingdom);
+
+//        System.out.println((System.currentTimeMillis() - start)/1000);
 
         return top;
     }
