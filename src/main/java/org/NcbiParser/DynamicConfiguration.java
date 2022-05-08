@@ -9,6 +9,7 @@ public class DynamicConfiguration {
 
     public DynamicConfiguration(String path) {
         prop = new Properties();
+        this.path = path;
         try {
             FileInputStream f = null;
             try {
