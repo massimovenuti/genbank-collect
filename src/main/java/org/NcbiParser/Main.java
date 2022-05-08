@@ -109,13 +109,11 @@ public class Main {
 
         ArrayList<OverviewData> need = new ArrayList<>();
         need.add(new OverviewData(null, null, null, null));
-        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.CDS));
+        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
 
         long start = System.currentTimeMillis();
         ArrayList<UpdateRow> data = DataBase.getGlobalRegroupedData();
         ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
-
-//        System.out.println((System.currentTimeMillis() - start)/1000);
 
         Collections.sort(data);
         Collections.sort(dataNeedingUpdate);
@@ -123,7 +121,7 @@ public class Main {
         Iterator<UpdateRow> dataIterator = data.iterator();
         Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
-        TreeNode top = new TreeNode("");
+        TreeNode top = new TreeNode("All");
         TreeNode kingdom = null, group = null, subGroup = null, organism = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "", prevOrganism = "";
@@ -184,9 +182,6 @@ public class Main {
                     while (dataNeedingUpdateIterator.hasNext() && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism()))
                         updateRow = dataNeedingUpdateIterator.next();
                 }
-                else { // For debug
-                    System.out.println("Don't need update");
-                }
                 organism = new TreeLeaf(row.getOrganism(), needAnUpdate);
                 prevOrganism = row.getOrganism();
             }
@@ -197,8 +192,6 @@ public class Main {
         assert kingdom != null;
         kingdom.push_node(group);
         top.push_node(kingdom);
-
-//        System.out.println((System.currentTimeMillis() - start)/1000);
 
         return top;
     }
