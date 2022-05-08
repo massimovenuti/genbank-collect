@@ -79,6 +79,7 @@ public class MainPanel extends JFrame {
     private JButton annulerButton;
     private JButton optionsButton;
     private JPanel toggleContainer;
+    private JPanel optPan;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -248,6 +249,7 @@ public class MainPanel extends JFrame {
 
     public void enableParsing() {
         parseButton.setEnabled(true);
+        optionsButton.setEnabled(true);
     }
 
     public MainPanel(String title) {
@@ -255,8 +257,10 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
-        optionsContainer.setVisible(false);
+
+        optionsButton.setEnabled(false);
         toggleContainer.setVisible(false);
+        optionsContainer.setVisible(false);
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
         document = (StyledDocument) logArea.getDocument();
@@ -332,7 +336,6 @@ public class MainPanel extends JFrame {
         });
 
         triggerButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();

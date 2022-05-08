@@ -31,16 +31,16 @@ public class OverviewData implements Comparable<OverviewData> {
     private String organism;
 
     public int compareTo(OverviewData overviewData) {
-        int cmp = getKingdom().compareTo(overviewData.getKingdom());
+        int cmp = getKingdom().compareToIgnoreCase(overviewData.getKingdom());
         if (cmp != 0)
             return cmp;
-        cmp = getGroup().compareTo(overviewData.getGroup());
+        cmp = getGroup().compareToIgnoreCase(overviewData.getGroup());
         if (cmp != 0)
             return cmp;
-        cmp = getSubgroup().compareTo(overviewData.getSubgroup());
+        cmp = getSubgroup().compareToIgnoreCase(overviewData.getSubgroup());
         if (cmp != 0)
             return cmp;
-        return getOrganism().compareTo(overviewData.getOrganism());
+        return getOrganism().compareToIgnoreCase(overviewData.getOrganism());
     }
 
     public int compareToGroupVersion(OverviewData overviewData){
