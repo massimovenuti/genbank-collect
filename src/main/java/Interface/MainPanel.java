@@ -417,7 +417,7 @@ public class MainPanel extends JFrame {
 
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("assets/settings.png"));
+            img = ImageIO.read(this.getClass().getResource("/settings.png"));
         } catch (IOException e) {
         }
         ImageIcon icon = new ImageIcon(img);
