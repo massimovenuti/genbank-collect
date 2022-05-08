@@ -3,10 +3,15 @@ package org.NcbiParser;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class DLTask {
-    public DLTask(UpdateRow row) {
+    private final ArrayList<Region> regions;
+
+    public DLTask(UpdateRow row, ArrayList<Region> regions) {
         this.row = row;
+        this.regions = regions;
     }
 
     public UpdateRow getRow() {
@@ -35,7 +40,7 @@ public class DLTask {
         System.out.printf("Download ended: %s\n", row.getGc());
         GlobalGUIVariables.get().insert_text(Color.GREEN,"Download ended: " + row.getGc() + "\n");
 
-        mt.pushTask(new ParsingTask(dl, row));
+        mt.pushTask(new ParsingTask(dl, row, regions));
         return true;
     }
 }

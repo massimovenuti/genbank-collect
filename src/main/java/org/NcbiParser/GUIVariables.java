@@ -17,16 +17,11 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 2;
-        this.nbThreadsParsing = 4;
-        this.regions = new ArrayList<Region>();
+        this.nbThreadsDL = Integer.parseInt(Config.fromDynamicConfiguration("nbDLThreads", "4"));
+        this.nbThreadsParsing = Integer.parseInt(Config.fromDynamicConfiguration("nbParsingThreads", "4"));
         this.logArea = null;
         this.tree = new TreeNode("CHARGEMENT...");
         this.setOnTreeChanged(new GenericTask(()->{}));
-    }
-
-    public ArrayList<Region> getRegions() {
-        return regions;
     }
 
     public boolean isStop() {
@@ -35,10 +30,6 @@ public class GUIVariables {
 
     public void setStop(boolean stop) {
         this.stop = stop;
-    }
-
-    public void setRegions(ArrayList<Region> regions) {
-        this.regions = regions;
     }
 
     public void setLogArea(StyledDocument log) {
@@ -55,6 +46,7 @@ public class GUIVariables {
 
     public void setNbThreadsDL(int nbThreadsDL) {
         this.nbThreadsDL = nbThreadsDL;
+        Config.setDynamicConfiguration("nbDLThreads", Integer.toString(nbThreadsDL));
     }
 
     public int getNbThreadsParsing() {
@@ -70,6 +62,7 @@ public class GUIVariables {
 
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
+        Config.setDynamicConfiguration("nbParsingThreads", Integer.toString(nbThreadsParsing));
     }
 
     public void setTree(TreeNode tree) {this.tree = tree;
@@ -88,7 +81,6 @@ public class GUIVariables {
             System.err.println(erro.getMessage());
         }
     }
-    private ArrayList<Region> regions;
     private int nbThreadsDL;
     private int nbThreadsParsing;
 
