@@ -54,3 +54,4 @@ out/
 *.jar
 META-INF/
 config.xml
+*.zip
