@@ -366,7 +366,7 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                 Config.setPriority(priorityCB.getSelectedItem().toString());
-                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
+                JOptionPane.showMessageDialog(null, "Changements sauvegardés, veuillez relancer le programme");
 
             }
         });
