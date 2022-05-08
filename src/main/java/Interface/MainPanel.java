@@ -339,7 +339,6 @@ public class MainPanel extends JFrame {
         });
 
         triggerButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();
