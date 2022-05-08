@@ -26,6 +26,10 @@ import java.util.Comparator;
 
 public class DataBase {
 
+    public static ArrayList<UpdateRow> getGlobalRegroupedData() {
+        return globalRegroupedData;
+    }
+
     private static ArrayList<UpdateRow> globalRegroupedData;
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
 

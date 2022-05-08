@@ -97,21 +97,22 @@ public class Main {
         mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Création de l'arborescence");
             t.addTodo(1);
-            var new_tree = createHierarchy(od, t);
+            var new_tree = createHierarchy(t);
             t.addDone(1);
             GlobalGUIVariables.get().setTree(new_tree);
             gl.remove_task(t);
         }));
     }
 
-    public static TreeNode createHierarchy(ArrayList<OverviewData> data, ProgressTask task) {
+    public static TreeNode createHierarchy(ProgressTask task) {
         //task.addTodo(data.size());
 
         ArrayList<OverviewData> need = new ArrayList<>();
         need.add(new OverviewData(null, null, null, null));
-        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
+        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.CDS));
 
         long start = System.currentTimeMillis();
+        ArrayList<UpdateRow> data = DataBase.getGlobalRegroupedData();
         ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
 
 //        System.out.println((System.currentTimeMillis() - start)/1000);
@@ -119,68 +120,76 @@ public class Main {
         Collections.sort(data);
         Collections.sort(dataNeedingUpdate);
 
-        Iterator<OverviewData> dataIterator = data.iterator();
+        Iterator<UpdateRow> dataIterator = data.iterator();
         Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
         TreeNode top = new TreeNode("");
-        TreeNode kingdom = null;
-        TreeNode group = null;
-        TreeNode subGroup = null;
+        TreeNode kingdom = null, group = null, subGroup = null, organism = null;
 
-        String prevKingdom = "", prevGroup = "", prevSubGroup = "";
-        UpdateRow row = null;
-        if (dataNeedingUpdateIterator.hasNext()) row = dataNeedingUpdateIterator.next();
+        String prevKingdom = "", prevGroup = "", prevSubGroup = "", prevOrganism = "";
+
+        UpdateRow updateRow = null;
+        if (dataNeedingUpdateIterator.hasNext()) updateRow = dataNeedingUpdateIterator.next();
 
         while (dataIterator.hasNext()) {
             //task.addDone(1);
-            OverviewData od = (OverviewData) dataIterator.next();
+            UpdateRow row = dataIterator.next();
 
-            if (!od.getKingdom().equals(prevKingdom)) {
+            if (!row.getKingdom().equals(prevKingdom)) {
                 if (kingdom != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
+                    assert group != null;
                     group.push_node(subGroup);
                     kingdom.push_node(group);
                     top.push_node(kingdom);
                 }
-                kingdom = new TreeNode(od.getKingdom());
-                prevKingdom = od.getKingdom();
-                group = new TreeNode(od.getGroup());
-                prevGroup = od.getGroup();
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                kingdom = new TreeNode(row.getKingdom());
+                prevKingdom = row.getKingdom();
+                group = subGroup = organism = null;
+                prevGroup = prevSubGroup = prevOrganism = "";
             }
-            if (!od.getGroup().equals(prevGroup)) {
+            if (!row.getGroup().equals(prevGroup)) {
                 if (group != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
                     group.push_node(subGroup);
                     assert kingdom != null;
                     kingdom.push_node(group);
                 }
-                group = new TreeNode(od.getGroup());
-                prevGroup = od.getGroup();
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                group = new TreeNode(row.getGroup());
+                prevGroup = row.getGroup();
+                subGroup = organism = null;
+                prevSubGroup = prevOrganism ="";
             }
-            if (!od.getSubgroup().equals(prevSubGroup)) {
+            if (!row.getSubGroup().equals(prevSubGroup)) {
                 if (subGroup != null) {
+                    subGroup.push_node(organism);
                     assert group != null;
                     group.push_node(subGroup);
                 }
-                subGroup = new TreeNode(od.getSubgroup());
-                prevSubGroup = od.getSubgroup();
+                subGroup = new TreeNode(row.getSubGroup());
+                prevSubGroup = row.getSubGroup();
+                organism = null;
+                prevOrganism = "";
             }
-
-            boolean needAnUpdate = false;
-            if (row != null && row.getOrganism().equalsIgnoreCase(od.getOrganism())) {
-                needAnUpdate = true;
-                while (dataNeedingUpdateIterator.hasNext() && row.getOrganism().equalsIgnoreCase(od.getOrganism()))
-                    row = dataNeedingUpdateIterator.next();
+            if (!row.getOrganism().equals(prevOrganism)) {
+                if (organism != null) {
+                    assert subGroup != null;
+                    subGroup.push_node(organism);
+                }
+                boolean needAnUpdate = false;
+                if (updateRow != null && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism())) {
+                    needAnUpdate = true;
+                    while (dataNeedingUpdateIterator.hasNext() && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism()))
+                        updateRow = dataNeedingUpdateIterator.next();
+                }
+                else { // For debug
+                    System.out.println("Don't need update");
+                }
+                organism = new TreeLeaf(row.getOrganism(), needAnUpdate);
+                prevOrganism = row.getOrganism();
             }
-            // For debug
-//            else {
-//                System.out.println("Don't need update");
-//            }
-
-            assert subGroup != null;
-            subGroup.push_node(new TreeLeaf(od.getOrganism(), needAnUpdate));
         }
 
         assert group != null;
