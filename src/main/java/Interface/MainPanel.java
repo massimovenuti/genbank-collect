@@ -370,7 +370,7 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                 Config.setPriority(priorityCB.getSelectedItem().toString());
-                JOptionPane.showMessageDialog(frame, "Changements sauvegardées, veuillez relancer le processus");
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
