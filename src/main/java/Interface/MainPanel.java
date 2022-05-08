@@ -3,14 +3,12 @@ package Interface;
 
 import org.NcbiParser.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -74,6 +72,13 @@ public class MainPanel extends JFrame {
     private JLabel label13;
     private JButton stopButton;
     private JCheckBox toutCheckBox;
+    private JPanel optionsContainer;
+    private JSpinner downloadSpinner;
+    private JSpinner paringSpinner;
+    private JButton appliquerButton;
+    private JButton annulerButton;
+    private JButton optionsButton;
+    private JPanel toggleContainer;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -259,6 +264,8 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+        optionsContainer.setVisible(false);
+        toggleContainer.setVisible(false);
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
         document = (StyledDocument) logArea.getDocument();
@@ -266,8 +273,8 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+        obsoleteIcon = new ImageIcon("assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
 
         var frame = this;
 
@@ -348,6 +355,38 @@ public class MainPanel extends JFrame {
                     modifiy_all_boxes(false);
             }
         });
+        optionsButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(false);
+                optionsContainer.setVisible(true);
+            }
+        });
+        appliquerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+                int dl, pars;
+                dl = (Integer)downloadSpinner.getValue();
+                pars = (Integer)paringSpinner.getValue();
+                GlobalGUIVariables.get().setNbThreadsDL(dl);
+                GlobalGUIVariables.get().setNbThreadsParsing(pars);
+                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
+
+            }
+        });
+        annulerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+            }
+        });
+
     }
 
     public void update_tree_from_root() {
@@ -355,6 +394,7 @@ public class MainPanel extends JFrame {
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
+        toggleContainer.setVisible(true);
     }
 
     public static void main(String[] args) {
@@ -375,5 +415,21 @@ public class MainPanel extends JFrame {
         tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
+
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 1000, 1);
+        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 1000, 1);
+
+        downloadSpinner = new JSpinner(model_dl);
+        paringSpinner = new JSpinner(model_parse);
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File("assets/settings.png"));
+        } catch (IOException e) {
+        }
+        ImageIcon icon = new ImageIcon(img);
+        Image image = icon.getImage();
+        Image newimg = image.getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH);
+        icon = new ImageIcon(newimg);
+        optionsButton = new JButton("options",icon);
     }
 }
