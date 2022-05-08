@@ -47,3 +47,8 @@ build/
 
 data/
 .attach_pid*
+
+### JAR ###
+out/
+*.jar
+META-INF/
