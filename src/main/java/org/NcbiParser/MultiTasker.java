@@ -1,6 +1,6 @@
 package org.NcbiParser;
 
-import java.util.concurrent.ConcurrentLinkedDeque; // fin = premier sorti
+import java.util.concurrent.ConcurrentLinkedDeque; // début = premier sorti
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MultiTasker {
@@ -31,7 +31,7 @@ public class MultiTasker {
         if (task.isDl()) {
             if (dlTask == null)
                 dlTask = GlobalProgress.get().registerTask("Téléchargements");
-            if (Config.parsingPriority()) {
+            if (Config.downloadPriority()) {
                 parsings.addFirst(task);
             } else {
                 parsings.addLast(task);
@@ -41,9 +41,9 @@ public class MultiTasker {
             if (parsingTask == null)
                 parsingTask = GlobalProgress.get().registerTask("Parsing");
             if (Config.parsingPriority()) {
-                parsings.addLast(task);
-            } else {
                 parsings.addFirst(task);
+            } else {
+                parsings.addLast(task);
             }
             parsingTask.addTodo(1);
         }
@@ -53,10 +53,11 @@ public class MultiTasker {
         gtasks.add(task);
     }
 
-    public ParsingTask popParsingTask() {return parsings.pollLast();}
+    public ParsingTask popParsingTask() {return parsings.pollFirst();}
 
     public void clearParsing() {
         GlobalProgress.get().remove_task(parsingTask);
+        GlobalProgress.get().remove_task(dlTask);
         parsings.clear();
     }
 

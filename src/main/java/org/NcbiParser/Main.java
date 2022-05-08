@@ -32,11 +32,13 @@ public class Main {
     }
 
     public static void atProgStart() {
+        var ini = GlobalProgress.get().registerTask("Initialisation");
+        ini.addTodo(1);
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
-                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1);
+                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, ini);
 
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
@@ -44,8 +46,8 @@ public class Main {
                 } catch (IOException e) {
                 }
             }));
-            //update(ncbi);
-//            test();
+            ini.addDone(1);
+            GlobalProgress.get().remove_task(ini);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -164,7 +166,7 @@ public class Main {
 
     public static MultiThreading getMt() throws IOException {
         if (mt == null)
-            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1);
+            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, null);
         return mt;
     }
 }
