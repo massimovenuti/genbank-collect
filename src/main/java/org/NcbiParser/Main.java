@@ -9,6 +9,7 @@ import java.sql.*;
 public class Main {
     public static Ncbi ncbi;
     public static MultiThreading mt;
+
     public static void main(String[] args) throws IOException {
         Ncbi ncbi = null;
         atProgStart();
@@ -40,7 +41,9 @@ public class Main {
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
                     update(ncbi);
-                } catch(IOException e) {}}));
+                } catch (IOException e) {
+                }
+            }));
             //update(ncbi);
 //            test();
         } catch (Exception e) {
@@ -71,8 +74,8 @@ public class Main {
 
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
-            Progress gl = GlobalProgress.get();
-            ArrayList<IndexData> idxDatas= new ArrayList<IndexData>();
+        Progress gl = GlobalProgress.get();
+        ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
         var task = gl.registerTask("Mise à jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
@@ -85,13 +88,13 @@ public class Main {
             task.addDone(1);
         }
         DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
-        DataBase.updateFromIndexAndOverview(od,idxDatas);
+        DataBase.updateFromIndexAndOverview(od, idxDatas);
         task.addDone(1);
         //ArrayList<OverviewData> test = new ArrayList<OverviewData>();
         //test.add(new OverviewData("Archaea",null,null,null));
         //DataBase.allOrganismNeedingUpdate(test);
         gl.remove_task(task);
-        mt.getMt().pushTask(new GenericTask(() ->{
+        mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Création de l'arborescence");
             t.addTodo(1);
             var new_tree = createHierarchy(od, t);
@@ -110,8 +113,8 @@ public class Main {
 
         TreeNode top = new TreeNode("");
         TreeNode kingdom = null;
-        TreeNode group  = null;
-        TreeNode subGroup  = null;
+        TreeNode group = null;
+        TreeNode subGroup = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "";
 
