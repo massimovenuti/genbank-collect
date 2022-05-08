@@ -41,8 +41,10 @@ public class ParsingTask {
     public boolean run(MultiTasker mt, Ncbi ncbi) {
         boolean ret;
         if (isDl) {
+            task = mt.getDlTask();
             ret = run_dl(mt, ncbi);
         } else {
+            task = mt.getParsingTask();
             ret = run_parsing(mt);
         }
         task.addDone(1);
