@@ -269,7 +269,8 @@ public class MainPanel extends JFrame {
         stopButton.setVisible(false);
         Main.atProgStart();
         update_tree_from_root();
-        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
+        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
+        tree.updateUI();}));
         var frame = this;
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
