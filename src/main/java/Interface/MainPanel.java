@@ -134,7 +134,7 @@ public class MainPanel extends JFrame {
         }
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
-        DefaultMutableTreeNode temp = new DefaultMutableTreeNode(String.format("%s;%s", child.is_uptodate() ? "1" : "0", child.getText()));
+        DefaultMutableTreeNode temp = new DefaultMutableTreeNode(String.format("%s;%s", child.getText(), child.is_uptodate() ? "1" : "0"));
         if (child.getChildren().size() != 0) {
             ArrayList<TreeNode> children = child.getChildren();
 

@@ -122,6 +122,7 @@ public class JCheckBoxTree extends JTree {
     private class CheckBoxCellRenderer extends JPanel implements TreeCellRenderer {
         private static final long serialVersionUID = -7341833835878991719L;
         JCheckBox checkBox;
+
         public CheckBoxCellRenderer() {
             super();
             this.setLayout(new BorderLayout());
@@ -135,7 +136,10 @@ public class JCheckBoxTree extends JTree {
         public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                       boolean selected, boolean expanded, boolean leaf, int row,
                                                       boolean hasFocus) {
-            checkBox.setText(value.toString());
+            var splt = value.toString().split(";");
+            checkBox.setText(splt[0]);
+            if (splt.length > 1)
+                checkBox.setForeground((splt[1].contentEquals("0")) ?  Color.ORANGE : Color.GREEN);
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             TreePath tp = new TreePath(node.getPath());
             CheckedNode cn = nodesCheckingState.get(tp);
@@ -146,7 +150,6 @@ public class JCheckBoxTree extends JTree {
             //checkBox.set
             checkBox.setSelected(cn.isSelected);
             checkBox.setOpaque(cn.isSelected && cn.hasChildren && !cn.allChildrenSelected);
-            checkBox.setEnabled(false);
             return this;
         }
     }
