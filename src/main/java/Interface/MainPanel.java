@@ -261,19 +261,21 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
+                if (!parseButton.isEnabled())
+                    return;
                 GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
-                Processing.getChecked(tree);
+                var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
-                GlobalGUIVariables.get().setRegions(regions);
                 GlobalGUIVariables.get().setStop(false);
                 parseButton.setVisible(false);
                 stopButton.setVisible(true);
-                /*
+
                 try {
-                    Main.getMt().getMt().pushTask(new GenericTask(Main::startParsing));
+                    Main.getMt().getMt().pushTask(new GenericTask(() -> {
+                            Main.startParsing(checkeds, regions);}));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }*/
+                }
             }
         });
 
@@ -289,6 +291,8 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+                if (!stopButton.isEnabled())
+                    return;
                 parseButton.setEnabled(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
