@@ -289,14 +289,6 @@ public class MainPanel extends JFrame {
             }
         });
 
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                tree_selection(active);
-
-            }
-        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -353,8 +345,9 @@ public class MainPanel extends JFrame {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
+
         tree = new JCheckBoxTree();
-        tree.setMinimumSize(new Dimension(700, 500));
+        tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
     }
