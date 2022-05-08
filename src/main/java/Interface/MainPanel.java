@@ -214,8 +214,13 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
-        if(GlobalProgress.get().all_tasks().size() == 0)
+        if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
+            if (stopButton.isVisible()) {
+                stopButton.setVisible(false);
+                parseButton.setVisible(true);
+            }
+        }
     }
 
     public String formatMs(float millis) {
