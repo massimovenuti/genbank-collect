@@ -17,11 +17,11 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = Integer.parseInt(Config.fromDynamicConfiguration("nbDLThreads", "4"));
-        this.nbThreadsParsing = Integer.parseInt(Config.fromDynamicConfiguration("nbParsingThreads", "4"));
+        this.nbThreads = Integer.parseInt(Config.fromDynamicConfiguration("nbThreads", "4"));
         this.logArea = null;
         this.tree = new TreeNode("CHARGEMENT...");
-        this.setOnTreeChanged(new GenericTask(()->{}));
+        this.setOnTreeChanged(new GenericTask(() -> {
+        }));
     }
 
     public boolean isStop() {
@@ -40,49 +40,45 @@ public class GUIVariables {
         this.trigger_add = trigger;
     }
 
-    public int getNbThreadsDL() {
-        return nbThreadsDL;
+    public int getNbThreads() {
+        return nbThreads;
     }
 
-    public void setNbThreadsDL(int nbThreadsDL) {
-        this.nbThreadsDL = nbThreadsDL;
-        Config.setDynamicConfiguration("nbDLThreads", Integer.toString(nbThreadsDL));
-    }
-
-    public int getNbThreadsParsing() {
-        return nbThreadsParsing;
-    }
-
-    public StyledDocument getLogArea()
-    {
+    public StyledDocument getLogArea() {
         return this.logArea;
     }
 
-    public JButton getAddTrigger() { return this.trigger_add; }
-
-    public void setNbThreadsParsing(int nbThreadsParsing) {
-        this.nbThreadsParsing = nbThreadsParsing;
-        Config.setDynamicConfiguration("nbParsingThreads", Integer.toString(nbThreadsParsing));
+    public JButton getAddTrigger() {
+        return this.trigger_add;
     }
 
-    public void setTree(TreeNode tree) {this.tree = tree;
-    onTreeChanged.run();}
+    public void setNbThreads(int nbThreadsParsing) {
+        this.nbThreads = nbThreadsParsing;
+        Config.setDynamicConfiguration("nbThreads", Integer.toString(nbThreadsParsing));
+    }
 
-    public TreeNode getTree() {return this.tree;}
+    public void setTree(TreeNode tree) {
+        this.tree = tree;
+        onTreeChanged.run();
+    }
 
-    public void insert_text(Color color, String text){
+    public TreeNode getTree() {
+        return this.tree;
+    }
+
+    public void insert_text(Color color, String text) {
         StyleContext cont = StyleContext.getDefaultStyleContext();
         Style style = cont.addStyle("col", null);
         StyleConstants.setForeground(style, color);
 
         try {
             logArea.insertString(logArea.getLength(), text, style);
-        } catch (BadLocationException erro){
+        } catch (BadLocationException erro) {
             System.err.println(erro.getMessage());
         }
     }
-    private int nbThreadsDL;
-    private int nbThreadsParsing;
+
+    private int nbThreads;
 
     private JButton trigger_add;
 
