@@ -58,10 +58,12 @@ public class Main {
                     break;
                 mt.getMt().pushTask(new DLTask(new UpdateRow("eukaryotes", line.getGroup(), line.getSubgroup(), line.getOrganism(), "", line.getGc(), line.getNcs())));
             }
-            while (!GlobalGUIVariables.get().isStop()) {
-                Thread.sleep(150, 0);
-            }
-            mt.stopParsing();
+            mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
+                if (mt.getMt().getDlTask().getDone() >= r.size()) {
+                    mt.getMt().clearDl();
+                    mt.getMt().clearParsing();
+                }
+            }));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -96,9 +96,7 @@ public class Ftp {
     }
 
     public File getFile(String ftp_path) throws IOException {
-        //prepare();
-
-        for (int i = 0; i < 10; ++i) { // retries
+        for (int i = 0; i < 5; ++i) { // retries
             try {
                 File localFile = new File(temp_directory() + "/" + ftp_path);
                 File parentDirectory = localFile.getParentFile();
@@ -130,7 +128,7 @@ public class Ftp {
                 }
 
                 return localFile;
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 System.out.printf("Error while downloading %20s (%d): %20s\n", ftp_path, i + 1, t.getMessage());
                 GlobalGUIVariables.get().insert_text(Color.RED,"Error while downloading " + ftp_path + "(" + String.valueOf(i + 1) + "): " + t.getMessage() + "\n");
 
@@ -141,10 +139,11 @@ public class Ftp {
                     restart();
                 if (i > 4)
                     fileHashMap.clear();
-                Thread.sleep(500 * i, 0);
+                if (i < 2)
+                    Thread.sleep(500, 0);
             } catch (Exception e) {
-                System.err.printf("Error while restarting: %20s\n%s", e.getMessage(), e.getStackTrace());
-                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting " + e.getMessage() + "\n" + e.getStackTrace() + "\n");
+                System.err.printf("Error while restarting: %20s\n%s", e.getMessage(), e.getStackTrace().toString());
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting " + e.getMessage() + "\n" + e.getStackTrace().toString() + "\n");
 
             }
         }

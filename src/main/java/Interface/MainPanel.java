@@ -6,7 +6,10 @@ import org.NcbiParser.TreeNode;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -20,7 +23,7 @@ import javax.swing.tree.*;
 
 
 public class MainPanel extends JFrame {
-    private JTree tree;
+    private JCheckBoxTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
     private JTextPane logArea;
@@ -75,7 +78,7 @@ public class MainPanel extends JFrame {
     private JTextPane textPane1;
     private JButton removeButton;
 
-    private TreeSelectionListener ts;
+    private JCheckBoxTree.CheckChangeEventListener ts;
 
     private boolean active = true;
 
@@ -148,6 +151,7 @@ public class MainPanel extends JFrame {
     }
     public OverviewData init_quadruplet(TreePath path , int depth)
     {
+        System.out.println(depth);
         DefaultMutableTreeNode node_temp;
         ArrayList<String> out = new ArrayList<>();
         String[] strArray = null;
@@ -159,7 +163,7 @@ public class MainPanel extends JFrame {
         //pas de depth -1 depth compte le root aussi
         for(int i = 1; i <= 4 ; i++)
         {
-            if(i <= depth) out.add(strArray[i]);
+            if(i <= depth -1 ) out.add(strArray[i]);
             else out.add(null);
         }
 
@@ -224,30 +228,19 @@ public class MainPanel extends JFrame {
 
     public void tree_selection()
     {
-        if(active) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            TreePath path = tree.getSelectionPath();
-            quadruplets = init_quadruplet(path, node.getLevel());
-            if (!treePaths.contains(path)) {
-                treePaths.add(path);
-                selectedNodes.add(quadruplets);
-            } else {
-                treePaths.remove(path);
-                selectedNodes.remove(quadruplets);
+        TreePath[] paths =  tree.getCheckedPaths();
+        DefaultMutableTreeNode node;
+        for(int i = 0; i < paths.length; i++) {
+            if(tree.isSelectedPartially(paths[i])){
+                System.out.println("partial");
+                continue;
             }
-            active = false;
-            tree.removeTreeSelectionListener(ts);
-            if(treePaths.isEmpty()) tree.clearSelection();
-            else tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
-            tree.addTreeSelectionListener(ts);
-            active = true;
-
-            for (int i = 0; i < selectedNodes.size(); i++)
-            {
-                System.out.println(selectedNodes.get(i).toString());
-            }
+            quadruplets = init_quadruplet(paths[i], paths[i].getPath().length);
+            treePaths.add(paths[i]);
+            selectedNodes.add(quadruplets);
         }
     }
+
 
     public MainPanel(String title) {
         super(title);
@@ -275,6 +268,7 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent event){
                 super.mousePressed(event);
+                tree_selection();
                 GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
                 regions = create_region_array();
                 GlobalGUIVariables.get().setRegions(regions);
@@ -288,22 +282,21 @@ public class MainPanel extends JFrame {
                 }
             }
         });
-        ts = new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                //tree_selection();
 
-            }
-        };
-        tree.addTreeSelectionListener(ts);
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                stopButton.setVisible(false);
-                parseButton.setVisible(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
+                try {
+                    Main.getMt().stopParsing();
+                    stopButton.setVisible(false);
+                    parseButton.setVisible(true);
+                    Main.atProgStart();
+                } catch (IOException ex) {
+                    GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
+                }
             }
         });
 
@@ -315,10 +308,7 @@ public class MainPanel extends JFrame {
                 show_bars();
             }
         });
-        logArea.addComponentListener(new ComponentAdapter() {
-        });
-        logArea.addContainerListener(new ContainerAdapter() {
-        });
+
     }
 
     public void update_tree_from_root() {
@@ -340,8 +330,8 @@ public class MainPanel extends JFrame {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
-        tree = new JTree(treeModel);
-        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+        tree = new JCheckBoxTree();
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();

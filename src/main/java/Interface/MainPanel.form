@@ -33,7 +33,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="1ba79" class="javax.swing.JTree" binding="tree" custom-create="true">
+          <component id="1ba79" class="Interface.JCheckBoxTree" binding="tree" custom-create="true">
             <constraints/>
             <properties>
               <editable value="false"/>

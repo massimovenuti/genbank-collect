@@ -19,7 +19,7 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 1;
+        this.nbThreadsDL = 2;
         this.nbThreadsParsing = 4;
         this.regions = new ArrayList<Region>();
         this.logArea = null;

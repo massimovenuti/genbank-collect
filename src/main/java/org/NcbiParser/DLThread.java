@@ -21,10 +21,16 @@ public class DLThread extends Thread {
                 }
                 dlt.run(mt, ncbi);
                 mt.getDlTask().addDone(1);
-            } catch (Throwable t) {
-                System.out.printf("Download failed: %s\n", t.getMessage());
+            } catch (Exception t) {
+                System.err.printf("Download failed: %s\n", t.getMessage());
+                t.printStackTrace(System.err);
                 GlobalGUIVariables.get().insert_text(Color.RED,"Download failed: " + t.getMessage() + "\n");
-
+                try {
+                    ncbi = new Ncbi();
+                } catch (Exception e) {
+                    System.err.printf("Error while recreating ncbi\n");
+                    e.printStackTrace(System.err);
+                }
                 mt.pushTask(dlt); // retry
             }
         }

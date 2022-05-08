@@ -56,7 +56,7 @@ public final class DataBaseManager {
         Statement s;
         try{
             String req = "SELECT * FROM FILES " +
-                    "WHERE kingdom = \"" + row.getKingdom() + "\" AND group = \"" + row.getGroup() + "\" AND " +
+                    "WHERE kingdom = \"" + row.getKingdom() + "\" AND groupe = \"" + row.getGroup() + "\" AND " +
                     "subGroup = \"" + row.getSubGroup() + "\" AND organism = \"" + row.getOrganism() + "\"" +
                     "AND organelle = \"" + row.getOrganelle() + "\";";
             s = connection_.createStatement();
