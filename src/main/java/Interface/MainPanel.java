@@ -362,8 +362,13 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
-                GlobalGUIVariables.get().setNbThreadsDL((Integer)downloadSpinner.getValue());
-                GlobalGUIVariables.get().setNbThreadsParsing((Integer)paringSpinner.getValue());
+                int dl, pars;
+                dl = (Integer)downloadSpinner.getValue();
+                pars = (Integer)paringSpinner.getValue();
+                GlobalGUIVariables.get().setNbThreadsDL(dl);
+                GlobalGUIVariables.get().setNbThreadsParsing(pars);
+                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
+
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
@@ -402,8 +407,8 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 4, 1.0);
-        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 4, 1.0);
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 4, 1);
+        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 4, 1);
 
         downloadSpinner = new JSpinner(model_dl);
         paringSpinner = new JSpinner(model_parse);
