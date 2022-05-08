@@ -20,7 +20,7 @@ import javax.swing.tree.TreePath;
 
 
 public class MainPanel extends JFrame {
-    private JTree tree;
+    private JCheckBoxTree tree;
     private JButton parseButton;
     private JPanel mainPanel;
     private JTextPane logArea;
@@ -329,7 +329,7 @@ public class MainPanel extends JFrame {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
-        tree = new JTree(treeModel);
+        tree = new JCheckBoxTree();
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();
