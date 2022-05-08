@@ -2,6 +2,7 @@ package org.NcbiParser;
 
 import java.util.concurrent.ConcurrentLinkedDeque; // début = premier sorti
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 
 public class MultiTasker {
     private ConcurrentLinkedDeque<ParsingTask> parsings;
@@ -14,9 +15,17 @@ public class MultiTasker {
 
     private ProgressTask dlTask;
 
+    private Semaphore lock = new Semaphore(1);
+
     public ProgressTask getParsingTask() {
+        try {
+            lock.acquire();
+        } catch (InterruptedException e) {
+            System.err.printf("Interrupted while waiting for lock");
+        }
         if (parsingTask == null)
             parsingTask = GlobalProgress.get().registerTask("Parsing");
+        lock.release();
         return parsingTask;
     }
 

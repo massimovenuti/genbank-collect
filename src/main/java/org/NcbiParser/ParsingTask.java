@@ -63,7 +63,7 @@ public class ParsingTask {
             row.setAreNcs(are_nc);
             System.out.printf("Downloading: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
             GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");
-            System.err.printf("%10s %10s %10s %10s - %10s\n", row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism(), row.getGc());
+            //System.err.printf("%10s %10s %10s %10s - %10s\n", row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism(), row.getGc());
 
             File dl = null;
             if (row.getGc() == null || row.getGc().contentEquals("null")/*&& row.getKingdom().equalsIgnoreCase("virus")*/) {
@@ -97,6 +97,7 @@ public class ParsingTask {
                 mt.pushTask(this); // retry
             } else {
                 System.err.println("Too many retries");
+                GlobalGUIVariables.get().insert_text(Color.RED,"Aborting " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ": too many retries" + "\n");
             }
         }
         return false;
@@ -111,7 +112,10 @@ public class ParsingTask {
             DataBaseManager.multipleInsertFilesTable(row, regions);
             mt.getParsingTask().addDone(1);
             return ret;
-        } catch (IOException | CompoundNotFoundException e) {
+        } catch (CompoundNotFoundException e) {
+            GlobalGUIVariables.get().insert_text(Color.RED, "File is ill-formed, skipping...\n");
+            DataBaseManager.multipleInsertFilesTable(row, regions);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         mt.getParsingTask().addDone(1);
