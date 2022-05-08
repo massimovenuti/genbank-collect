@@ -46,7 +46,6 @@ public class DataBase {
                 return o1.compareTo(o2);
             }
         });
-
         int i = 0, j = 0;
          while(i < index_parsed.size() && j < overview_parsed.size()){
             if(index_parsed.get(i).getGroup().equalsIgnoreCase(overview_parsed.get(j).getGroup())
@@ -62,6 +61,7 @@ public class DataBase {
                 ++j;
             }
          }
+
         System.out.println();
     }
 
@@ -72,12 +72,12 @@ public class DataBase {
             ur = globalRegroupedData;
         }
         else{
-            Collections.sort(userNeeds, new Comparator<OverviewData>() {
+           /* Collections.sort(userNeeds, new Comparator<OverviewData>() {
                 @Override
                 public int compare(OverviewData o1, OverviewData o2) {
                     return o1.compareToGroupVersion(o2);
                 }
-            });
+            });*/
             for(var row : userNeeds){
                 if(row.getGroup() == null){
                     //recup toutes les lignes kingdom = row.kingdom
