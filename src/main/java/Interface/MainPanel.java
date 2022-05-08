@@ -269,14 +269,15 @@ public class MainPanel extends JFrame {
         obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
         up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
 
+        var frame = this;
 
         set_bars_invisible();
         stopButton.setVisible(false);
         update_tree_from_root();
         parseButton.setEnabled(false);
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
-        tree.updateUI();}));
-        var frame = this;
+            tree.updateUI();
+            frame.enableParsing();}));
 
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
@@ -363,7 +364,6 @@ public class MainPanel extends JFrame {
         frame.repaint();
         frame.setVisible(true);
         Main.atProgStart();
-        frame.enableParsing();
     }
 
     private void createUIComponents() {
