@@ -82,7 +82,7 @@ public class Main {
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
         ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
-        var task = gl.registerTask("Mise à jour des indexes");
+        var task = gl.registerTask("Mise \u00e0 jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
         task.addDone(1);
@@ -101,7 +101,7 @@ public class Main {
         //DataBase.allOrganismNeedingUpdate(test);
         gl.remove_task(task);
         mt.getMt().pushTask(new GenericTask(() -> {
-            var t = gl.registerTask("Création de l'arborescence");
+            var t = gl.registerTask("Cr\u00e9ation de l'arborescence");
             t.addTodo(1);
             var new_tree = createHierarchy(od, t);
             t.addDone(1);
