@@ -2,6 +2,7 @@ package org.NcbiParser;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.sql.*;
@@ -105,6 +106,15 @@ public class Main {
         Collections.sort(data);
 
         //task.addTodo(data.size());
+
+        ArrayList<OverviewData> need = new ArrayList<>();
+        need.add(new OverviewData(null, null, null, null));
+        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
+
+        ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
+
+//        System.out.println(String.join(" ", data.get(0).getKingdom(), data.get(0).getGroup(), data.get(0).getSubgroup(), data.get(0).getOrganism()));
+//        System.out.println(String.join(" ", dataNeedingUpdate.get(0).getKingdom(), dataNeedingUpdate.get(0).getGroup(), dataNeedingUpdate.get(0).getSubGroup(), dataNeedingUpdate.get(0).getOrganism()));
 
         Iterator iter = data.iterator();
 
