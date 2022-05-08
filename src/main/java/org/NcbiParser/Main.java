@@ -1,6 +1,8 @@
 package org.NcbiParser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -32,11 +34,14 @@ public class Main {
     }
 
     public static void atProgStart() {
+        var ini = GlobalProgress.get().registerTask("Initialisation");
+        ini.addTodo(1);
         try {
+            Files.createDirectories(Paths.get(Config.result_directory()));
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
-                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, ini);
 
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
@@ -44,14 +49,16 @@ public class Main {
                 } catch (IOException e) {
                 }
             }));
-            //update(ncbi);
-//            test();
+            ini.addDone(1);
+            GlobalProgress.get().remove_task(ini);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void startParsing(ArrayList<OverviewData> selected, ArrayList<Region> regions) {
+        if (selected.size() == 0)
+            return;
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
@@ -59,11 +66,10 @@ public class Main {
             for (var line : r) {
                 if (GlobalGUIVariables.get().isStop())
                     break;
-                mt.getMt().pushTask(new DLTask(line, regions));
+                mt.getMt().pushTask(new ParsingTask(line, regions));
             }
             mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
                 if (mt.getMt().getDlTask().getDone() >= r.size()) {
-                    mt.getMt().clearDl();
                     mt.getMt().clearParsing();
                 }
             }));
@@ -163,7 +169,7 @@ public class Main {
 
     public static MultiThreading getMt() throws IOException {
         if (mt == null)
-            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, null);
         return mt;
     }
 }

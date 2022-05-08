@@ -3,12 +3,12 @@ package Interface;
 
 import org.NcbiParser.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -71,6 +71,15 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
     private JButton stopButton;
+    private JCheckBox toutCheckBox;
+    private JPanel optionsContainer;
+    private JSpinner threadSpinner;
+    private JComboBox priorityCB;
+    private JButton appliquerButton;
+    private JButton annulerButton;
+    private JButton optionsButton;
+    private JPanel toggleContainer;
+    private JPanel optPan;
     private JTextPane textPane1;
     private JButton removeButton;
 
@@ -105,6 +114,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
+                    System.out.println(region);
                 }
             }
         }
@@ -114,25 +124,26 @@ public class MainPanel extends JFrame {
         }
         return checked;
     }
-    public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
-        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-        DefaultMutableTreeNode temp;
-        temp = new DefaultMutableTreeNode(child.getText());
-        parent_node.add(temp);
-        if (child.is_uptodate()) {
-            renderer.setIcon(up_to_dateIcon);
-        } else {
-            renderer.setIcon(obsoleteIcon);
+
+    public void modifiy_all_boxes(Boolean selected)
+    {
+        for (Component c : regionPanel.getComponents())
+        {
+            if(c instanceof JCheckBox){
+                ((JCheckBox) c).setSelected(selected);
+            }
         }
-        if (child instanceof TreeLeaf) {
-            return;
-        } else {
+    }
+    public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
+        DefaultMutableTreeNode temp = new DefaultMutableTreeNode(String.format("%s;%s", child.getText(), child.is_uptodate() ? "1" : "0"));
+        if (child.getChildren().size() != 0) {
             ArrayList<TreeNode> children = child.getChildren();
 
             for (int i = 0; i < children.size(); i++) {
                 build_tree_aux(temp, children.get(i));
             }
         }
+        parent_node.add(temp);
     }
 
     public DefaultMutableTreeNode build_tree() {
@@ -236,11 +247,20 @@ public class MainPanel extends JFrame {
 
     }
 
+    public void enableParsing() {
+        parseButton.setEnabled(true);
+        optionsButton.setEnabled(true);
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+
+        optionsButton.setEnabled(false);
+        toggleContainer.setVisible(false);
+        optionsContainer.setVisible(false);
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
         document = (StyledDocument) logArea.getDocument();
@@ -248,14 +268,21 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("../../../../assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("../../../../assets/up_to_date.png");
+        obsoleteIcon = new ImageIcon("assets/obsolete.png");
+        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
+
+        var frame = this;
 
         set_bars_invisible();
         stopButton.setVisible(false);
-        Main.atProgStart();
         update_tree_from_root();
-        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
+        parseButton.setEnabled(false);
+        GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
+            tree.updateUI();
+            frame.enableParsing();}));
+
+        priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1);
+
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -263,30 +290,30 @@ public class MainPanel extends JFrame {
                 super.mousePressed(event);
                 if (!parseButton.isEnabled())
                     return;
-                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
+
                 var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
-                GlobalGUIVariables.get().setStop(false);
-                parseButton.setVisible(false);
-                stopButton.setVisible(true);
 
-                try {
-                    Main.getMt().getMt().pushTask(new GenericTask(() -> {
-                            Main.startParsing(checkeds, regions);}));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                if (checkeds.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins un item", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else if (regions.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins une région", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    GlobalGUIVariables.get().setStop(false);
+                    parseButton.setVisible(false);
+                    stopButton.setVisible(true);
+                    GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing started...\n");
+                    try {
+                        Main.getMt().getMt().pushTask(new GenericTask(() -> {
+                            Main.startParsing(checkeds, regions);
+                        }));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
 
-        /*tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                tree_selection(active);
-
-            }
-        });*/
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -307,13 +334,52 @@ public class MainPanel extends JFrame {
                 }
             }
         });
-        triggerButton.addActionListener(new ActionListener() {
 
+        triggerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();
             }
         });
+
+        toutCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(toutCheckBox.isSelected())
+                    modifiy_all_boxes(true);
+                else
+                    modifiy_all_boxes(false);
+            }
+        });
+        optionsButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(false);
+                optionsContainer.setVisible(true);
+            }
+        });
+        appliquerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+                GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
+                Config.setPriority(priorityCB.getSelectedItem().toString());
+                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
+
+            }
+        });
+        annulerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+            }
+        });
+
     }
 
     public void update_tree_from_root() {
@@ -321,23 +387,41 @@ public class MainPanel extends JFrame {
         arbo = build_tree();
         treeModel = new DefaultTreeModel(arbo);
         tree.setModel(treeModel);
+        toggleContainer.setVisible(true);
     }
 
     public static void main(String[] args) {
-        JFrame frame = new MainPanel("GeneBank");
+        var frame = new MainPanel("GeneBank");
         frame.setPreferredSize(new Dimension(10000, 10000));
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
+        Main.atProgStart();
     }
 
     private void createUIComponents() {
         root_node = new DefaultMutableTreeNode("Root");
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
+
         tree = new JCheckBoxTree();
-        tree.setMinimumSize(new Dimension(700, 500));
+        tree.setMinimumSize(new Dimension(800, 500));
         tree.revalidate();
         tree.repaint();
+
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
+
+        threadSpinner = new JSpinner(model_threads);
+
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File("assets/settings.png"));
+        } catch (IOException e) {
+        }
+        ImageIcon icon = new ImageIcon(img);
+        Image image = icon.getImage();
+        Image newimg = image.getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH);
+        icon = new ImageIcon(newimg);
+        optionsButton = new JButton("options",icon);
     }
 }

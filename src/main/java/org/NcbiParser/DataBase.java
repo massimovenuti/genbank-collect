@@ -27,6 +27,10 @@ import java.util.Comparator;
 
 public class DataBase {
 
+    public static ArrayList<UpdateRow> getGlobalRegroupedData() {
+        return globalRegroupedData;
+    }
+
     private static ArrayList<UpdateRow> globalRegroupedData;
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
 
@@ -69,7 +73,7 @@ public class DataBase {
         ArrayList<UpdateRow> ur = new ArrayList<UpdateRow>();
         int beg = 0;
         if(userNeeds.get(0).getKingdom() == null){ // cas ou on veut tester pour tous
-            ur = globalRegroupedData;
+            ur = new ArrayList<>(globalRegroupedData);
         }
         else{
            /* Collections.sort(userNeeds, new Comparator<OverviewData>() {

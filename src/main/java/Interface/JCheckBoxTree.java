@@ -1,7 +1,6 @@
 package Interface;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EventListener;
@@ -135,16 +134,18 @@ public class JCheckBoxTree extends JTree {
         public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                       boolean selected, boolean expanded, boolean leaf, int row,
                                                       boolean hasFocus) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-            Object obj = node.getUserObject();
+            var splt = value.toString().split(";");
+            checkBox.setText(splt[0]);
+            if (splt.length > 1)
+                checkBox.setForeground((splt[1].contentEquals("1")) ?  Color.BLACK : Color.RED);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             TreePath tp = new TreePath(node.getPath());
             CheckedNode cn = nodesCheckingState.get(tp);
             if (cn == null) {
                 return this;
             }
             checkBox.setSelected(cn.isSelected);
-            checkBox.setText(obj.toString());
-            checkBox.setOpaque(cn.isSelected && cn.hasChildren && ! cn.allChildrenSelected);
+            checkBox.setOpaque(cn.isSelected && cn.hasChildren && !cn.allChildrenSelected);
             return this;
         }
     }
