@@ -44,7 +44,7 @@
           </component>
         </children>
       </scrollpane>
-      <scrollpane id="d792">
+      <scrollpane id="d792" binding="scrollLog">
         <constraints>
           <grid row="5" column="1" row-span="3" col-span="12" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>

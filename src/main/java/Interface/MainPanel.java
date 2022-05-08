@@ -2,13 +2,11 @@ package Interface;
 
 
 import org.NcbiParser.*;
+import org.NcbiParser.TreeNode;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -18,10 +16,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 
 
 public class MainPanel extends JFrame {
@@ -76,16 +71,19 @@ public class MainPanel extends JFrame {
     private JLabel label12;
     private JLabel label13;
     private JButton stopButton;
+    private JScrollPane scrollLog;
     private JTextPane textPane1;
     private JButton removeButton;
+
+    private TreeSelectionListener ts;
 
     private boolean active = true;
 
     public ArrayList<TreePath> treePaths;
 
-    public ArrayList<TreeNode> quadruplets;
+    public OverviewData quadruplets;
 
-    public ArrayList<ArrayList<TreeNode>> selectedNodes;
+    public ArrayList<OverviewData> selectedNodes;
 
     public ArrayList<JProgressBar> progBars;
     public ArrayList<JLabel> barLabels;
@@ -148,14 +146,12 @@ public class MainPanel extends JFrame {
         }
         return root_node;
     }
-    public ArrayList<TreeNode> init_quadruplet(TreePath path , int depth)
+    public OverviewData init_quadruplet(TreePath path , int depth)
     {
         DefaultMutableTreeNode node_temp;
-
-        ArrayList<TreeNode> out = new ArrayList<>();
+        ArrayList<String> out = new ArrayList<>();
         String[] strArray = null;
         String stringArray= path.toString();
-
         stringArray = stringArray.replace("[", "");
         stringArray = stringArray.replace("]", "");
 
@@ -163,11 +159,12 @@ public class MainPanel extends JFrame {
         //pas de depth -1 depth compte le root aussi
         for(int i = 1; i <= 4 ; i++)
         {
-            if(i <= depth) out.add(find_by_name(root,strArray[i]));
+            if(i <= depth) out.add(strArray[i]);
             else out.add(null);
         }
 
-        return out;
+        return new OverviewData(out.get(0), out.get(1), out.get(2), out.get(3));
+
     }
 
     public TreeNode find_by_name(TreeNode current,String name){
@@ -229,8 +226,7 @@ public class MainPanel extends JFrame {
     {
         if(active) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            TreePath path = tree.getNextMatch(node.getUserObject().toString(), 0, Position.Bias.Forward);
-            TreeNode tree_node = find_by_name(root,node.getUserObject().toString());
+            TreePath path = tree.getSelectionPath();
             quadruplets = init_quadruplet(path, node.getLevel());
             if (!treePaths.contains(path)) {
                 treePaths.add(path);
@@ -239,12 +235,18 @@ public class MainPanel extends JFrame {
                 treePaths.remove(path);
                 selectedNodes.remove(quadruplets);
             }
-
             active = false;
-            tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+            tree.removeTreeSelectionListener(ts);
+            if(treePaths.isEmpty()) tree.clearSelection();
+            else tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
+            tree.addTreeSelectionListener(ts);
             active = true;
-        }
 
+            for (int i = 0; i < selectedNodes.size(); i++)
+            {
+                System.out.println(selectedNodes.get(i).toString());
+            }
+        }
     }
 
     public MainPanel(String title) {
@@ -252,6 +254,7 @@ public class MainPanel extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(mainPanel);
         this.pack();
+        GlobalGUIVariables.get().setScroller(scrollLog);
         GlobalGUIVariables.get().setAddTrigger(triggerButton);
         triggerButton.setVisible(false);
         document = (StyledDocument) logArea.getDocument();
@@ -285,30 +288,36 @@ public class MainPanel extends JFrame {
                 }
             }
         });
-
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
-
+        ts = new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                tree_selection();
+                //tree_selection();
 
             }
-        });
+        };
+        tree.addTreeSelectionListener(ts);
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                parseButton.setEnabled(true);
+                stopButton.setVisible(false);
+                parseButton.setVisible(true);
                 set_bars_invisible();
                 GlobalGUIVariables.get().setStop(true);
             }
         });
+
+
         triggerButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 show_bars();
             }
+        });
+        logArea.addComponentListener(new ComponentAdapter() {
+        });
+        logArea.addContainerListener(new ContainerAdapter() {
         });
     }
 
@@ -332,6 +341,7 @@ public class MainPanel extends JFrame {
         treeModel = new DefaultTreeModel(root_node);
         treeModel.setAsksAllowsChildren(true);
         tree = new JTree(treeModel);
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         tree.setMinimumSize(new Dimension(700, 500));
         tree.revalidate();
         tree.repaint();

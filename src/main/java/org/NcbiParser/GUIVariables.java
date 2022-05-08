@@ -9,6 +9,8 @@ public class GUIVariables {
     private TreeNode tree;
     private StyledDocument logArea;
 
+    private JScrollPane scroller;
+
     public void setOnTreeChanged(GenericTask onTreeChanged) {
         this.onTreeChanged = onTreeChanged;
     }
@@ -49,6 +51,10 @@ public class GUIVariables {
         this.trigger_add = trigger;
     }
 
+    public void setScroller(JScrollPane scroller) {
+        this.scroller = scroller;
+    }
+
     public int getNbThreadsDL() {
         return nbThreadsDL;
     }
@@ -68,6 +74,8 @@ public class GUIVariables {
 
     public JButton getAddTrigger() { return this.trigger_add; }
 
+    public JScrollPane getScroller() { return this.scroller; }
+
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
     }
@@ -86,6 +94,11 @@ public class GUIVariables {
             logArea.insertString(logArea.getLength(), text, style);
         } catch (BadLocationException erro){
             System.err.println(erro.getMessage());
+        }
+
+        JScrollBar vertical = scroller.getVerticalScrollBar();
+        if(vertical.getValue() == vertical.getMaximum()) {
+            vertical.setValue(vertical.getMaximum());
         }
     }
     private ArrayList<Region> regions;

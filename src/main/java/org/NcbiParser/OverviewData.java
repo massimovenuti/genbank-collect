@@ -53,4 +53,9 @@ public class OverviewData implements Comparable<OverviewData> {
         return organism.compareTo(overviewData.organism);
 
     }
+
+    public String toString()
+    {
+        return "[" + this.kingdom + ", " + this.group + ", " + this.subgroup + ", " + this.organism + "]" ;
+    }
 }
