@@ -194,7 +194,8 @@ public class GbffParser implements Parser {
             throw e;
         }
         try {
-            Files.deleteIfExists(Paths.get(gbPath));
+            if (Config.removeFromCacheAfterParsing())
+                Files.deleteIfExists(Paths.get(gbPath));
         } catch (IOException e) {
             System.err.println("Failed to delete file " + gbPath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to delete file " + gbPath + "\n");

@@ -39,7 +39,7 @@ public class DynamicConfiguration {
         prop.setProperty("nbThreads", Integer.toString(maxThreads));
         prop.setProperty("resultDirectory", "Results");
         prop.setProperty("cacheDirectory", "cache");
-        prop.setProperty("removeParsedFiles", "true");
+        prop.setProperty("removeFromCacheAfterParsing", "true");
         prop.setProperty("priority", "parsing");
         prop.storeToXML(of, "Genebank configuration");
         of.close();

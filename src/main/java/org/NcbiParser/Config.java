@@ -1,7 +1,5 @@
 package org.NcbiParser;
 
-import java.util.Properties;
-
 public class Config {
     static private String cached_dir;
     static private String cached_r;
@@ -42,5 +40,9 @@ public class Config {
 
     public static void setPriority(String toString) {
         setDynamicConfiguration("priority", toString);
+    }
+
+    public static boolean removeFromCacheAfterParsing() {
+        return fromDynamicConfiguration("removeFromCacheAfterParsing", "true").contentEquals("true");
     }
 }
