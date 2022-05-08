@@ -250,6 +250,10 @@ public class MainPanel extends JFrame {
 
     }
 
+    public void enableParsing() {
+        parseButton.setEnabled(true);
+    }
+
     public MainPanel(String title) {
         super(title);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -268,8 +272,8 @@ public class MainPanel extends JFrame {
 
         set_bars_invisible();
         stopButton.setVisible(false);
-        tree = new JCheckBoxTree();
-        //update_tree_from_root();
+        update_tree_from_root();
+        parseButton.setEnabled(false);
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
         tree.updateUI();}));
         var frame = this;
@@ -353,12 +357,13 @@ public class MainPanel extends JFrame {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new MainPanel("GeneBank");
+        var frame = new MainPanel("GeneBank");
         frame.setPreferredSize(new Dimension(10000, 10000));
         frame.revalidate();
         frame.repaint();
         frame.setVisible(true);
         Main.atProgStart();
+        frame.enableParsing();
     }
 
     private void createUIComponents() {
