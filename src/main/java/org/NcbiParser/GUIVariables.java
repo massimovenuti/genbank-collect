@@ -17,8 +17,8 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreadsDL = 2;
-        this.nbThreadsParsing = 4;
+        this.nbThreadsDL = Integer.parseInt(Config.fromDynamicConfiguration("nbDLThreads", "4"));
+        this.nbThreadsParsing = Integer.parseInt(Config.fromDynamicConfiguration("nbParsingThreads", "4"));
         this.regions = new ArrayList<Region>();
         this.logArea = null;
         this.tree = new TreeNode("CHARGEMENT...");
@@ -55,6 +55,7 @@ public class GUIVariables {
 
     public void setNbThreadsDL(int nbThreadsDL) {
         this.nbThreadsDL = nbThreadsDL;
+        Config.setDynamicConfiguration("nbDLThreads", Integer.toString(nbThreadsDL));
     }
 
     public int getNbThreadsParsing() {
@@ -70,6 +71,7 @@ public class GUIVariables {
 
     public void setNbThreadsParsing(int nbThreadsParsing) {
         this.nbThreadsParsing = nbThreadsParsing;
+        Config.setDynamicConfiguration("nbParsingThreads", Integer.toString(nbThreadsParsing));
     }
 
     public void setTree(TreeNode tree) {this.tree = tree;
