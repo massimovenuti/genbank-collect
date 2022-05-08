@@ -18,6 +18,7 @@ import java.util.Comparator;
     - ParsingResult : Organism, Date (celle des fichiers locaux, ou bien la même que celle dans overview à ce moment là), nb_files_parsed (int)
     [- NC : Organism, NC (String)] pas nécessaire ?
     [- SeqType : nom (CDS, Codon, etc.) ] nécessaire ?]
+    - ParsingResult : Organism, Date (celle des fichiers locaux, ou bien la même que celle dans overview à ce moment là), nb_files_parsed (int)
     [[- Files : (NC ou Organism ?), Date de création)] pas franchement nécessaire]
 
   Vues:
@@ -49,7 +50,6 @@ public class DataBase {
                 return o1.compareTo(o2);
             }
         });
-
         int i = 0, j = 0;
          while(i < index_parsed.size() && j < overview_parsed.size()){
             if(index_parsed.get(i).getGroup().equalsIgnoreCase(overview_parsed.get(j).getGroup())
@@ -65,6 +65,7 @@ public class DataBase {
                 ++j;
             }
          }
+
         System.out.println();
     }
 
@@ -75,12 +76,12 @@ public class DataBase {
             ur = new ArrayList<>(globalRegroupedData);
         }
         else{
-            Collections.sort(userNeeds, new Comparator<OverviewData>() {
+           /* Collections.sort(userNeeds, new Comparator<OverviewData>() {
                 @Override
                 public int compare(OverviewData o1, OverviewData o2) {
                     return o1.compareToGroupVersion(o2);
                 }
-            });
+            });*/
             for(var row : userNeeds){
                 if(row.getGroup() == null){
                     //recup toutes les lignes kingdom = row.kingdom
