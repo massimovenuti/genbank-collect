@@ -135,24 +135,15 @@ public class MainPanel extends JFrame {
         }
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
-        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-        DefaultMutableTreeNode temp;
-        temp = new DefaultMutableTreeNode(child.getText());
-        parent_node.add(temp);
-        if (child.is_uptodate()) {
-            renderer.setIcon(up_to_dateIcon);
-        } else {
-            renderer.setIcon(obsoleteIcon);
-        }
-        if (child instanceof TreeLeaf) {
-            return;
-        } else {
+        DefaultMutableTreeNode temp = new DefaultMutableTreeNode(String.format("%s;%s", child.getText(), child.is_uptodate() ? "1" : "0"));
+        if (child.getChildren().size() != 0) {
             ArrayList<TreeNode> children = child.getChildren();
 
             for (int i = 0; i < children.size(); i++) {
                 build_tree_aux(temp, children.get(i));
             }
         }
+        parent_node.add(temp);
     }
 
     public DefaultMutableTreeNode build_tree() {
