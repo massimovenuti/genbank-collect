@@ -1,6 +1,8 @@
 package org.NcbiParser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +35,8 @@ public class Main {
 
     public static void atProgStart() {
         try {
+            Files.createDirectories(Paths.get(Config.result_directory()));
+
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
