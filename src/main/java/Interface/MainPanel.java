@@ -244,7 +244,6 @@ public class MainPanel extends JFrame {
             tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
             active = true;
         }
-
     }
 
     public void enableParsing() {
