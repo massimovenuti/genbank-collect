@@ -205,7 +205,8 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-        for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
+        int i;
+        for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
@@ -214,6 +215,8 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
+        for (; i < progBars.size(); ++i)
+            progBars.get(i).setVisible(false);
         if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
@@ -419,6 +422,7 @@ public class MainPanel extends JFrame {
         try {
             img = ImageIO.read(this.getClass().getResource("/settings.png"));
         } catch (IOException e) {
+            e.printStackTrace(System.err);
         }
         ImageIcon icon = new ImageIcon(img);
         Image image = icon.getImage();
