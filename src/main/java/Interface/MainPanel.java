@@ -256,6 +256,7 @@ public class MainPanel extends JFrame {
         Main.atProgStart();
         update_tree_from_root();
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();}));
+        var frame = this;
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
             @Override
@@ -263,18 +264,26 @@ public class MainPanel extends JFrame {
                 super.mousePressed(event);
                 if (!parseButton.isEnabled())
                     return;
-                GlobalGUIVariables.get().insert_text(Color.BLACK,"Starting process...\n");
+
                 var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
-                GlobalGUIVariables.get().setStop(false);
-                parseButton.setVisible(false);
-                stopButton.setVisible(true);
 
-                try {
-                    Main.getMt().getMt().pushTask(new GenericTask(() -> {
-                            Main.startParsing(checkeds, regions);}));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                if (checkeds.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins un item", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else if (regions.size() == 0) {
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins une région", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    GlobalGUIVariables.get().setStop(false);
+                    parseButton.setVisible(false);
+                    stopButton.setVisible(true);
+                    GlobalGUIVariables.get().insert_text(Color.BLACK,"Parsing started...\n");
+                    try {
+                        Main.getMt().getMt().pushTask(new GenericTask(() -> {
+                            Main.startParsing(checkeds, regions);
+                        }));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
