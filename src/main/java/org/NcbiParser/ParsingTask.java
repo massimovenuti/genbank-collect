@@ -93,13 +93,13 @@ public class ParsingTask {
             t.printStackTrace(System.err);
             GlobalGUIVariables.get().insert_text(Color.RED,"Download failed: " + t.getMessage() + "\n");
             try {
-                ncbi.close();
-                ncbi = new Ncbi();
+                ncbi.reset();
             } catch (Exception e) {
                 System.err.printf("Error while recreating ncbi\n");
                 e.printStackTrace(System.err);
             }
             if (cpt++ < 5) {
+                System.err.printf("Retrying download later  (%d)\n", cpt);
                 mt.pushTask(this); // retry
             } else {
                 System.err.println("Too many retries");
