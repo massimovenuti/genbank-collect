@@ -58,6 +58,7 @@ public class ParsingTask {
             if (are_nc.size() == 0) {
                 System.out.printf("No NC in %s, skipping download\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
                 GlobalGUIVariables.get().insert_text(Color.ORANGE, "No NC in " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ", skipping download\n");
+                mt.registerDlEnded();
                 return true;
             }
             row.setAreNcs(are_nc);
