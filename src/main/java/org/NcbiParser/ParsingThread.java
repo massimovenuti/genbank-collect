@@ -23,7 +23,11 @@ public class ParsingThread extends Thread {
                     Thread.currentThread().interrupt();
                 }
             }
-            pt.run(mt, ncbi);
+            try {
+                pt.run(mt, ncbi);
+            } catch (Exception e) {
+                GlobalGUIVariables.get().insert_text(Color.RED, "Unrecoverable error: aborting task: " + e.getMessage());
+            }
         }
     }
 }
