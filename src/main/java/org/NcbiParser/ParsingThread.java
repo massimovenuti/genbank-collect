@@ -27,6 +27,8 @@ public class ParsingThread extends Thread {
                 pt.run(mt, ncbi);
             } catch (Exception e) {
                 GlobalGUIVariables.get().insert_text(Color.RED, "Unrecoverable error: aborting task: " + e.getMessage());
+                System.err.println("Unrecoverable error, aborting task: " + e.getMessage());
+                e.printStackTrace(System.err);
             }
         }
     }
