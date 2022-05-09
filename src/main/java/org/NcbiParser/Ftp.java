@@ -80,6 +80,8 @@ public class Ftp {
             try {
                 close();
                 Thread.sleep(1000, 0);
+                ftpClient = new FTPClient();
+                ftpClient.setControlKeepAliveTimeout(10);
                 connect();
                 Thread.sleep(100, 0);
                 login();
