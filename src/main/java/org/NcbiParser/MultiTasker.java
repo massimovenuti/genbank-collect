@@ -82,6 +82,8 @@ public class MultiTasker {
     public void clearParsing() {
         GlobalProgress.get().remove_task(parsingTask);
         GlobalProgress.get().remove_task(dlTask);
+        parsingTask = null;
+        dlTask = null;
         parsings.clear();
     }
 
