@@ -82,13 +82,16 @@ public class Ftp {
                 Thread.sleep(1000, 0);
                 ftpClient = new FTPClient();
                 ftpClient.setControlKeepAliveTimeout(10);
+                FTPClientConfig config = new FTPClientConfig();
+                ftpClient.configure(config);
                 connect();
                 Thread.sleep(100, 0);
                 login();
                 Thread.sleep(100, 0);
             } catch (Throwable t) {
-                System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
-                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting FTP: " + t.getMessage() + "\n" + t.getStackTrace() + "\n");
+                System.err.printf("Error while restarting FTP: %20s\n", t.getMessage());
+                t.printStackTrace(System.err);
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting FTP: " + t.getMessage() + "\n");
             }
     }
 

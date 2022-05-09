@@ -109,4 +109,8 @@ public class Ncbi {
     public void close() throws IOException {
         ftp.close();
     }
+
+    public void reset() {
+        ftp.restart();
+    }
 }
