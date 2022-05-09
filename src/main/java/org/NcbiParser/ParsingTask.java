@@ -59,6 +59,7 @@ public class ParsingTask {
                 System.out.printf("No NC in %s, skipping download\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
                 GlobalGUIVariables.get().insert_text(Color.ORANGE, "No NC in " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ", skipping download\n");
                 mt.registerDlEnded();
+                task.addDone(1);
                 return true;
             }
             row.setAreNcs(are_nc);
@@ -73,6 +74,7 @@ public class ParsingTask {
                 } catch (Exception e) {
                     GlobalGUIVariables.get().insert_text(Color.RED, "No file associated with " + row.getOrganism() + "\n");
                     mt.registerDlEnded();
+                    task.addDone(1);
                     return false;
                 }
             } else {
@@ -81,8 +83,8 @@ public class ParsingTask {
             System.out.printf("Download ended: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
             GlobalGUIVariables.get().insert_text(Color.GREEN, "Download ended: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");
 
-            var task = new ParsingTask(dl, row, regions);
-            mt.pushTask(task);
+            var ptask = new ParsingTask(dl, row, regions);
+            mt.pushTask(ptask);
             mt.getDlTask().addDone(1);
             mt.registerDlEnded();
             return true;
@@ -104,6 +106,7 @@ public class ParsingTask {
             }
         }
         mt.registerDlEnded();
+        task.addDone(1);
         return false;
     }
 

@@ -72,6 +72,14 @@ public class Main {
             mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
                 if (mt.getMt().getDlTask().getDone() >= r.size()) {
                     mt.getMt().clearParsing();
+                    mt.getMt().pushTask(new GenericTask(() -> {
+                        var t = GlobalProgress.get().registerTask("Cr\u00e9ation de l'arborescence");
+                        t.addTodo(1);
+                        var new_tree = createHierarchy(t);
+                        t.addDone(1);
+                        GlobalGUIVariables.get().setTree(new_tree);
+                        GlobalProgress.get().remove_task(t);
+                    }));
                 }
             }));
         } catch (Exception e) {
