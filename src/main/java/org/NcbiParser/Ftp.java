@@ -78,8 +78,13 @@ public class Ftp {
 
     public void restart() {
             try {
-                close();
-                Thread.sleep(1000, 0);
+                try {
+                    close();
+                    Thread.sleep(1000, 0);
+                } catch (IOException e) {
+                    System.err.printf("Error in close: %s\n", e.getMessage());
+                    e.printStackTrace(System.err);
+                }
                 ftpClient = new FTPClient();
                 ftpClient.setControlKeepAliveTimeout(10);
                 FTPClientConfig config = new FTPClientConfig();
