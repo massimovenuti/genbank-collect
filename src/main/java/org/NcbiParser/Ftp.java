@@ -58,7 +58,7 @@ public class Ftp {
         // Download ftp references files
         // https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftpClient = new FTPClient();
-        ftpClient.setControlKeepAliveTimeout(10);
+        ftpClient.setControlKeepAliveTimeout(3);
         //ftpCV.setControlEncoding("UTF-8");
         //ftp.setAutodetectUTF8(true);
         FTPClientConfig config = new FTPClientConfig();
@@ -101,7 +101,12 @@ public class Ftp {
     }
 
     public void close() throws IOException {
+        try {
             ftpClient.logout();
+        } catch (Exception e) {
+            System.err.println("Error in logout : " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
             ftpClient.disconnect();
     }
 
