@@ -16,7 +16,6 @@ public class Ftp {
     private void connect() throws IOException {
         try {
             ftpClient.connect(server);
-
             int reply = ftpClient.getReplyCode();
 
             if (!FTPReply.isPositiveCompletion(reply)) {
@@ -27,6 +26,7 @@ public class Ftp {
             }
 
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            ftpClient.enterLocalPassiveMode();
 
         } catch (Throwable e) {
             GlobalGUIVariables.get().insert_text(Color.RED,"Unable to connnect to ftp server: " + e.getMessage() + "\n");
@@ -58,7 +58,8 @@ public class Ftp {
         // Download ftp references files
         // https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftpClient = new FTPClient();
-        ftpClient.setControlKeepAliveTimeout(3);
+
+        ftpClient.setControlKeepAliveTimeout(300);
         //ftpCV.setControlEncoding("UTF-8");
         //ftp.setAutodetectUTF8(true);
         FTPClientConfig config = new FTPClientConfig();
@@ -86,7 +87,7 @@ public class Ftp {
                     e.printStackTrace(System.err);
                 }
                 ftpClient = new FTPClient();
-                ftpClient.setControlKeepAliveTimeout(10);
+                ftpClient.setControlKeepAliveTimeout(300);
                 FTPClientConfig config = new FTPClientConfig();
                 ftpClient.configure(config);
                 connect();
