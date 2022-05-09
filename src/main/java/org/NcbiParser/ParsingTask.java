@@ -71,6 +71,7 @@ public class ParsingTask {
                     dl = ncbi.getGbkFromVirus(row.getOrganism());
                 } catch (Exception e) {
                     GlobalGUIVariables.get().insert_text(Color.RED, "No file associated with " + row.getOrganism() + "\n");
+                    mt.registerDlEnded();
                     return false;
                 }
             } else {
@@ -82,6 +83,7 @@ public class ParsingTask {
             var task = new ParsingTask(dl, row, regions);
             mt.pushTask(task);
             mt.getDlTask().addDone(1);
+            mt.registerDlEnded();
             return true;
         } catch (Exception t) {
             System.err.printf("Download failed: %s\n", t.getMessage());
@@ -100,6 +102,7 @@ public class ParsingTask {
                 GlobalGUIVariables.get().insert_text(Color.RED,"Aborting " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ": too many retries" + "\n");
             }
         }
+        mt.registerDlEnded();
         return false;
     }
 

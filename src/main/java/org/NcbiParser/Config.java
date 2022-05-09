@@ -45,4 +45,10 @@ public class Config {
     public static boolean removeFromCacheAfterParsing() {
         return fromDynamicConfiguration("removeFromCacheAfterParsing", "true").contentEquals("true");
     }
+    public static int maxParallelDownloads() {
+        return Integer.parseInt(fromDynamicConfiguration("maxParallelDownloads", "2"));
+    }
+    public static void setMaxParallelDownloads(int new_max) {
+        setDynamicConfiguration("maxParallelDownloads", Integer.toString(new_max));
+    }
 }

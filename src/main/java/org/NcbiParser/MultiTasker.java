@@ -3,6 +3,7 @@ package org.NcbiParser;
 import java.util.concurrent.ConcurrentLinkedDeque; // début = premier sorti
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiTasker {
     private ConcurrentLinkedDeque<ParsingTask> parsings;
@@ -16,6 +17,8 @@ public class MultiTasker {
     private ProgressTask dlTask;
 
     private Semaphore lock = new Semaphore(1);
+
+    private AtomicInteger parallelDownloads = new AtomicInteger(0);
 
     public ProgressTask getParsingTask() {
         try {
@@ -62,7 +65,19 @@ public class MultiTasker {
         gtasks.add(task);
     }
 
-    public ParsingTask popParsingTask() {return parsings.pollFirst();}
+    public ParsingTask popParsingTask() {
+        var ret = parsings.pollFirst();
+        if (ret == null)
+            return null;
+        if (ret.isDl()) {
+            if (parallelDownloads.getAndIncrement() >= Config.maxParallelDownloads()) {
+                parallelDownloads.decrementAndGet();
+                parsings.addFirst(ret);
+                return null;
+            }
+        }
+        return ret;
+    }
 
     public void clearParsing() {
         GlobalProgress.get().remove_task(parsingTask);
@@ -71,4 +86,9 @@ public class MultiTasker {
     }
 
     public GenericTask popGenericTask() {return gtasks.poll();}
+
+
+    public void registerDlEnded() {
+        parallelDownloads.decrementAndGet();
+    }
 }
