@@ -105,4 +105,8 @@ public class Ncbi {
             throw new IOException("No file associated");
         return ftp.getFile(path + filename);
     }
+
+    public void close() throws IOException {
+        ftp.close();
+    }
 }
