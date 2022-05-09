@@ -9,7 +9,8 @@
 - Veillez à bien sélectionner des kingdom, groupe, sous-groupe et/ou organisme dans la hiérarchie.
 - De même pour les régions à parser (CDS, Introns, etc.). 
 - L'interface graphique permet de configurer plusieurs choses dont le nombre de thread à partir du menu config situé en haut à droite. On peut également choisir de prioriser au choix les parsings ou les téléchargements, nous conseillons de garder la priorité au parsing (cf. Config).
-- Cocher uniquement la case la plus générale dans la hiérarchie selectionnera tous les organismes qui sont en dessous de cette case. 
+- Cocher uniquement la case la plus générale dans la hiérarchie selectionnera tous les organismes qui sont en dessous de cette case.
+- Si la connexion est stable (_Ethernet_) augmenter le nombre maximum de téléchargements parallèles dans la config. Si le FTP donne trop d'erreur, diminuer le nombre de téléchargements parallèles.
 
 --------
 
