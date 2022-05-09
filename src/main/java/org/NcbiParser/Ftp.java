@@ -58,7 +58,7 @@ public class Ftp {
         // Download ftp references files
         // https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftpClient = new FTPClient();
-        ftpClient.setControlKeepAliveTimeout(300);
+        ftpClient.setControlKeepAliveTimeout(10);
         //ftpCV.setControlEncoding("UTF-8");
         //ftp.setAutodetectUTF8(true);
         FTPClientConfig config = new FTPClientConfig();
