@@ -101,7 +101,12 @@ public class Ftp {
     }
 
     public void close() throws IOException {
+        try {
             ftpClient.logout();
+        } catch (Exception e) {
+            System.err.println("Error in logout : " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
             ftpClient.disconnect();
     }
 
