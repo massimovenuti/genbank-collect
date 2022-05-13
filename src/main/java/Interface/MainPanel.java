@@ -73,8 +73,8 @@ public class MainPanel extends JFrame {
     private JButton stopButton;
     private JCheckBox toutCheckBox;
     private JPanel optionsContainer;
-    private JSpinner downloadSpinner;
-    private JSpinner paringSpinner;
+    private JSpinner threadSpinner;
+    private JComboBox priorityCB;
     private JButton appliquerButton;
     private JButton annulerButton;
     private JButton optionsButton;
@@ -114,7 +114,7 @@ public class MainPanel extends JFrame {
                     Region region = Region.get(((JCheckBox) c).getText());
                     assert region != null;
                     checked.add(region);
-                    System.out.println(region);
+                    //System.out.println(region);
                 }
             }
         }
@@ -135,24 +135,15 @@ public class MainPanel extends JFrame {
         }
     }
     public void build_tree_aux(DefaultMutableTreeNode parent_node, TreeNode child) {
-        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-        DefaultMutableTreeNode temp;
-        temp = new DefaultMutableTreeNode(child.getText());
-        parent_node.add(temp);
-        if (child.is_uptodate()) {
-            renderer.setIcon(up_to_dateIcon);
-        } else {
-            renderer.setIcon(obsoleteIcon);
-        }
-        if (child instanceof TreeLeaf) {
-            return;
-        } else {
+        DefaultMutableTreeNode temp = new DefaultMutableTreeNode(String.format("%s;%s", child.getText(), child.is_uptodate() ? "1" : "0"));
+        if (child.getChildren().size() != 0) {
             ArrayList<TreeNode> children = child.getChildren();
 
             for (int i = 0; i < children.size(); i++) {
                 build_tree_aux(temp, children.get(i));
             }
         }
+        parent_node.add(temp);
     }
 
     public DefaultMutableTreeNode build_tree() {
@@ -214,7 +205,8 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-        for (int i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
+        int i;
+        for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
             progBars.get(i).setVisible(true);
             barLabels.get(i).setVisible(true);
@@ -223,8 +215,15 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
-        if(GlobalProgress.get().all_tasks().size() == 0)
+        /*for (i = i+1; i < progBars.size(); ++i)
+            progBars.get(i).setVisible(false);*/
+        if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
+            if (stopButton.isVisible()) {
+                stopButton.setVisible(false);
+                parseButton.setVisible(true);
+            }
+        }
     }
 
     public String formatMs(float millis) {
@@ -253,7 +252,6 @@ public class MainPanel extends JFrame {
             tree.setSelectionPaths(treePaths.toArray(new TreePath[0]));
             active = true;
         }
-
     }
 
     public void enableParsing() {
@@ -277,9 +275,6 @@ public class MainPanel extends JFrame {
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
         treePaths = new ArrayList<>();
-        obsoleteIcon = new ImageIcon("assets/obsolete.png");
-        up_to_dateIcon = new ImageIcon("assets/up_to_date.png");
-
         var frame = this;
 
         set_bars_invisible();
@@ -289,6 +284,8 @@ public class MainPanel extends JFrame {
         GlobalGUIVariables.get().setOnTreeChanged(new GenericTask(() -> {update_tree_from_root();
             tree.updateUI();
             frame.enableParsing();}));
+
+        priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1);
 
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
@@ -361,6 +358,8 @@ public class MainPanel extends JFrame {
         optionsButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!optionsButton.isEnabled())
+                    return;
                 super.mousePressed(e);
                 toggleContainer.setVisible(false);
                 optionsContainer.setVisible(true);
@@ -372,13 +371,9 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
-                int dl, pars;
-                dl = (Integer)downloadSpinner.getValue();
-                pars = (Integer)paringSpinner.getValue();
-                GlobalGUIVariables.get().setNbThreadsDL(dl);
-                GlobalGUIVariables.get().setNbThreadsParsing(pars);
-                JOptionPane.showMessageDialog(null, "Changements sauvegardées, veuillez relancer le processus");
-
+                GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
+                Config.setPriority(priorityCB.getSelectedItem().toString());
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
@@ -419,15 +414,15 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_dl = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsDL(), 1, 1000, 1);
-        SpinnerNumberModel model_parse = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreadsParsing(), 1, 1000, 1);
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
 
-        downloadSpinner = new JSpinner(model_dl);
-        paringSpinner = new JSpinner(model_parse);
+        threadSpinner = new JSpinner(model_threads);
+
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("assets/settings.png"));
+            img = ImageIO.read(this.getClass().getResource("/settings.png"));
         } catch (IOException e) {
+            e.printStackTrace(System.err);
         }
         ImageIcon icon = new ImageIcon(img);
         Image image = icon.getImage();

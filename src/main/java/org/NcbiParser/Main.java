@@ -1,10 +1,13 @@
 package org.NcbiParser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.sql.*;
 
 public class Main {
     public static Ncbi ncbi;
@@ -32,11 +35,14 @@ public class Main {
     }
 
     public static void atProgStart() {
+        var ini = GlobalProgress.get().registerTask("Initialisation");
+        ini.addTodo(1);
         try {
+            Files.createDirectories(Paths.get(Config.result_directory()));
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
-                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, ini);
 
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
@@ -44,14 +50,16 @@ public class Main {
                 } catch (IOException e) {
                 }
             }));
-            //update(ncbi);
-//            test();
+            ini.addDone(1);
+            GlobalProgress.get().remove_task(ini);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void startParsing(ArrayList<OverviewData> selected, ArrayList<Region> regions) {
+        if (selected.size() == 0)
+            return;
         try {
             if (ncbi == null)
                 ncbi = new Ncbi();
@@ -59,12 +67,18 @@ public class Main {
             for (var line : r) {
                 if (GlobalGUIVariables.get().isStop())
                     break;
-                mt.getMt().pushTask(new DLTask(line, regions));
+                mt.getMt().pushTask(new ParsingTask(line, regions));
             }
             mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
                 if (mt.getMt().getDlTask().getDone() >= r.size()) {
-                    mt.getMt().clearDl();
                     mt.getMt().clearParsing();
+
+                    var t = GlobalProgress.get().registerTask("Cr\u00e9ation de l'arborescence");
+                    t.addTodo(1);
+                    var new_tree = createHierarchy(t);
+                    t.addDone(1);
+                    GlobalGUIVariables.get().setTree(new_tree);
+                    GlobalProgress.get().remove_task(t);
                 }
             }));
         } catch (Exception e) {
@@ -109,13 +123,10 @@ public class Main {
 
         ArrayList<OverviewData> need = new ArrayList<>();
         need.add(new OverviewData(null, null, null, null));
-        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.CDS));
+        ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
 
-        long start = System.currentTimeMillis();
         ArrayList<UpdateRow> data = DataBase.getGlobalRegroupedData();
         ArrayList<UpdateRow> dataNeedingUpdate = DataBase.allOrganismNeedingUpdate(need, regions);
-
-//        System.out.println((System.currentTimeMillis() - start)/1000);
 
         Collections.sort(data);
         Collections.sort(dataNeedingUpdate);
@@ -123,7 +134,7 @@ public class Main {
         Iterator<UpdateRow> dataIterator = data.iterator();
         Iterator<UpdateRow> dataNeedingUpdateIterator = dataNeedingUpdate.iterator();
 
-        TreeNode top = new TreeNode("");
+        TreeNode top = new TreeNode("All");
         TreeNode kingdom = null, group = null, subGroup = null, organism = null;
 
         String prevKingdom = "", prevGroup = "", prevSubGroup = "", prevOrganism = "";
@@ -178,16 +189,13 @@ public class Main {
                     assert subGroup != null;
                     subGroup.push_node(organism);
                 }
-                boolean needAnUpdate = false;
+                boolean isUpToDate = true;
                 if (updateRow != null && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism())) {
-                    needAnUpdate = true;
+                    isUpToDate = false;
                     while (dataNeedingUpdateIterator.hasNext() && updateRow.getOrganism().equalsIgnoreCase(row.getOrganism()))
                         updateRow = dataNeedingUpdateIterator.next();
                 }
-                else { // For debug
-                    System.out.println("Don't need update");
-                }
-                organism = new TreeLeaf(row.getOrganism(), needAnUpdate);
+                organism = new TreeLeaf(row.getOrganism(), isUpToDate);
                 prevOrganism = row.getOrganism();
             }
         }
@@ -198,14 +206,12 @@ public class Main {
         kingdom.push_node(group);
         top.push_node(kingdom);
 
-//        System.out.println((System.currentTimeMillis() - start)/1000);
-
         return top;
     }
 
     public static MultiThreading getMt() throws IOException {
         if (mt == null)
-            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreadsDL(), GlobalGUIVariables.get().getNbThreadsParsing(), 1);
+            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, null);
         return mt;
     }
 }

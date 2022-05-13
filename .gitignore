@@ -19,6 +19,7 @@ Results/
 *.ipr
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+.idea/artifacts/*.xml
 
 ### Eclipse ###
 .apt_generated
@@ -54,3 +55,5 @@ out/
 *.jar
 META-INF/
 config.xml
+*.zip
+*.pdf

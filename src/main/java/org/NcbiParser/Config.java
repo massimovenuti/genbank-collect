@@ -1,7 +1,5 @@
 package org.NcbiParser;
 
-import java.util.Properties;
-
 public class Config {
     static private String cached_dir;
     static private String cached_r;
@@ -31,5 +29,26 @@ public class Config {
 
     public static void setDynamicConfiguration(String key, String newValue) {
         dconf.setProperty(key, newValue);
+    }
+
+    public static boolean parsingPriority() {
+        return fromDynamicConfiguration("priority", "parsing").contentEquals("parsing");
+    }
+    public static boolean downloadPriority() {
+        return !parsingPriority();
+    }
+
+    public static void setPriority(String toString) {
+        setDynamicConfiguration("priority", toString);
+    }
+
+    public static boolean removeFromCacheAfterParsing() {
+        return fromDynamicConfiguration("removeFromCacheAfterParsing", "true").contentEquals("true");
+    }
+    public static int maxParallelDownloads() {
+        return Integer.parseInt(fromDynamicConfiguration("maxParallelDownloads", "2"));
+    }
+    public static void setMaxParallelDownloads(int new_max) {
+        setDynamicConfiguration("maxParallelDownloads", Integer.toString(new_max));
     }
 }
