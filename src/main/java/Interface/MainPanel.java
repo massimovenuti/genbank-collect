@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
@@ -205,6 +206,7 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
+        set_bars_invisible();
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
@@ -420,7 +422,7 @@ public class MainPanel extends JFrame {
 
         BufferedImage img = null;
         try {
-            img = ImageIO.read(this.getClass().getResource("/settings.png"));
+            img = ImageIO.read(new FileInputStream("assets/settings.png"));
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }
