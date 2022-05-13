@@ -16,7 +16,6 @@ public class Ftp {
     private void connect() throws IOException {
         try {
             ftpClient.connect(server);
-
             int reply = ftpClient.getReplyCode();
 
             if (!FTPReply.isPositiveCompletion(reply)) {
@@ -27,6 +26,7 @@ public class Ftp {
             }
 
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            ftpClient.enterLocalPassiveMode();
 
         } catch (Throwable e) {
             GlobalGUIVariables.get().insert_text(Color.RED,"Unable to connnect to ftp server: " + e.getMessage() + "\n");
@@ -58,6 +58,7 @@ public class Ftp {
         // Download ftp references files
         // https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftpClient = new FTPClient();
+
         ftpClient.setControlKeepAliveTimeout(300);
         //ftpCV.setControlEncoding("UTF-8");
         //ftp.setAutodetectUTF8(true);
@@ -78,20 +79,35 @@ public class Ftp {
 
     public void restart() {
             try {
-                close();
-                Thread.sleep(1000, 0);
+                try {
+                    close();
+                    Thread.sleep(1000, 0);
+                } catch (IOException e) {
+                    System.err.printf("Error in close: %s\n", e.getMessage());
+                    e.printStackTrace(System.err);
+                }
+                ftpClient = new FTPClient();
+                ftpClient.setControlKeepAliveTimeout(300);
+                FTPClientConfig config = new FTPClientConfig();
+                ftpClient.configure(config);
                 connect();
                 Thread.sleep(100, 0);
                 login();
                 Thread.sleep(100, 0);
             } catch (Throwable t) {
-                System.err.printf("Error while restarting FTP: %20s\n%s\n", t.getMessage(), t.getStackTrace());
-                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting FTP: " + t.getMessage() + "\n" + t.getStackTrace() + "\n");
+                System.err.printf("Error while restarting FTP: %20s\n", t.getMessage());
+                t.printStackTrace(System.err);
+                GlobalGUIVariables.get().insert_text(Color.RED,"Error while restarting FTP: " + t.getMessage() + "\n");
             }
     }
 
     public void close() throws IOException {
+        try {
             ftpClient.logout();
+        } catch (Exception e) {
+            System.err.println("Error in logout : " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
             ftpClient.disconnect();
     }
 

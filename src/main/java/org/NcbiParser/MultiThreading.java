@@ -4,36 +4,43 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class MultiThreading {
-    private ArrayList<Thread> pThreads;
-    private ArrayList<Thread> gThreads;
+    private ArrayList<Thread> parsingThreads;
+    private ArrayList<Thread> guiThreads;
     private MultiTasker mt;
 
     public MultiTasker getMt() {
         return mt;
     }
 
-    MultiThreading(int nbDlThreads, int nbParsingThreads, int nbbGenericThreads) throws IOException {
+    MultiThreading(int nbParsingThreads, int nbbGenericThreads, ProgressTask init) throws IOException {
+        if (init != null) init.addTodo(1+2*(nbbGenericThreads+nbbGenericThreads));
         mt = new MultiTasker();
-        pThreads = new ArrayList<Thread>();
-        gThreads = new ArrayList<Thread>();
+        parsingThreads = new ArrayList<Thread>();
+        guiThreads = new ArrayList<Thread>();
+        if (init != null) init.addDone(1);
 
-        for (int i = 0; i < nbDlThreads; ++i)
-            pThreads.add(new DLThread(mt));
-        for (int i = 0; i < nbParsingThreads; ++i)
-            pThreads.add(new ParsingThread(mt));
-        for (int i = 0; i < nbbGenericThreads; ++i)
-            gThreads.add(new GenericThread(mt));
+        for (int i = 0; i < nbParsingThreads; ++i) {
+            parsingThreads.add(new ParsingThread(mt));
+            if (init != null) init.addDone(1);
+        }
+        for (int i = 0; i < nbbGenericThreads; ++i) {
+            guiThreads.add(new GenericThread(mt));
+            if (init != null) init.addDone(1);
+        }
 
-        for (var t : pThreads)
+        for (var t : parsingThreads) {
             t.start();
-        for (var t : gThreads)
+            if (init != null) init.addDone(1);
+        }
+        for (var t : guiThreads) {
             t.start();
+            if (init != null) init.addDone(1);
+        }
     }
 
     public void stopParsing() {
-        mt.clearDl();
         mt.clearParsing();
-        for (var t : pThreads) {
+        for (var t : parsingThreads) {
             t.interrupt();
         }
     }

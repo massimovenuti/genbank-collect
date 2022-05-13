@@ -101,6 +101,16 @@ public class Ncbi {
         // TODO: plusieurs .gbk ??
         String path = virusDirectory(virusName);
         String filename = ftp.getFileFromEnd(path, ".gbk");
+        if (!filename.endsWith(".gbk"))
+            throw new IOException("No file associated");
         return ftp.getFile(path + filename);
+    }
+
+    public void close() throws IOException {
+        ftp.close();
+    }
+
+    public void reset() {
+        ftp.restart();
     }
 }
