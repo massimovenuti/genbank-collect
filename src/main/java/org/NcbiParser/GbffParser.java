@@ -5,6 +5,7 @@ import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.MyGenbankReader;
 import org.biojava.nbio.core.sequence.Strand;
 import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.features.FeatureInterface;
 import org.biojava.nbio.core.sequence.io.DNASequenceCreator;
@@ -43,14 +44,14 @@ public class GbffParser implements Parser {
             throw e;
         }
 
-        dnaReader = new MyGenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(AmbiguityDNACompoundSet.getDNACompoundSet()));
+        dnaReader = new MyGenbankReader(inStream, new GenericGenbankHeaderParser(), new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
     }
 
     private void writeFeature(FeatureInterface<AbstractSequence<NucleotideCompound>, NucleotideCompound> feature,
                               DNASequence sequence,
                               String header,
                               Region region,
-                              BufferedWriter bufferedWriter) throws IOException {
+                              BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         if (wrongSourceFormat(feature.getSource())) {
             if (false) {
                 System.err.println("Wrong source format : " + feature.getSource());
@@ -84,7 +85,7 @@ public class GbffParser implements Parser {
     private void writeCDS(AbstractLocation loc,
                           DNASequence sequence,
                           String header,
-                          BufferedWriter bufferedWriter) throws IOException {
+                          BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         int n = loc.getSubLocations().size();
         String exon = null;
 
@@ -112,7 +113,7 @@ public class GbffParser implements Parser {
     private void writeIntron(AbstractLocation loc,
                              DNASequence sequence,
                              String header,
-                             BufferedWriter bufferedWriter) throws IOException {
+                             BufferedWriter bufferedWriter) throws IllegalStateException, IOException {
         int n = loc.getSubLocations().size();
         String intron = null;
 
@@ -194,7 +195,8 @@ public class GbffParser implements Parser {
             throw e;
         }
         try {
-            Files.deleteIfExists(Paths.get(gbPath));
+            if (Config.removeFromCacheAfterParsing())
+                Files.deleteIfExists(Paths.get(gbPath));
         } catch (IOException e) {
             System.err.println("Failed to delete file " + gbPath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to delete file " + gbPath + "\n");
@@ -273,7 +275,7 @@ public class GbffParser implements Parser {
                                String nc,
                                DNASequence sequence,
                                Region region,
-                               String filePath) throws IOException {
+                               String filePath) throws IllegalStateException, IOException {
         FileWriter writer = null;
         BufferedWriter bufferedWriter = null;
         try {
@@ -283,6 +285,9 @@ public class GbffParser implements Parser {
                 String header = makeSequenceHeader(region.toString(), organism, nc, organelle, feature.getSource());
                 writeFeature(feature, sequence, header, region, bufferedWriter);
             }
+        } catch (IllegalStateException e) {
+            close();
+            throw e;
         } catch (IOException e) {
             System.err.println("Failed to write file " + filePath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to write file " + gbPath + "\n");
@@ -294,7 +299,7 @@ public class GbffParser implements Parser {
         }
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IllegalStateException, IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 

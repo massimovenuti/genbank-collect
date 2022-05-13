@@ -78,6 +78,7 @@ public final class DataBaseManager {
             boolean isIn;
             //pour toutes les lignes -> regarder si chaque region selectionnée est à jour
             for(var reg : regs){
+                if (reg.toString().isEmpty()) continue;
                 isIn = false;
                 //chercher la colonne correspondant à ce type
                 for (int i = 0; i < types.size(); ++i) {
