@@ -8,14 +8,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -422,7 +419,7 @@ public class MainPanel extends JFrame {
 
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new FileInputStream("assets/settings.png"));
+            img = ImageIO.read(this.getClass().getResource("/settings.png"));
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }
