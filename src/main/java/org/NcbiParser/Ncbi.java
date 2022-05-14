@@ -39,7 +39,7 @@ public class Ncbi {
         return ret;
     }
 
-    public ArrayList<AssemblyData> assembly_to_db(String name) throws IOException {
+    public ArrayList<AssemblyData> assembly_to_db() throws IOException {
         var raw = rawAssembly();
         var prefix_length = "https://ftp.ncbi.nlm.nih.gov/genomes/all/".length();
         var ret = new ArrayList<AssemblyData>();

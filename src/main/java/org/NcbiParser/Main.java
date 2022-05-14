@@ -18,20 +18,19 @@ public class Main {
         //startParsing(new OverviewData());
     }
 
-    public static void test() {
+    /*public static void test() {
         try {
-            var r = ncbi.assembly_to_db("eukaryotes.txt");
+            var r = ncbi.assembly_to_db();
             var row = r.get(3);
-            File gbffFile = ncbi.getGbffFromAssemblyData(row.getGc());
+            File gbffFile = ncbi.getGbffFromAssemblyData(row);
             GbffParser parser = new GbffParser(gbffFile);
             ArrayList<Region> regions = new ArrayList<>();
             regions.add(Region.CDS);
-            var ncs = NcbiParser.preparse_ncs(row.getNcs());
-            parser.parse_into("Results/", "Homo Sapiens", "", regions, ncs);
+            parser.parse_into("Results/", "Homo Sapiens", "", regions);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public static void atProgStart() {
         var ini = GlobalProgress.get().registerTask("Initialisation");
@@ -88,25 +87,17 @@ public class Main {
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
-        ArrayList<AssemblyData> idxDatas = new ArrayList<AssemblyData>();
         var task = gl.registerTask("Mise \u00e0 jour des indexes");
-        task.addTodo(5);
+        task.addTodo(3);
         var od = ncbi.overview_to_db();
         task.addDone(1);
-        String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
-        for (var idx : arr) {
-            System.out.printf("File: %s | %d/%d -> %ds\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
-            //DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
-            idxDatas.addAll(ncbi.assembly_to_db(idx));
-            task.addDone(1);
-        }
-        DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
-        DataBase.updateFromIndexAndOverview(od, idxDatas);
+        var ad = ncbi.assembly_to_db();
         task.addDone(1);
-        //ArrayList<OverviewData> test = new ArrayList<OverviewData>();
-        //test.add(new OverviewData("Archaea",null,null,null));
-        //DataBase.allOrganismNeedingUpdate(test);
+        DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
+        DataBase.updateFromIndexAndOverview(od, ad);
+        task.addDone(1);
         gl.remove_task(task);
+
         mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Cr\u00e9ation de l'arborescence");
             t.addTodo(1);
