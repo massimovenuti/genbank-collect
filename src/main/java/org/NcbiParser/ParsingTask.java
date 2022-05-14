@@ -1,6 +1,5 @@
 package org.NcbiParser;
 
-import org.apache.commons.net.telnet.EchoOptionHandler;
 import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 
 import java.awt.*;
@@ -78,7 +77,7 @@ public class ParsingTask {
                     return false;
                 }
             } else {
-                dl = ncbi.getGbffFromGc(row.getGc());
+                dl = ncbi.getGbffFromAssemblyData(row.getGc());
             }
             System.out.printf("Download ended: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
             GlobalGUIVariables.get().insert_text(Color.GREEN, "Download ended: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");

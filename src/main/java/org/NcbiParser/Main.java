@@ -22,7 +22,7 @@ public class Main {
         try {
             var r = ncbi.assembly_to_db("eukaryotes.txt");
             var row = r.get(3);
-            File gbffFile = ncbi.getGbffFromGc(row.getGc());
+            File gbffFile = ncbi.getGbffFromAssemblyData(row.getGc());
             GbffParser parser = new GbffParser(gbffFile);
             ArrayList<Region> regions = new ArrayList<>();
             regions.add(Region.CDS);
