@@ -18,7 +18,8 @@ public class GenericThread extends Thread {
                 }
                 gt.run();
             } catch (Exception t) {
-                System.out.printf("Error in GenericThread: %s\n", t.getMessage());
+                System.err.printf("Error in GenericThread: %s\n", t.getMessage());
+                t.printStackTrace(System.err);
                 GlobalGUIVariables.get().insert_text(Color.RED,"Error in GenericThread: " + t.getMessage() + "\n");
             }
         }

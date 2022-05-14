@@ -226,8 +226,8 @@ public class MainPanel extends JFrame {
         }
     }
 
-    public String formatMs(float millis) {
-        long sec = (long)millis/1000;
+    public String formatMs(long millis) {
+        long sec = millis/1000;
         long min = sec / 60;
         long hou = min / 60;
         return String.format("%3dh%2dm%2ds", hou, min % 60, sec % 60);
