@@ -26,6 +26,7 @@ public class Ftp {
             }
 
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            ftpClient.setBufferSize(32*1024*1024); // 32 Mo
             ftpClient.enterLocalPassiveMode();
 
         } catch (Throwable e) {
