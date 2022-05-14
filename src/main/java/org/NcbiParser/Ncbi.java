@@ -14,7 +14,7 @@ public class Ncbi {
 
     public ArrayList<ArrayList<String>> rawOverview() throws IOException {
         var f = ftp.getFile(report_dir + "/overview.txt");
-        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name"};
+        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name", "Organelles"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
 
@@ -23,30 +23,16 @@ public class Ncbi {
         String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", (name.contains("virus")) ? "Segmemts" : "Replicons"};
         return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
     }
-    /*
-    public ArrayList<ArrayList<String>> rawEukaryotes() throws IOException {
-        var f = ftp.getFile(report_dir + "/eukaryotes.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }
-
-    public ArrayList<ArrayList<String>> rawViruses() throws IOException {
-        var f = ftp.getFile(report_dir + "/viruses.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }
-
-    public ArrayList<ArrayList<String>> rawProkaryotes() throws IOException {
-        var f = ftp.getFile(report_dir + "/prokaryotes.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", "Segmemts"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }*/
 
     public ArrayList<OverviewData> overview_to_db() throws IOException {
         var raw = rawOverview();
         var ret = new ArrayList<OverviewData>();
         for (var s : raw) {
-            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3)));
+            if (s.size() < 5) {
+                System.err.println("Warning: bad line in overview.txt");
+                continue;
+            }
+            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4) == "-" ? "" : s.get(4)));
         }
         return ret;
     }
