@@ -39,8 +39,11 @@ public class ProgressTask {
         return System.currentTimeMillis() - start_ms;
     }
 
-    public float estimatedTimeLeftMs() {
-        return getTodo() > 0 ? elapsedMs() / (((float) getDone()) / ((float)getTodo())) : 0;
+    public long estimatedTimeLeftMs() {
+        var todo = getTodo();
+        var done = getDone();
+        var speed = elapsedMs() / done;
+        return (todo > 0 && done > 0) || (todo == done) ? speed * (todo-done) : 0;
     }
 
     public void addTodo(int todo) {
