@@ -53,34 +53,14 @@ public class ParsingTask {
 
     public boolean run_dl(MultiTasker mt, Ncbi ncbi) {
         try {
-            var are_nc = NcbiParser.preparse_ncs(row.getNcs());
-            if (are_nc.size() == 0) {
-                System.out.printf("No NC in %s, skipping download\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
-                GlobalGUIVariables.get().insert_text(Color.ORANGE, "No NC in " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ", skipping download\n");
-                mt.registerDlEnded();
-                task.addDone(1);
-                return true;
-            }
-            row.setAreNcs(are_nc);
-            System.out.printf("Downloading: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
-            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");
+            System.out.printf("Downloading: %s\n", row.getGc());
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + row.getGc());
             //System.err.printf("%10s %10s %10s %10s - %10s\n", row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism(), row.getGc());
 
-            File dl = null;
-            if (row.getGc() == null || row.getGc().contentEquals("null")/*&& row.getKingdom().equalsIgnoreCase("virus")*/) {
-                try {
-                    dl = ncbi.getGbkFromVirus(row.getOrganism());
-                } catch (Exception e) {
-                    GlobalGUIVariables.get().insert_text(Color.RED, "No file associated with " + row.getOrganism() + "\n");
-                    mt.registerDlEnded();
-                    task.addDone(1);
-                    return false;
-                }
-            } else {
-                dl = ncbi.getGbffFromAssemblyData(row.getGc());
-            }
-            System.out.printf("Download ended: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
-            GlobalGUIVariables.get().insert_text(Color.GREEN, "Download ended: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");
+            File dl = ncbi.getGbffFromAssemblyData(row.getAssemblyData());
+
+            System.out.printf("Download ended: %s\n", row.getGc());
+            GlobalGUIVariables.get().insert_text(Color.GREEN, "Download ended: " + row.getGc() + "\n");
 
             var ptask = new ParsingTask(dl, row, regions);
             mt.pushTask(ptask);
@@ -102,7 +82,7 @@ public class ParsingTask {
                 mt.pushTask(this); // retry
             } else {
                 System.err.println("Too many retries");
-                GlobalGUIVariables.get().insert_text(Color.RED,"Aborting " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + ": too many retries" + "\n");
+                GlobalGUIVariables.get().insert_text(Color.RED,"Aborting " + row.getGc() + ": too many retries" + "\n");
             }
         }
         mt.registerDlEnded();
@@ -115,7 +95,7 @@ public class ParsingTask {
             var dir = Config.organism_path(row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism());
             Files.createDirectories(Paths.get(dir));
             GbffParser parser = new GbffParser(gbFile);
-            var ret = parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions, row.getAreNcs());
+            var ret = parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
             DataBaseManager.multipleInsertFilesTable(row, regions);
             mt.getParsingTask().addDone(1);
             return ret;

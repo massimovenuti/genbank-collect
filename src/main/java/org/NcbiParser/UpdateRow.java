@@ -9,6 +9,14 @@ public class UpdateRow implements Comparable<UpdateRow> {
         this.assemblyData = assemblyData;
     }
 
+    public OverviewData getOverviewData() {
+        return overviewData;
+    }
+
+    public AssemblyData getAssemblyData() {
+        return assemblyData;
+    }
+
     public String getKingdom() {
         return overviewData.getKingdom();
     }
