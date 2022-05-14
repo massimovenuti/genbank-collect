@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.sql.*;
 
 public class Main {
     public static Ncbi ncbi;
@@ -21,7 +20,7 @@ public class Main {
 
     public static void test() {
         try {
-            var r = ncbi.index_to_db("eukaryotes.txt");
+            var r = ncbi.assembly_to_db("eukaryotes.txt");
             var row = r.get(3);
             File gbffFile = ncbi.getGbffFromGc(row.getGc());
             GbffParser parser = new GbffParser(gbffFile);
@@ -89,7 +88,7 @@ public class Main {
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
-        ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
+        ArrayList<AssemblyData> idxDatas = new ArrayList<AssemblyData>();
         var task = gl.registerTask("Mise \u00e0 jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
@@ -98,7 +97,7 @@ public class Main {
         for (var idx : arr) {
             System.out.printf("File: %s | %d/%d -> %ds\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
             //DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
-            idxDatas.addAll(ncbi.index_to_db(idx));
+            idxDatas.addAll(ncbi.assembly_to_db(idx));
             task.addDone(1);
         }
         DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");

@@ -1,6 +1,5 @@
 package org.NcbiParser;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +34,7 @@ public class DataBase {
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
 
 
-    public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<IndexData> index_parsed){
+    public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<AssemblyData> index_parsed){
         globalRegroupedData = new ArrayList<UpdateRow>();
         Collections.sort(overview_parsed, new Comparator<OverviewData>() {
             @Override
@@ -44,9 +43,9 @@ public class DataBase {
             }
         });
 
-        Collections.sort(index_parsed, new Comparator<IndexData>() {
+        Collections.sort(index_parsed, new Comparator<AssemblyData>() {
             @Override
-            public int compare(IndexData o1, IndexData o2) {
+            public int compare(AssemblyData o1, AssemblyData o2) {
                 return o1.compareTo(o2);
             }
         });
