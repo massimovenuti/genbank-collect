@@ -8,13 +8,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -205,6 +203,7 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
+        set_bars_invisible();
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
