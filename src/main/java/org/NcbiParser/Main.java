@@ -96,7 +96,7 @@ public class Main {
         task.addDone(1);
         String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
         for (var idx : arr) {
-            System.out.printf("File: %s | %d/%d -> %fs\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
+            System.out.printf("File: %s | %d/%d -> %ds\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
             //DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
             idxDatas.addAll(ncbi.index_to_db(idx));
             task.addDone(1);
