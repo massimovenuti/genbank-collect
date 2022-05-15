@@ -204,36 +204,37 @@ public class GbffParser implements Parser {
         }
     }
 
-    private String readNextNc(HashMap<String, String> areNcs) throws IOException {
+    private String readNextNc() throws IOException {
         try {
-            BufferedReader bufferedReader = dnaReader.getBufferedReader();
-            bufferedReader.mark(1000);
+            while (true) {
+                BufferedReader bufferedReader = dnaReader.getBufferedReader();
+                bufferedReader.mark(1000);
 
-            String line = bufferedReader.readLine();
-            if (line == null)
-                return null;
+                String line = bufferedReader.readLine();
+                if (line == null)
+                    return null;
 
-            String accession = line.split("\\s+")[1];
-            String nc = areNcs.get(accession);
+                String accession = line.split("\\s+")[1];
+                boolean is_nc = accession.startsWith("NC_");
 
-            if (nc != null) {
-                bufferedReader.reset();
-                return nc;
+                if (is_nc) {
+                    bufferedReader.reset();
+                    return accession;
+                }
+
+                while (line != null && line.charAt(0) != '/')
+                    line = bufferedReader.readLine();
+
+                if (line == null)
+                    return null;
             }
 
-            while (line != null && line.charAt(0) != '/')
-                line = bufferedReader.readLine();
-
-            if (line == null)
-                return null;
         } catch (IOException e) {
             System.err.println("Failed to read file : " + gbPath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath + "\n");
             close();
             throw e;
         }
-
-        return readNextNc(areNcs);
     }
 
     private boolean wrongSourceFormat(String source) {
@@ -299,12 +300,12 @@ public class GbffParser implements Parser {
         }
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IllegalStateException, IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions) throws IllegalStateException, IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
         while (true) {
-            String nc = readNextNc(areNcs);
+            String nc = readNextNc();
             if (nc == null) break;
             DNASequence sequence = readNextSequence();
             if (sequence == null) break;
