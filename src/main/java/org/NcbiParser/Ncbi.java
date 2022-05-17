@@ -17,13 +17,13 @@ public class Ncbi {
     public ArrayList<ArrayList<String>> rawOverview() throws IOException {
         var f = ftp.getFile(genome_report_dir + "/overview.txt");
         String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name", "Organelles"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+        return NcbiParser.parseFile(new FileInputStream(f), new ArrayList<String>(Arrays.asList(cols)));
     }
 
     public ArrayList<ArrayList<String>> rawAssembly() throws IOException {
         var f = ftp.getFile(assembly_report_dir + "/assembly_summary_refseq.txt");
-        String[] cols = {"assembly_accession", "taxid", "organism_name", "seq_rel_date", "ftp_path"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols), 1);
+        int[] cols = {0, 5, 7, 14, 19};
+        return NcbiParser.parseFile(new FileInputStream(f), cols, 1);
     }
 
     public ArrayList<OverviewData> overview_to_db() throws IOException {
@@ -49,7 +49,7 @@ public class Ncbi {
                 continue;
             }
             // remove https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/
-                ret.add(new AssemblyData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4).substring(prefix_length)));
+                ret.add(new AssemblyData(   s.get(0), s.get(1), s.get(2), s.get(3), s.get(4).substring(prefix_length)));
         }
         return ret;
     }
