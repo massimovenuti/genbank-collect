@@ -8,6 +8,16 @@ public class ProgressTask {
     private String name;
     private AtomicInteger done;
 
+    public boolean isRemovable() {
+        return removable;
+    }
+
+    public void setRemovable(boolean removable) {
+        this.removable = removable;
+    }
+
+    private boolean removable = false;
+
     public void setOnFinished(GenericTask onFinished) {
         this.onFinished = onFinished;
     }
@@ -53,7 +63,7 @@ public class ProgressTask {
 
     public void addDone(int done) {
         var t = this.done.addAndGet(done);
-        if (onFinished != null && t == getTodo())
+        if (onFinished != null && t == getTodo() && isRemovable())
             onFinished.run();
         GlobalGUIVariables.get().getAddTrigger().doClick();
     }

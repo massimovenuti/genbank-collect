@@ -64,22 +64,31 @@ public class Main {
             if (ncbi == null)
                 ncbi = new Ncbi();
             var r = DataBase.allOrganismNeedingUpdate(selected, regions);
+            var dtask = GlobalProgress.get().registerTask("T\u00e9l\u00e9chargement");
+            var ptask = GlobalProgress.get().registerTask("Parsing");
             for (var line : r) {
                 if (GlobalGUIVariables.get().isStop())
                     break;
-                mt.getMt().pushTask(new ParsingTask(line, regions));
+                mt.getMt().pushTask(new ParsingTask(dtask, ptask, line, regions));
+                dtask.addTodo(1);
             }
-            mt.getMt().getParsingTask().setOnFinished(new GenericTask(() -> { // remove everything
-                if (mt.getMt().getDlTask().getDone() >= r.size()) {
-                    mt.getMt().clearParsing();
 
-                    var t = GlobalProgress.get().registerTask("Cr\u00e9ation de l'arborescence");
-                    t.addTodo(1);
-                    var new_tree = createHierarchy(t);
-                    t.addDone(1);
-                    GlobalGUIVariables.get().setTree(new_tree);
-                    GlobalProgress.get().remove_task(t);
-                }
+            dtask.setOnFinished(new GenericTask(() -> {
+                ptask.setRemovable(true);
+                GlobalProgress.get().remove_task(dtask);
+            }));
+            dtask.setRemovable(true);
+
+            ptask.setOnFinished(new GenericTask(() -> { // remove everything
+                mt.getMt().clearParsing();
+                GlobalProgress.get().remove_task(ptask);
+
+                var t = GlobalProgress.get().registerTask("Cr\u00e9ation de l'arborescence");
+                t.addTodo(1);
+                var new_tree = createHierarchy(t);
+                t.addDone(1);
+                GlobalGUIVariables.get().setTree(new_tree);
+                GlobalProgress.get().remove_task(t);
             }));
         } catch (Exception e) {
             e.printStackTrace();
