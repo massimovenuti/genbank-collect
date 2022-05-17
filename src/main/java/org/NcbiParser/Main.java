@@ -190,11 +190,12 @@ public class Main {
             }
         }
 
-        assert group != null;
-        group.push_node(subGroup);
-        assert kingdom != null;
-        kingdom.push_node(group);
-        top.push_node(kingdom);
+        if (subGroup != null && group != null && kingdom != null) {
+            // si rien n'a été créé, ne devrait jamais arriver
+            group.push_node(subGroup);
+            kingdom.push_node(group);
+            top.push_node(kingdom);
+        }
 
         return top;
     }
