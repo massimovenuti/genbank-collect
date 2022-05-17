@@ -1,6 +1,7 @@
 package org.NcbiParser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -36,10 +37,10 @@ public class DataBase {
 
     public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<AssemblyData> index_parsed){
         globalRegroupedData = new ArrayList<UpdateRow>();
-        Collections.sort(overview_parsed, Comparator.comparing(OverviewData::getOrganism));
+        Collections.sort(overview_parsed, (OverviewData o1,OverviewData o2) -> o1.getOrganism().compareToIgnoreCase(o2.getOrganism()) );
 
-        Collections.sort(index_parsed, Comparator.comparing(AssemblyData::getOrganism));
-        int i = 0, j = 0;
+        //Collections.sort(index_parsed, Comparator.comparing(AssemblyData::getOrganism));
+        /*int i = 0, j = 0;
          while(i < index_parsed.size() && j < overview_parsed.size()){
             if(overview_parsed.get(j).getOrganism().equalsIgnoreCase(index_parsed.get(i).getOrganism())){
 
@@ -49,7 +50,15 @@ public class DataBase {
                 //cherche le kingdom qui correspond à l'index courant
                 ++j;
             }
-         }
+         }*/
+        for(var index : index_parsed){
+            int pos = BinarySearchClass.binarySearch(overview_parsed,0,overview_parsed.size()-1,index.getOrganism());
+            if( pos != -1){
+                globalRegroupedData.add(new UpdateRow(overview_parsed.get(pos),index));
+            }else{
+                System.err.println("index correspondant à aucun organisme dans overviewData : " + index.getOrganism());
+            }
+        }
 
         System.out.println();
     }
