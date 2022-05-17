@@ -302,6 +302,7 @@ public class GbffParser implements Parser {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
+        organelle = "";
         boolean dirCreated = false;
         int n_nc = 0;
 
