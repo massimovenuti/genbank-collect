@@ -378,7 +378,7 @@ public class MainPanel extends JFrame {
                     optionsContainer.setVisible(false);
                     GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
                     GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                    Config.setPriority(slider.getValue() / 100);
+                    Config.setPriority((float)slider.getValue() / 100.f);
                     JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
                     if(cacheBox.getSelectedItem().equals("Oui")) {
                         GlobalGUIVariables.get().setDelete_cache(true);
