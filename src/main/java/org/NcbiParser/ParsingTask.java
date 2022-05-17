@@ -93,7 +93,6 @@ public class ParsingTask {
     public boolean run_parsing(MultiTasker mt) {
         try {
             var dir = Config.organism_path(row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism());
-            Files.createDirectories(Paths.get(dir));
             GbffParser parser = new GbffParser(gbFile);
             var ret = parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
             DataBaseManager.multipleInsertFilesTable(row, regions);
