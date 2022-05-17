@@ -303,10 +303,12 @@ public class GbffParser implements Parser {
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
         boolean dirCreated = false;
+        int n_nc = 0;
 
         while (true) {
             String nc = readNextNc();
             if (nc == null) break;
+            n_nc++;
             DNASequence sequence = readNextSequence();
             if (sequence == null) break;
             for (Region region : regions) {
@@ -327,8 +329,14 @@ public class GbffParser implements Parser {
 
         close();
 
-        System.out.printf("Parsing ended: %s\n", gbPath);
-        GlobalGUIVariables.get().insert_text(Color.GREEN, "Parsing ended: " + gbPath + "\n");
+        if (n_nc == 0) {
+            System.out.printf("No NC in: %s\n", gbPath);
+            GlobalGUIVariables.get().insert_text(Color.ORANGE, String.format("No NC in: %s\n", gbPath));
+        } else {
+            System.out.printf("Parsing ended: %s (%d NC)\n", gbPath, n_nc);
+            GlobalGUIVariables.get().insert_text(Color.GREEN, String.format("Parsing ended: %s (%d NC)\n", gbPath, n_nc));
+        }
+
         return true;
     }
 }
