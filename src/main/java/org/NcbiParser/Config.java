@@ -31,15 +31,13 @@ public class Config {
         dconf.setProperty(key, newValue);
     }
 
-    public static boolean parsingPriority() {
-        return fromDynamicConfiguration("priority", "parsing").contentEquals("parsing");
-    }
-    public static boolean downloadPriority() {
-        return !parsingPriority();
+    public static float parsingPriority() {
+        return Float.parseFloat(fromDynamicConfiguration("priority", "0.2"));
     }
 
-    public static void setPriority(String toString) {
-        setDynamicConfiguration("priority", toString);
+    public static void setPriority(float new_priority) {
+        assert new_priority > 0.f && new_priority < 1.f: "Out of range";
+        setDynamicConfiguration("priority", Float.toString(Math.round(new_priority*100.f)/100.f));
     }
 
     public static boolean removeFromCacheAfterParsing() {
@@ -49,6 +47,7 @@ public class Config {
         return Integer.parseInt(fromDynamicConfiguration("maxParallelDownloads", "2"));
     }
     public static void setMaxParallelDownloads(int new_max) {
+        assert new_max > 0: "Bad numbber of DL";
         setDynamicConfiguration("maxParallelDownloads", Integer.toString(new_max));
     }
 }

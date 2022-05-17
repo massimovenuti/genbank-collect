@@ -43,7 +43,7 @@ public class MultiTasker {
         if (task.isDl()) {
             if (dlTask == null)
                 dlTask = GlobalProgress.get().registerTask("Téléchargements");
-            if (Config.downloadPriority()) {
+            if (Math.random() < Config.parsingPriority()) {
                 parsings.addFirst(task);
             } else {
                 parsings.addLast(task);
@@ -52,7 +52,7 @@ public class MultiTasker {
         }else {
             if (parsingTask == null)
                 parsingTask = GlobalProgress.get().registerTask("Parsing");
-            if (Config.parsingPriority()) {
+            if (Math.random() > Config.parsingPriority()) {
                 parsings.addFirst(task);
             } else {
                 parsings.addLast(task);
