@@ -372,7 +372,7 @@ public class MainPanel extends JFrame {
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                //Config.setPriority(priorityCB.getSelectedItem().toString()); TODO; update
+                Config.setPriority(slider.getValue());
                 JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
             }
         });
