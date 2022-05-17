@@ -78,6 +78,8 @@ public class MainPanel extends JFrame {
     private JButton optionsButton;
     private JPanel toggleContainer;
     private JSlider slider;
+    private JSpinner downloadspinner;
+    private JComboBox cacheBox;
     private JPanel optPan;
     private JTextPane textPane1;
     private JButton removeButton;
@@ -369,11 +371,26 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                toggleContainer.setVisible(true);
-                optionsContainer.setVisible(false);
-                GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                Config.setPriority(slider.getValue());
-                JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
+
+
+                if((int) downloadspinner.getValue() <= (int) threadSpinner.getValue()) {
+                    toggleContainer.setVisible(true);
+                    optionsContainer.setVisible(false);
+                    GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
+                    GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
+                    Config.setPriority(slider.getValue() / 100);
+                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                    if(cacheBox.getSelectedItem().equals("Oui")) {
+                        GlobalGUIVariables.get().setDelete_cache(true);
+                    }else{
+                        GlobalGUIVariables.get().setDelete_cache(false);
+                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
+
+                    }
+                }
+                else{
+                    JOptionPane.showMessageDialog(frame, "Nombre maximum de telechargements en parallele ne peut pas depasser le nombre de threads");
+                }
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {

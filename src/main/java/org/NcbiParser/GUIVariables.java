@@ -9,6 +9,8 @@ public class GUIVariables {
     private TreeNode tree;
     private StyledDocument logArea;
 
+
+
     public void setOnTreeChanged(GenericTask onTreeChanged) {
         this.onTreeChanged = onTreeChanged;
     }
@@ -78,7 +80,27 @@ public class GUIVariables {
         }
     }
 
+    public int getNbDownloadParallel() {
+        return nbDownloadParallel;
+    }
+
+    public void setNbDownloadParallel(int nbDownloadParallel) {
+        this.nbDownloadParallel = nbDownloadParallel;
+    }
+
+
+    public boolean isDelete_cache() {
+        return delete_cache;
+    }
+
+    public void setDelete_cache(boolean delete_cache) {
+        this.delete_cache = delete_cache;
+    }
+
+    private boolean delete_cache;
     private int nbThreads;
+
+    private int nbDownloadParallel;
 
     private JButton trigger_add;
 
