@@ -37,7 +37,7 @@ public class Config {
 
     public static void setPriority(float new_priority) {
         assert new_priority > 0.f && new_priority < 1.f: "Out of range";
-        setDynamicConfiguration("priority", Float.toString(Math.round(new_priority*100.f)/100.f);
+        setDynamicConfiguration("priority", Float.toString(Math.round(new_priority*100.f)/100.f));
     }
 
     public static boolean removeFromCacheAfterParsing() {

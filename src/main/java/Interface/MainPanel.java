@@ -284,7 +284,7 @@ public class MainPanel extends JFrame {
             tree.updateUI();
             frame.enableParsing();}));
 
-        priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1);
+        //priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1); TODO: delete
 
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
@@ -371,7 +371,7 @@ public class MainPanel extends JFrame {
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
                 GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                Config.setPriority(priorityCB.getSelectedItem().toString());
+                //Config.setPriority(priorityCB.getSelectedItem().toString()); TODO; update
                 JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
             }
         });
