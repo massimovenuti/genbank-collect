@@ -73,7 +73,7 @@ public final class DataBaseManager {
                 dates.add(rs.getString("date"));
             }
 
-            java.util.Date newParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(row.getModifyDate());
+            java.util.Date newParseDate = new SimpleDateFormat("yyyy/MM/dd").parse(row.getReleaseDate());
             java.util.Date prevParseDate;
             boolean isIn;
             //pour toutes les lignes -> regarder si chaque region selectionnée est à jour

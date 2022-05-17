@@ -4,106 +4,60 @@ import java.io.*;
 import java.util.*;
 
 public class Ncbi {
-    private static String report_dir = "/genomes/GENOME_REPORTS";
+    private static String genome_report_dir = "/genomes/GENOME_REPORTS";
+    private static String assembly_report_dir = "genomes/ASSEMBLY_REPORTS";
+    private static String gc_root_dir = "/genomes/all";
     private Ftp ftp;
 
     public Ncbi() throws IOException {
         ftp = new Ftp("ftp.ncbi.nlm.nih.gov");
-        ftp.cacheMetadata(report_dir);
+        ftp.cacheMetadata(genome_report_dir);
     }
 
     public ArrayList<ArrayList<String>> rawOverview() throws IOException {
-        var f = ftp.getFile(report_dir + "/overview.txt");
-        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+        var f = ftp.getFile(genome_report_dir + "/overview.txt");
+        String[] cols = {"Kingdom", "Group", "SubGroup", "#Organism/Name", "Organelles"};
+        return NcbiParser.parseFile(new FileInputStream(f), new ArrayList<String>(Arrays.asList(cols)));
     }
 
-    public ArrayList<ArrayList<String>> rawIndex(String name) throws IOException {
-        var f = ftp.getFile(report_dir + "/" + name);
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", (name.contains("virus")) ? "Segmemts" : "Replicons"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+    public ArrayList<ArrayList<String>> rawAssembly() throws IOException {
+        var f = ftp.getFile(assembly_report_dir + "/assembly_summary_refseq.txt");
+        int[] cols = {0, 5, 7, 14, 19};
+        return NcbiParser.parseFile(new FileInputStream(f), cols, 1);
     }
-    /*
-    public ArrayList<ArrayList<String>> rawEukaryotes() throws IOException {
-        var f = ftp.getFile(report_dir + "/eukaryotes.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }
-
-    public ArrayList<ArrayList<String>> rawViruses() throws IOException {
-        var f = ftp.getFile(report_dir + "/viruses.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }
-
-    public ArrayList<ArrayList<String>> rawProkaryotes() throws IOException {
-        var f = ftp.getFile(report_dir + "/prokaryotes.txt");
-        String[] cols = {"Group", "SubGroup", "#Organism/Name", "Modify Date", "Assembly Accession", "Segmemts"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
-    }*/
 
     public ArrayList<OverviewData> overview_to_db() throws IOException {
         var raw = rawOverview();
         var ret = new ArrayList<OverviewData>();
         for (var s : raw) {
-            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3)));
-        }
-        return ret;
-    }
-
-    public ArrayList<IndexData> index_to_db(String name) throws IOException {
-        var raw = rawIndex(name);
-        var ret = new ArrayList<IndexData>();
-        for (var s : raw) {
-            if (!s.get(s.size()-1).contains("NC"))
+            if (s.size() < 5) {
+                System.err.printf("Warning: bad line in overview.txt\n");
                 continue;
-            if (name.contains("virus")) {
-                ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), null, s.get(4)));
-            } else {
-                ret.add(new IndexData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4), s.get(5)));
             }
+            ret.add(new OverviewData(s.get(0), s.get(1), s.get(2), s.get(3), s.get(4) == "-" ? "" : s.get(4)));
         }
         return ret;
     }
 
-    /*
-    - Prokaryotes / Eukaryotes : GCA_022488325.1 -> /genomes/all/022/488/325/GCA_022488325.1_ASM2248832v1/
-        * GCA_022488325.1_ASM2248832v1_genomic.gbff.gz
-    - Viruses : nom = Acholeplasma virus L2 -> /genomes/Viruses/acholeplasma_virus_l2_uid14066/
-        * NC_001447.gbk
-     */
-    public static String gcPath(String gc) {
-        String g = gc.substring(0, 3);
-        String dirs[] = {gc.substring(4, 4+3), gc.substring(4+3, 4+6), gc.substring(4+6, 4+9)};
-        String suffix = gc.substring(4+9);
-        String ftpDir = "/genomes/all/" + g + "/" + dirs[0] + "/" + dirs[1] + "/" + dirs[2] + "/";
-        return ftpDir;
+    public ArrayList<AssemblyData> assembly_to_db() throws IOException {
+        var raw = rawAssembly();
+        var prefix_length = "https://ftp.ncbi.nlm.nih.gov/genomes/all/".length();
+        var ret = new ArrayList<AssemblyData>();
+        for (var s : raw) {
+            if (s.size() < 5) {
+                System.err.printf("Warning: bad line in assembly_summary_refseq.txt\n");
+                continue;
+            }
+            // remove https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/
+                ret.add(new AssemblyData(   s.get(0), s.get(1), s.get(2), s.get(3), s.get(4).substring(prefix_length)));
+        }
+        return ret;
     }
 
-    public String gcDirectory(String gc) throws IOException {
-        String p = gcPath(gc);
-        return ftp.getDirectoryFromStart(p, gc);
-    }
-
-    public File getGbffFromGc(String gc) throws IOException {
-        String path = gcPath(gc);
-        String sub = gcDirectory(gc);
-        return ftp.getFile(path + sub + "/" + sub + "_genomic.gbff.gz");
-    }
-
-    public String virusDirectory(String virusName) throws IOException {
-        String virus = virusName.replace(" ", "_").toLowerCase();
-        String path = "/genomes/Viruses/";
-        return path + ftp.getDirectoryFromStart(path, virus) + "/";
-    }
-
-    public File getGbkFromVirus(String virusName) throws IOException {
-        // TODO: plusieurs .gbk ??
-        String path = virusDirectory(virusName);
-        String filename = ftp.getFileFromEnd(path, ".gbk");
-        if (!filename.endsWith(".gbk"))
-            throw new IOException("No file associated");
-        return ftp.getFile(path + filename);
+    public File getGbffFromAssemblyData(AssemblyData asm) throws IOException {
+        var split = asm.getFtpPath().split("/");
+        var suffix = split[split.length-1];
+        return ftp.getFile(gc_root_dir + "/" + asm.getFtpPath() + "/" + suffix + "_genomic.gbff.gz");
     }
 
     public void close() throws IOException {
