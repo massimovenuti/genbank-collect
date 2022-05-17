@@ -54,7 +54,7 @@ public class ParsingTask {
     public boolean run_dl(MultiTasker mt, Ncbi ncbi) {
         try {
             System.out.printf("Downloading: %s\n", row.getGc());
-            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + row.getGc());
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + row.getGc() + "\n");
             //System.err.printf("%10s %10s %10s %10s - %10s\n", row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism(), row.getGc());
 
             File dl = ncbi.getGbffFromAssemblyData(row.getAssemblyData());
