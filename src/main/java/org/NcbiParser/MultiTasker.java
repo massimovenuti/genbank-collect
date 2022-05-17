@@ -6,7 +6,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiTasker {
-    private ConcurrentLinkedDeque<ParsingTask> parsings;
+    private ConcurrentLinkedDeque<ParsingTask> ptasks;
+    private ConcurrentLinkedDeque<ParsingTask> dtasks;
 
     public ProgressTask getDlTask() {
         return dlTask;
@@ -21,14 +22,7 @@ public class MultiTasker {
     private AtomicInteger parallelDownloads = new AtomicInteger(0);
 
     public ProgressTask getParsingTask() {
-        try {
-            lock.acquire();
-        } catch (InterruptedException e) {
-            System.err.printf("Interrupted while waiting for lock");
-        }
-        if (parsingTask == null)
-            parsingTask = GlobalProgress.get().registerTask("Parsing");
-        lock.release();
+
         return parsingTask;
     }
 
@@ -39,13 +33,21 @@ public class MultiTasker {
         gtasks = new ConcurrentLinkedQueue<GenericTask>();
     }
 
+    public void pushNonPriority(ParsingTask task) {
+        parsings.addLast(task);
+    }
+
+    public void pushPriority(ParsingTask)
+
     public void pushTask(ParsingTask task) {
         if (task.isDl()) {
             if (dlTask == null)
                 dlTask = GlobalProgress.get().registerTask("Téléchargements");
             if (Math.random() < Config.parsingPriority()) {
+                System.err.println("hit DL");
                 parsings.addFirst(task);
             } else {
+                System.err.println("miss DL");
                 parsings.addLast(task);
             }
             dlTask.addTodo(1);
@@ -53,8 +55,10 @@ public class MultiTasker {
             if (parsingTask == null)
                 parsingTask = GlobalProgress.get().registerTask("Parsing");
             if (Math.random() > Config.parsingPriority()) {
+                System.err.println("hit parsing");
                 parsings.addFirst(task);
             } else {
+                System.err.println("miss parsing");
                 parsings.addLast(task);
             }
             parsingTask.addTodo(1);
