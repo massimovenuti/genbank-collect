@@ -23,7 +23,7 @@ public class Ncbi {
     public ArrayList<ArrayList<String>> rawAssembly() throws IOException {
         var f = ftp.getFile(assembly_report_dir + "/assembly_summary_refseq.txt");
         String[] cols = {"assembly_accession", "taxid", "organism_name", "seq_rel_date", "ftp_path"};
-        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols));
+        return NcbiParser.parseFile(new FileInputStream(f), Arrays.asList(cols), 1);
     }
 
     public ArrayList<OverviewData> overview_to_db() throws IOException {

@@ -5,12 +5,17 @@ import java.util.*;
 
 public class NcbiParser {
     public static ArrayList<ArrayList<String>> parseFile(InputStream file, List<String> columns) throws IOException {
+        return parseFile(file, columns, 0);
+    }
+    public static ArrayList<ArrayList<String>> parseFile(InputStream file, List<String> columns, int skip_head) throws IOException {
         try {
             var ret = new ArrayList<ArrayList<String>>();
             var br = new BufferedReader(new InputStreamReader(file));
 
             // get first line to extract columns
             var line = br.readLine();
+            for (int i = 0; i < skip_head; ++i)
+                line = br.readLine();
             var header = line.split("\t");
             var col_idx = new ArrayList<Integer>();
             for (int j = 0; j < columns.size(); ++j) {
