@@ -77,6 +77,7 @@ public class MainPanel extends JFrame {
     private JButton annulerButton;
     private JButton optionsButton;
     private JPanel toggleContainer;
+    private JSlider slider;
     private JPanel optPan;
     private JTextPane textPane1;
     private JButton removeButton;
