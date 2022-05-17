@@ -4,7 +4,6 @@ import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.MyGenbankReader;
 import org.biojava.nbio.core.sequence.Strand;
-import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.features.FeatureInterface;
@@ -21,7 +20,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -304,6 +302,8 @@ public class GbffParser implements Parser {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
+        boolean dirCreated = false;
+
         while (true) {
             String nc = readNextNc();
             if (nc == null) break;
@@ -316,6 +316,10 @@ public class GbffParser implements Parser {
                 else
                     features = sequence.getFeaturesByType(region.toString());
                 if (features.isEmpty()) continue;
+                if (!dirCreated) {
+                    Files.createDirectories(Paths.get(outDirectory));
+                    dirCreated = true;
+                }
                 String filePath = makeFilePath(outDirectory, region.toString(), organism, organelle, nc);
                 writeFeatures(features, organism, organelle, nc, sequence, region, filePath);
             }
