@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="23" column-count="13" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="20" y="52" width="1128" height="941"/>
+      <xy x="20" y="52" width="1318" height="1526"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -51,7 +51,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="29b6b" binding="progressBarContainer" layout-manager="GridLayoutManager" row-count="13" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="29b6b" binding="progressBarContainer" layout-manager="GridLayoutManager" row-count="15" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints/>
             <properties/>
@@ -59,93 +59,83 @@
             <children>
               <component id="54ad5" class="javax.swing.JProgressBar" binding="progressBar1" default-binding="true">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="ba55f" class="javax.swing.JProgressBar" binding="progressBar2" default-binding="true">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="5e6a2" class="javax.swing.JProgressBar" binding="progressBar3" default-binding="true">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="a06d9" class="javax.swing.JProgressBar" binding="progressBar4" default-binding="true">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="bf3b9" class="javax.swing.JProgressBar" binding="progressBar5" default-binding="true">
                 <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="1f421" class="javax.swing.JProgressBar" binding="progressBar6" default-binding="true">
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="41353" class="javax.swing.JProgressBar" binding="progressBar7" default-binding="true">
                 <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="81253" class="javax.swing.JProgressBar" binding="progressBar8" default-binding="true">
                 <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="f8153" class="javax.swing.JProgressBar" binding="progressBar9" default-binding="true">
                 <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="147ca" class="javax.swing.JProgressBar" binding="progressBar10" default-binding="true">
                 <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="bf920" class="javax.swing.JProgressBar" binding="progressBar11" default-binding="true">
                 <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="54093" class="javax.swing.JProgressBar" binding="progressBar12" default-binding="true">
                 <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="9cda0" class="javax.swing.JProgressBar" binding="progressBar13" default-binding="true">
                 <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
               </component>
               <component id="5b7c1" class="javax.swing.JLabel" binding="label1">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                    <minimum-size width="30" height="30"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <text value="Label"/>
-                </properties>
-              </component>
-              <component id="fd638" class="javax.swing.JLabel" binding="label2">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -155,7 +145,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="80b85" class="javax.swing.JLabel" binding="label3">
+              <component id="fd638" class="javax.swing.JLabel" binding="label2">
                 <constraints>
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -165,7 +155,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="ab4c0" class="javax.swing.JLabel" binding="label4">
+              <component id="80b85" class="javax.swing.JLabel" binding="label3">
                 <constraints>
                   <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -175,7 +165,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="19244" class="javax.swing.JLabel" binding="label5">
+              <component id="ab4c0" class="javax.swing.JLabel" binding="label4">
                 <constraints>
                   <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -185,7 +175,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="1f8bb" class="javax.swing.JLabel" binding="label6">
+              <component id="19244" class="javax.swing.JLabel" binding="label5">
                 <constraints>
                   <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -195,7 +185,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="b5941" class="javax.swing.JLabel" binding="label7">
+              <component id="1f8bb" class="javax.swing.JLabel" binding="label6">
                 <constraints>
                   <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -205,7 +195,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="963b" class="javax.swing.JLabel" binding="label8">
+              <component id="b5941" class="javax.swing.JLabel" binding="label7">
                 <constraints>
                   <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -215,7 +205,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="6e39a" class="javax.swing.JLabel" binding="label9">
+              <component id="963b" class="javax.swing.JLabel" binding="label8">
                 <constraints>
                   <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -225,7 +215,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="bcae5" class="javax.swing.JLabel" binding="label10">
+              <component id="6e39a" class="javax.swing.JLabel" binding="label9">
                 <constraints>
                   <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -235,7 +225,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="cd193" class="javax.swing.JLabel" binding="label11">
+              <component id="bcae5" class="javax.swing.JLabel" binding="label10">
                 <constraints>
                   <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -245,7 +235,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="4bfe8" class="javax.swing.JLabel" binding="label12">
+              <component id="cd193" class="javax.swing.JLabel" binding="label11">
                 <constraints>
                   <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -255,7 +245,7 @@
                   <text value="Label"/>
                 </properties>
               </component>
-              <component id="62bcd" class="javax.swing.JLabel" binding="label13">
+              <component id="4bfe8" class="javax.swing.JLabel" binding="label12">
                 <constraints>
                   <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="30" height="30"/>
@@ -265,6 +255,26 @@
                   <text value="Label"/>
                 </properties>
               </component>
+              <component id="62bcd" class="javax.swing.JLabel" binding="label13">
+                <constraints>
+                  <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <minimum-size width="30" height="30"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value="Label"/>
+                </properties>
+              </component>
+              <vspacer id="fd2a3">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <vspacer id="c22c3">
+                <constraints>
+                  <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
             </children>
           </grid>
         </children>
@@ -645,6 +655,11 @@
           <hideActionText class="java.lang.Boolean" value="false"/>
         </clientProperties>
       </component>
+      <vspacer id="b5555">
+        <constraints>
+          <grid row="0" column="2" row-span="2" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
     </children>
   </grid>
 </form>

@@ -206,7 +206,7 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-        set_bars_invisible();
+
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
