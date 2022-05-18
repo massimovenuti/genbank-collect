@@ -339,9 +339,6 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
                 if (!stopButton.isEnabled())
                     return;
-                parseButton.setEnabled(true);
-                set_bars_invisible();
-                GlobalGUIVariables.get().setStop(true);
                 try {
                     stopButton.setEnabled(false);
                     Main.getMt().stopParsing();
@@ -351,6 +348,12 @@ public class MainPanel extends JFrame {
                 } catch (IOException ex) {
                     GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
                 }
+                for (var p : GlobalProgress.get().all_tasks()) {
+                    GlobalProgress.get().remove_task(p);
+                }
+                parseButton.setEnabled(true);
+                set_bars_invisible();
+                GlobalGUIVariables.get().setStop(true);
                 set_bars_invisible();
 
             }
