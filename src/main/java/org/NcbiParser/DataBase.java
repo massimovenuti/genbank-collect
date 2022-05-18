@@ -55,8 +55,6 @@ public class DataBase {
             int pos = BinarySearchClass.binarySearch(overview_parsed,0,overview_parsed.size()-1,index.getOrganism());
             if( pos != -1){
                 globalRegroupedData.add(new UpdateRow(overview_parsed.get(pos),index));
-            }else{
-                System.err.println("index correspondant à aucun organisme dans overviewData : " + index.getOrganism());
             }
         }
 

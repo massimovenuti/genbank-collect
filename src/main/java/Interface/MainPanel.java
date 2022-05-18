@@ -191,18 +191,23 @@ public class MainPanel extends JFrame {
         return temp;
     }
 
-    public void set_bars_invisible()
-    {
+    public void fill_progbars(){
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
-                c.setVisible(false);
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
-                c.setVisible(false);
                 barLabels.add((JLabel) c);
             }
         }
+    }
+
+    public void set_bars_invisible()
+    {
+        for (Component c: progBars)
+            c.setVisible(false);
+        for (Component c: barLabels)
+            c.setVisible(false);
     }
     public JButton get_trigger(){
         return triggerButton;
@@ -217,9 +222,16 @@ public class MainPanel extends JFrame {
             progBars.get(i).setMaximum(progressTask.getTodo());
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
+            if(progressTask.getTodo() == progressTask.getDone()){
+                progBars.get(i).setVisible(false);
+                barLabels.get(i).setVisible(false);
+            }
         }
-        /*for (i = i+1; i < progBars.size(); ++i)
-            progBars.get(i).setVisible(false);*/
+        for (int j = i+1; j < progBars.size(); j++) {
+            progBars.get(j).setVisible(false);
+            barLabels.get(j).setVisible(false);
+        }
+
         if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
@@ -277,6 +289,7 @@ public class MainPanel extends JFrame {
         GlobalGUIVariables.get().setLogArea(document);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
+        fill_progbars();
         treePaths = new ArrayList<>();
         var frame = this;
 
@@ -297,7 +310,6 @@ public class MainPanel extends JFrame {
                 super.mousePressed(event);
                 if (!parseButton.isEnabled())
                     return;
-
                 var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
 
