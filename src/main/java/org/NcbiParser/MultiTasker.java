@@ -6,58 +6,27 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiTasker {
-    private ConcurrentLinkedDeque<ParsingTask> parsings;
-
-    public ProgressTask getDlTask() {
-        return dlTask;
-    }
-
+    private ConcurrentLinkedQueue<ParsingTask> ptasks;
+    private ConcurrentLinkedQueue<ParsingTask> dtasks;
     private ConcurrentLinkedQueue<GenericTask> gtasks;
-
-    private ProgressTask dlTask;
-
     private Semaphore lock = new Semaphore(1);
-
     private AtomicInteger parallelDownloads = new AtomicInteger(0);
-
-    public ProgressTask getParsingTask() {
-        try {
-            lock.acquire();
-        } catch (InterruptedException e) {
-            System.err.printf("Interrupted while waiting for lock");
-        }
-        if (parsingTask == null)
-            parsingTask = GlobalProgress.get().registerTask("Parsing");
-        lock.release();
-        return parsingTask;
-    }
-
-    private ProgressTask parsingTask;
+    private AtomicInteger ptasksSize = new AtomicInteger(0);
+    private AtomicInteger dtasksSize = new AtomicInteger(0);
 
     public MultiTasker() {
-        parsings = new ConcurrentLinkedDeque<ParsingTask>();
+        ptasks = new ConcurrentLinkedQueue<ParsingTask>();
+        dtasks = new ConcurrentLinkedQueue<ParsingTask>();
         gtasks = new ConcurrentLinkedQueue<GenericTask>();
     }
 
     public void pushTask(ParsingTask task) {
         if (task.isDl()) {
-            if (dlTask == null)
-                dlTask = GlobalProgress.get().registerTask("Téléchargements");
-            if (Config.downloadPriority()) {
-                parsings.addFirst(task);
-            } else {
-                parsings.addLast(task);
-            }
-            dlTask.addTodo(1);
+            dtasks.add(task);
+            dtasksSize.incrementAndGet();
         }else {
-            if (parsingTask == null)
-                parsingTask = GlobalProgress.get().registerTask("Parsing");
-            if (Config.parsingPriority()) {
-                parsings.addFirst(task);
-            } else {
-                parsings.addLast(task);
-            }
-            parsingTask.addTodo(1);
+            ptasks.add(task);
+            ptasksSize.incrementAndGet();
         }
     }
 
@@ -66,31 +35,56 @@ public class MultiTasker {
     }
 
     public ParsingTask popParsingTask() {
-        var ret = parsings.pollFirst();
-        if (ret == null)
+        if (dtasksSize.get() == 0 && ptasksSize.get() == 0)
             return null;
-        if (ret.isDl()) {
-            if (parallelDownloads.getAndIncrement() >= Config.maxParallelDownloads()) {
+
+        ParsingTask ret = null;
+        boolean dlt = false;
+        if (dtasksSize.get() == 0) {
+            ret = ptasks.poll();
+            //System.err.println("y " + parallelDownloads.get());
+        } else if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads() && ptasksSize.get() == 0) {
+            dlt = true;
+            ret = dtasks.poll();
+            //System.err.println("z " + parallelDownloads.get());
+        } else {
+            parallelDownloads.decrementAndGet();
+            //System.err.println("a" + parallelDownloads.get());
+            if (Math.random() > Config.parsingPriority()) {
+                //System.err.println("b " + parallelDownloads.get());
+                ret = ptasks.poll();
+            } else if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads()) {
+                dlt = true;
+                ret = dtasks.poll();
+                //System.err.println("c " + parallelDownloads.get());
+            } else {
                 parallelDownloads.decrementAndGet();
-                parsings.addFirst(ret);
-                return null;
+            }
+        }
+
+        if (ret == null) {
+            if (dlt) {
+                parallelDownloads.decrementAndGet();
+                //System.err.println("d " + parallelDownloads.get());
+            }
+        } else {
+            if (dlt) {
+                dtasksSize.decrementAndGet();
+            } else {
+                ptasksSize.decrementAndGet();
             }
         }
         return ret;
     }
 
-    public void clearParsing() {
-        GlobalProgress.get().remove_task(parsingTask);
-        GlobalProgress.get().remove_task(dlTask);
-        parsingTask = null;
-        dlTask = null;
-        parsings.clear();
-    }
-
     public GenericTask popGenericTask() {return gtasks.poll();}
-
 
     public void registerDlEnded() {
         parallelDownloads.decrementAndGet();
+    }
+
+    public void clearParsing() {
+        ptasks.clear();
+        dtasks.clear();
     }
 }

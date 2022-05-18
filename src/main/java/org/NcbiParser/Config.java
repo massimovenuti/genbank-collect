@@ -31,24 +31,36 @@ public class Config {
         dconf.setProperty(key, newValue);
     }
 
-    public static boolean parsingPriority() {
-        return fromDynamicConfiguration("priority", "parsing").contentEquals("parsing");
-    }
-    public static boolean downloadPriority() {
-        return !parsingPriority();
+    public static float parsingPriority() {
+        return Float.parseFloat(fromDynamicConfiguration("priority", "0.2"));
     }
 
-    public static void setPriority(String toString) {
-        setDynamicConfiguration("priority", toString);
+    public static void setPriority(float new_priority) {
+        assert new_priority > 0.f && new_priority < 1.f: "Out of range";
+        setDynamicConfiguration("priority", Float.toString(Math.round(new_priority*100.f)/100.f));
     }
 
     public static boolean removeFromCacheAfterParsing() {
         return fromDynamicConfiguration("removeFromCacheAfterParsing", "true").contentEquals("true");
     }
+
+    public static void setRemoveFromCacheAfterParsing(boolean value) {
+        setDynamicConfiguration("removeFromCacheAfterParsing", value ? "true" : "false");
+    }
+
     public static int maxParallelDownloads() {
         return Integer.parseInt(fromDynamicConfiguration("maxParallelDownloads", "2"));
     }
     public static void setMaxParallelDownloads(int new_max) {
+        assert new_max > 0: "Bad numbber of DL";
         setDynamicConfiguration("maxParallelDownloads", Integer.toString(new_max));
     }
+    public static void setNbThreads(int nbThreadsParsing) {
+        setDynamicConfiguration("nbThreads", Integer.toString(nbThreadsParsing));
+    }
+    public static int getNbThreads() {
+        var ret =  fromDynamicConfiguration("nbThreads", "");
+        return ret == "" ? Runtime.getRuntime().availableProcessors() : Integer.parseInt(ret);
+    }
+
 }
