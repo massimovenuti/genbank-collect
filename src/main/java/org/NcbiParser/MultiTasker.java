@@ -43,7 +43,7 @@ public class MultiTasker {
         if (ptasksSize.get() == 0)
             return dtasks.poll();
 
-        if (Math.random() < Config.parsingPriority()) {
+        if (Math.random() > Config.parsingPriority()) {
             var ret = ptasks.poll();
             if (ret != null)
                 ptasksSize.decrementAndGet();
@@ -51,7 +51,7 @@ public class MultiTasker {
         } else if (dtasksSize.get() > 0) {
             if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads()) {
                 var ret = dtasks.poll();
-                if (ret != null)
+                if (ret == null)
                     dtasksSize.decrementAndGet();
                 return ret;
             } else {
