@@ -14,8 +14,10 @@ public class ParsingTask {
     UpdateRow row;
     ArrayList<Region> regions;
     boolean isDl;
-    private ProgressTask task;
+    private ProgressTask dtask;
+    private ProgressTask ptask;
     private int cpt = 0;
+    private boolean last = false;
 
     public UpdateRow getRow() {
         return row;
@@ -25,36 +27,37 @@ public class ParsingTask {
         return isDl;
     }
 
-    public ParsingTask(File gbFile, UpdateRow row, ArrayList<Region> regions) {
+    public ParsingTask(ProgressTask dtask, ProgressTask ptask, File gbFile, UpdateRow row, ArrayList<Region> regions) {
         this.gbFile = gbFile;
         this.row = row;
         this.regions = regions;
         this.isDl = false;
+        this.dtask = dtask;
+        this.ptask = ptask;
     }
 
-    public ParsingTask(UpdateRow row, ArrayList<Region> regions) {
+    public ParsingTask(ProgressTask dtask, ProgressTask ptask, UpdateRow row, ArrayList<Region> regions) {
         this.row = row;
         this.regions = regions;
         this.isDl = true;
+        this.dtask = dtask;
+        this.ptask = ptask;
     }
 
     public boolean run(MultiTasker mt, Ncbi ncbi) {
         boolean ret;
         if (isDl) {
-            task = mt.getDlTask();
             ret = run_dl(mt, ncbi);
         } else {
-            task = mt.getParsingTask();
             ret = run_parsing(mt);
         }
-        task.addDone(1);
         return ret;
     }
 
     public boolean run_dl(MultiTasker mt, Ncbi ncbi) {
         try {
-            System.out.printf("Downloading: %s\n", row.getGc());
-            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + row.getGc() + "\n");
+            System.out.printf("Downloading: %s\n", row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc());
+            GlobalGUIVariables.get().insert_text(Color.BLACK, "Downloading: " + (row.getGc() == null || row.getGc().contentEquals("null") ? row.getOrganism() : row.getGc()) + "\n");
             //System.err.printf("%10s %10s %10s %10s - %10s\n", row.getKingdom(), row.getGroup(), row.getSubGroup(), row.getOrganism(), row.getGc());
 
             File dl = ncbi.getGbffFromAssemblyData(row.getAssemblyData());
@@ -62,9 +65,12 @@ public class ParsingTask {
             System.out.printf("Download ended: %s\n", row.getGc());
             GlobalGUIVariables.get().insert_text(Color.GREEN, "Download ended: " + row.getGc() + "\n");
 
-            var ptask = new ParsingTask(dl, row, regions);
-            mt.pushTask(ptask);
-            mt.getDlTask().addDone(1);
+            var new_ptask = new ParsingTask(dtask, ptask, dl, row, regions);
+            if (this.last)
+                new_ptask.setLast();
+            mt.pushTask(new_ptask);
+            ptask.addTodo(1);
+            dtask.addDone(1);
             mt.registerDlEnded();
             return true;
         } catch (Exception t) {
@@ -86,7 +92,7 @@ public class ParsingTask {
             }
         }
         mt.registerDlEnded();
-        task.addDone(1);
+        dtask.addDone(1);
         return false;
     }
 
@@ -96,7 +102,7 @@ public class ParsingTask {
             GbffParser parser = new GbffParser(gbFile);
             var ret = parser.parse_into(dir, row.getOrganism(), row.getOrganelle(), regions);
             DataBaseManager.multipleInsertFilesTable(row, regions);
-            mt.getParsingTask().addDone(1);
+            ptask.addDone(1);
             return ret;
         } catch (IllegalStateException | CompoundNotFoundException e) {
             GlobalGUIVariables.get().insert_text(Color.RED, "File is ill-formed, skipping...\n");
@@ -104,7 +110,11 @@ public class ParsingTask {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mt.getParsingTask().addDone(1);
+        ptask.addDone(1);
         return false;
+    }
+
+    public void setLast() {
+        this.last = true;
     }
 }

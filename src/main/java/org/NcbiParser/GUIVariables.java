@@ -9,6 +9,8 @@ public class GUIVariables {
     private TreeNode tree;
     private StyledDocument logArea;
 
+
+
     public void setOnTreeChanged(GenericTask onTreeChanged) {
         this.onTreeChanged = onTreeChanged;
     }
@@ -17,7 +19,6 @@ public class GUIVariables {
 
     public GUIVariables() {
         this.stop = false;
-        this.nbThreads = Integer.parseInt(Config.fromDynamicConfiguration("nbThreads", "4"));
         this.logArea = null;
         this.tree = new TreeNode("CHARGEMENT...");
         this.setOnTreeChanged(new GenericTask(() -> {
@@ -40,21 +41,12 @@ public class GUIVariables {
         this.trigger_add = trigger;
     }
 
-    public int getNbThreads() {
-        return nbThreads;
-    }
-
     public StyledDocument getLogArea() {
         return this.logArea;
     }
 
     public JButton getAddTrigger() {
         return this.trigger_add;
-    }
-
-    public void setNbThreads(int nbThreadsParsing) {
-        this.nbThreads = nbThreadsParsing;
-        Config.setDynamicConfiguration("nbThreads", Integer.toString(nbThreadsParsing));
     }
 
     public void setTree(TreeNode tree) {
@@ -77,8 +69,6 @@ public class GUIVariables {
             System.err.println(erro.getMessage());
         }
     }
-
-    private int nbThreads;
 
     private JButton trigger_add;
 

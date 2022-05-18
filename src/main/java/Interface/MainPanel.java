@@ -10,6 +10,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -77,6 +79,9 @@ public class MainPanel extends JFrame {
     private JButton annulerButton;
     private JButton optionsButton;
     private JPanel toggleContainer;
+    private JSlider slider;
+    private JSpinner downloadSpinner;
+    private JComboBox cacheBox;
     private JPanel optPan;
     private JTextPane textPane1;
     private JButton removeButton;
@@ -186,24 +191,28 @@ public class MainPanel extends JFrame {
         return temp;
     }
 
-    public void set_bars_invisible()
-    {
+    public void fill_progbars(){
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
-                c.setVisible(false);
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
-                c.setVisible(false);
                 barLabels.add((JLabel) c);
             }
         }
+    }
+
+    public void set_bars_invisible()
+    {
+        for (Component c: progBars)
+            c.setVisible(false);
+        for (Component c: barLabels)
+            c.setVisible(false);
     }
     public JButton get_trigger(){
         return triggerButton;
     }
     public void show_bars(){
-        set_bars_invisible();
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
@@ -213,9 +222,16 @@ public class MainPanel extends JFrame {
             progBars.get(i).setMaximum(progressTask.getTodo());
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
+            if(progressTask.getTodo() == progressTask.getDone()){
+                progBars.get(i).setVisible(false);
+                barLabels.get(i).setVisible(false);
+            }
         }
-        /*for (i = i+1; i < progBars.size(); ++i)
-            progBars.get(i).setVisible(false);*/
+        for (int j = i+1; j < progBars.size(); j++) {
+            progBars.get(j).setVisible(false);
+            barLabels.get(j).setVisible(false);
+        }
+
         if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
@@ -273,6 +289,7 @@ public class MainPanel extends JFrame {
         GlobalGUIVariables.get().setLogArea(document);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
+        fill_progbars();
         treePaths = new ArrayList<>();
         var frame = this;
 
@@ -284,7 +301,7 @@ public class MainPanel extends JFrame {
             tree.updateUI();
             frame.enableParsing();}));
 
-        priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1);
+        //priorityCB.setSelectedIndex(Config.parsingPriority() ? 0 : 1); TODO: delete
 
         parseButton.addMouseListener(new MouseAdapter() {
             ArrayList<Region> regions = new ArrayList<>();
@@ -293,7 +310,6 @@ public class MainPanel extends JFrame {
                 super.mousePressed(event);
                 if (!parseButton.isEnabled())
                     return;
-
                 var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
 
@@ -323,9 +339,6 @@ public class MainPanel extends JFrame {
                 super.mousePressed(e);
                 if (!stopButton.isEnabled())
                     return;
-                parseButton.setEnabled(true);
-                set_bars_invisible();
-                GlobalGUIVariables.get().setStop(true);
                 try {
                     stopButton.setEnabled(false);
                     Main.getMt().stopParsing();
@@ -335,6 +348,14 @@ public class MainPanel extends JFrame {
                 } catch (IOException ex) {
                     GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
                 }
+                for (var p : GlobalProgress.get().all_tasks()) {
+                    GlobalProgress.get().remove_task(p);
+                }
+                parseButton.setEnabled(true);
+                set_bars_invisible();
+                GlobalGUIVariables.get().setStop(true);
+                set_bars_invisible();
+
             }
         });
 
@@ -368,11 +389,25 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
+                boolean thread_changed = true;
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
-                GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                Config.setPriority(priorityCB.getSelectedItem().toString());
-                JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
+                Config.setMaxParallelDownloads((int) downloadSpinner.getValue());
+                if((int) threadSpinner.getValue() == Config.getNbThreads()){
+                    thread_changed = false;
+                }
+                Config.setNbThreads((int) threadSpinner.getValue());
+
+                Config.setPriority((float)slider.getValue() / 100.f);
+                if(thread_changed)
+                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                if(cacheBox.getSelectedItem().equals("Oui")) {
+                    Config.setRemoveFromCacheAfterParsing(true);
+                }else{
+                    Config.setRemoveFromCacheAfterParsing(false);
+                    JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
+                }
+                downloadSpinner.setModel(new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1));
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
@@ -383,7 +418,13 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
             }
         });
-
+        downloadSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if((int) downloadSpinner.getValue() > (int) threadSpinner.getValue()){
+                    downloadSpinner.setValue(threadSpinner.getValue());
+                }
+            }
+        });
     }
 
     public void update_tree_from_root() {
@@ -413,10 +454,11 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(Config.getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1);
 
         threadSpinner = new JSpinner(model_threads);
-
+        downloadSpinner = new JSpinner(model_dl);
         BufferedImage img = null;
         try {
             img = ImageIO.read(this.getClass().getResource("/settings.png"));
