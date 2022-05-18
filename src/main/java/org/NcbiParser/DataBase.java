@@ -1,7 +1,7 @@
 package org.NcbiParser;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -35,36 +35,30 @@ public class DataBase {
     //public static void updateFromIds(ArrayList<IdsData> ids_parsed) { } // pas nécessaire ?
 
 
-    public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<IndexData> index_parsed){
+    public static void updateFromIndexAndOverview(ArrayList<OverviewData> overview_parsed, ArrayList<AssemblyData> index_parsed){
         globalRegroupedData = new ArrayList<UpdateRow>();
-        Collections.sort(overview_parsed, new Comparator<OverviewData>() {
-            @Override
-            public int compare(OverviewData o1, OverviewData o2) {
-                return o1.compareToGroupVersion(o2);
-            }
-        });
+        Collections.sort(overview_parsed, (OverviewData o1,OverviewData o2) -> o1.getOrganism().compareToIgnoreCase(o2.getOrganism()) );
 
-        Collections.sort(index_parsed, new Comparator<IndexData>() {
-            @Override
-            public int compare(IndexData o1, IndexData o2) {
-                return o1.compareTo(o2);
-            }
-        });
-        int i = 0, j = 0;
+        //Collections.sort(index_parsed, Comparator.comparing(AssemblyData::getOrganism));
+        /*int i = 0, j = 0;
          while(i < index_parsed.size() && j < overview_parsed.size()){
-            if(index_parsed.get(i).getGroup().equalsIgnoreCase(overview_parsed.get(j).getGroup())
-                    && index_parsed.get(i).getSubgroup().equalsIgnoreCase(overview_parsed.get(j).getSubgroup())){
+            if(overview_parsed.get(j).getOrganism().equalsIgnoreCase(index_parsed.get(i).getOrganism())){
 
-                globalRegroupedData.add(new UpdateRow(overview_parsed.get(j).getKingdom(),index_parsed.get(i).getGroup()
-                        ,index_parsed.get(i).getSubgroup(),index_parsed.get(i).getOrganism(),null,index_parsed.get(i).getGc()
-                        ,index_parsed.get(i).getNcs()));
-                globalRegroupedData.get(globalRegroupedData.size()-1).setModifyDate(index_parsed.get(i).getModifyDate());
+                globalRegroupedData.add(new UpdateRow(overview_parsed.get(j),index_parsed.get(i)));
                 ++i;
             }else{
                 //cherche le kingdom qui correspond à l'index courant
                 ++j;
             }
-         }
+         }*/
+        for(var index : index_parsed){
+            int pos = BinarySearchClass.binarySearch(overview_parsed,0,overview_parsed.size()-1,index.getOrganism());
+            if( pos != -1){
+                globalRegroupedData.add(new UpdateRow(overview_parsed.get(pos),index));
+            }else{
+                System.err.println("index correspondant à aucun organisme dans overviewData : " + index.getOrganism());
+            }
+        }
 
         System.out.println();
     }
@@ -76,12 +70,6 @@ public class DataBase {
             ur = new ArrayList<>(globalRegroupedData);
         }
         else{
-           /* Collections.sort(userNeeds, new Comparator<OverviewData>() {
-                @Override
-                public int compare(OverviewData o1, OverviewData o2) {
-                    return o1.compareToGroupVersion(o2);
-                }
-            });*/
             for(var row : userNeeds){
                 if(row.getGroup() == null){
                     //recup toutes les lignes kingdom = row.kingdom
