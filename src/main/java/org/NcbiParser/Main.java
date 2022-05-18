@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.sql.*;
 
 public class Main {
     public static Ncbi ncbi;
@@ -19,20 +18,19 @@ public class Main {
         //startParsing(new OverviewData());
     }
 
-    public static void test() {
+    /*public static void test() {
         try {
-            var r = ncbi.index_to_db("eukaryotes.txt");
+            var r = ncbi.assembly_to_db();
             var row = r.get(3);
-            File gbffFile = ncbi.getGbffFromGc(row.getGc());
+            File gbffFile = ncbi.getGbffFromAssemblyData(row);
             GbffParser parser = new GbffParser(gbffFile);
             ArrayList<Region> regions = new ArrayList<>();
             regions.add(Region.CDS);
-            var ncs = NcbiParser.preparse_ncs(row.getNcs());
-            parser.parse_into("Results/", "Homo Sapiens", "", regions, ncs);
+            parser.parse_into("Results/", "Homo Sapiens", "", regions);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public static void atProgStart() {
         var ini = GlobalProgress.get().registerTask("Initialisation");
@@ -98,25 +96,17 @@ public class Main {
     // dl les index et met à jour la DB
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
-        ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
         var task = gl.registerTask("Mise \u00e0 jour des indexes");
-        task.addTodo(5);
+        task.addTodo(3);
         var od = ncbi.overview_to_db();
         task.addDone(1);
-        String[] arr = {"eukaryotes.txt", "prokaryotes.txt", "viruses.txt"};
-        for (var idx : arr) {
-            System.out.printf("File: %s | %d/%d -> %ds\n", idx, task.getDone(), task.getTodo(), task.estimatedTimeLeftMs() / 1000);
-            //DataBase.updateFromIndexFile(ncbi.index_to_db(idx));
-            idxDatas.addAll(ncbi.index_to_db(idx));
-            task.addDone(1);
-        }
-        DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
-        DataBase.updateFromIndexAndOverview(od, idxDatas);
+        var ad = ncbi.assembly_to_db();
         task.addDone(1);
-        //ArrayList<OverviewData> test = new ArrayList<OverviewData>();
-        //test.add(new OverviewData("Archaea",null,null,null));
-        //DataBase.allOrganismNeedingUpdate(test);
+        DataBase.createOrOpenDataBase(Config.result_directory() + "/test.db");
+        DataBase.updateFromIndexAndOverview(od, ad);
+        task.addDone(1);
         gl.remove_task(task);
+
         mt.getMt().pushTask(new GenericTask(() -> {
             var t = gl.registerTask("Cr\u00e9ation de l'arborescence");
             t.addTodo(1);
@@ -131,7 +121,7 @@ public class Main {
         //task.addTodo(data.size());
 
         ArrayList<OverviewData> need = new ArrayList<>();
-        need.add(new OverviewData(null, null, null, null));
+        need.add(new OverviewData(null, null, null, null, null));
         ArrayList<Region> regions = new ArrayList<>(Arrays.asList(Region.values()));
 
         ArrayList<UpdateRow> data = DataBase.getGlobalRegroupedData();
@@ -209,11 +199,12 @@ public class Main {
             }
         }
 
-        assert group != null;
-        group.push_node(subGroup);
-        assert kingdom != null;
-        kingdom.push_node(group);
-        top.push_node(kingdom);
+        if (subGroup != null && group != null && kingdom != null) {
+            // si rien n'a été créé, ne devrait jamais arriver
+            group.push_node(subGroup);
+            kingdom.push_node(group);
+            top.push_node(kingdom);
+        }
 
         return top;
     }

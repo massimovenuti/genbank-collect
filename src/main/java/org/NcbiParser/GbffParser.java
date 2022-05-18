@@ -4,7 +4,6 @@ import org.biojava.nbio.core.exceptions.CompoundNotFoundException;
 import org.biojava.nbio.core.sequence.DNASequence;
 import org.biojava.nbio.core.sequence.MyGenbankReader;
 import org.biojava.nbio.core.sequence.Strand;
-import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.DNACompoundSet;
 import org.biojava.nbio.core.sequence.compound.NucleotideCompound;
 import org.biojava.nbio.core.sequence.features.FeatureInterface;
@@ -21,7 +20,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -204,36 +202,37 @@ public class GbffParser implements Parser {
         }
     }
 
-    private String readNextNc(HashMap<String, String> areNcs) throws IOException {
+    private String readNextNc() throws IOException {
         try {
-            BufferedReader bufferedReader = dnaReader.getBufferedReader();
-            bufferedReader.mark(1000);
+            while (true) {
+                BufferedReader bufferedReader = dnaReader.getBufferedReader();
+                bufferedReader.mark(1000);
 
-            String line = bufferedReader.readLine();
-            if (line == null)
-                return null;
+                String line = bufferedReader.readLine();
+                if (line == null)
+                    return null;
 
-            String accession = line.split("\\s+")[1];
-            String nc = areNcs.get(accession);
+                String accession = line.split("\\s+")[1];
+                boolean is_nc = accession.startsWith("NC_");
 
-            if (nc != null) {
-                bufferedReader.reset();
-                return nc;
+                if (is_nc) {
+                    bufferedReader.reset();
+                    return accession;
+                }
+
+                while (line != null && line.charAt(0) != '/')
+                    line = bufferedReader.readLine();
+
+                if (line == null)
+                    return null;
             }
 
-            while (line != null && line.charAt(0) != '/')
-                line = bufferedReader.readLine();
-
-            if (line == null)
-                return null;
         } catch (IOException e) {
             System.err.println("Failed to read file : " + gbPath);
             GlobalGUIVariables.get().insert_text(Color.RED, "Failed to read file : " + gbPath + "\n");
             close();
             throw e;
         }
-
-        return readNextNc(areNcs);
     }
 
     private boolean wrongSourceFormat(String source) {
@@ -299,13 +298,18 @@ public class GbffParser implements Parser {
         }
     }
 
-    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions, HashMap<String, String> areNcs) throws IllegalStateException, IOException, CompoundNotFoundException {
+    public boolean parse_into(String outDirectory, String organism, String organelle, ArrayList<Region> regions) throws IllegalStateException, IOException, CompoundNotFoundException {
         System.out.printf("Parsing: %s\n", gbPath);
         GlobalGUIVariables.get().insert_text(Color.BLACK, "Parsing: " + gbPath + "\n");
 
+        organelle = "";
+        boolean dirCreated = false;
+        int n_nc = 0;
+
         while (true) {
-            String nc = readNextNc(areNcs);
+            String nc = readNextNc();
             if (nc == null) break;
+            n_nc++;
             DNASequence sequence = readNextSequence();
             if (sequence == null) break;
             for (Region region : regions) {
@@ -315,6 +319,10 @@ public class GbffParser implements Parser {
                 else
                     features = sequence.getFeaturesByType(region.toString());
                 if (features.isEmpty()) continue;
+                if (!dirCreated) {
+                    Files.createDirectories(Paths.get(outDirectory));
+                    dirCreated = true;
+                }
                 String filePath = makeFilePath(outDirectory, region.toString(), organism, organelle, nc);
                 writeFeatures(features, organism, organelle, nc, sequence, region, filePath);
             }
@@ -322,8 +330,14 @@ public class GbffParser implements Parser {
 
         close();
 
-        System.out.printf("Parsing ended: %s\n", gbPath);
-        GlobalGUIVariables.get().insert_text(Color.GREEN, "Parsing ended: " + gbPath + "\n");
+        if (n_nc == 0) {
+            System.out.printf("No NC in: %s\n", gbPath);
+            GlobalGUIVariables.get().insert_text(Color.ORANGE, String.format("No NC in: %s\n", gbPath));
+        } else {
+            System.out.printf("Parsing ended: %s (%d NC)\n", gbPath, n_nc);
+            GlobalGUIVariables.get().insert_text(Color.GREEN, String.format("Parsing ended: %s (%d NC)\n", gbPath, n_nc));
+        }
+
         return true;
     }
 }

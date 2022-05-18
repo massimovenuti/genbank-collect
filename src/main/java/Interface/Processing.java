@@ -16,7 +16,7 @@ public class Processing {
             var group = pcount > 2 ? p.getPathComponent(2).toString().split(";")[0] : null;
             var sgroup = pcount > 3 ? p.getPathComponent(3).toString().split(";")[0] : null;
             var og = pcount > 4 ? p.getPathComponent(4).toString().split(";")[0] : null;
-            var od = new OverviewData(kingdom, group, sgroup, og);
+            var od = new OverviewData(kingdom, group, sgroup, og, null);
             //System.out.printf("%2d -> %40s\n", p.getPathCount(), p.toString());
             //System.out.printf("%10s - %10s - %10s - %10s\n", od.getKingdom(), od.getGroup(), od.getSubgroup(), od.getOrganism());
             ret.add(od);
