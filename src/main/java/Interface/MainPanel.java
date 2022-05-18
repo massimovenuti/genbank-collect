@@ -222,9 +222,16 @@ public class MainPanel extends JFrame {
             progBars.get(i).setMaximum(progressTask.getTodo());
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
+            if(progressTask.getTodo() == progressTask.getDone()){
+                progBars.get(i).setVisible(false);
+                barLabels.get(i).setVisible(false);
+            }
         }
-        /*for (i = i+1; i < progBars.size(); ++i)
-            progBars.get(i).setVisible(false);*/
+        for (int j = i+1; j < progBars.size(); j++) {
+            progBars.get(j).setVisible(false);
+            barLabels.get(j).setVisible(false);
+        }
+
         if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
