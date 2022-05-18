@@ -389,13 +389,18 @@ public class MainPanel extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-
+                boolean thread_changed = true;
                 toggleContainer.setVisible(true);
                 optionsContainer.setVisible(false);
                 Config.setMaxParallelDownloads((int) downloadSpinner.getValue());
+                if((int) threadSpinner.getValue() == Config.getNbThreads()){
+                    thread_changed = false;
+                }
                 Config.setNbThreads((int) threadSpinner.getValue());
+
                 Config.setPriority((float)slider.getValue() / 100.f);
-                JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                if(thread_changed)
+                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
                 if(cacheBox.getSelectedItem().equals("Oui")) {
                     Config.setRemoveFromCacheAfterParsing(true);
                 }else{
