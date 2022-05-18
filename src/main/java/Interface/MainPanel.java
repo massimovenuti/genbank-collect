@@ -8,8 +8,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -206,7 +209,6 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
@@ -338,6 +340,8 @@ public class MainPanel extends JFrame {
                 } catch (IOException ex) {
                     GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
                 }
+                set_bars_invisible();
+
             }
         });
 
@@ -379,17 +383,17 @@ public class MainPanel extends JFrame {
                     GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
                     GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                     Config.setPriority(slider.getValue() / 100);
-                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                    JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
                     if(cacheBox.getSelectedItem().equals("Oui")) {
                         GlobalGUIVariables.get().setDelete_cache(true);
                     }else{
                         GlobalGUIVariables.get().setDelete_cache(false);
-                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
+                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut dépasser 150Go");
 
                     }
                 }
                 else{
-                    JOptionPane.showMessageDialog(frame, "Nombre maximum de telechargements en parallele ne peut pas depasser le nombre de threads");
+                    JOptionPane.showMessageDialog(frame, "Nombre maximum de téléchargements en parallèle ne peut pas dépasser le nombre de threads");
                 }
             }
         });
@@ -401,7 +405,13 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
             }
         });
-
+        downloadspinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if((int) downloadspinner.getValue() > (int) threadSpinner.getValue()){
+                    downloadspinner.setValue(threadSpinner.getValue());
+                }
+            }
+        });
     }
 
     public void update_tree_from_root() {
@@ -434,7 +444,7 @@ public class MainPanel extends JFrame {
         SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
 
         threadSpinner = new JSpinner(model_threads);
-
+        downloadspinner = new JSpinner(model_threads);
         BufferedImage img = null;
         try {
             img = ImageIO.read(this.getClass().getResource("/settings.png"));
