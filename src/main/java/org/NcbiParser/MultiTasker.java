@@ -13,7 +13,6 @@ public class MultiTasker {
     private AtomicInteger parallelDownloads = new AtomicInteger(0);
     private AtomicInteger ptasksSize = new AtomicInteger(0);
     private AtomicInteger dtasksSize = new AtomicInteger(0);
-    private boolean noNewDl = false;
 
     public MultiTasker() {
         ptasks = new ConcurrentLinkedQueue<ParsingTask>();
@@ -38,29 +37,44 @@ public class MultiTasker {
     public ParsingTask popParsingTask() {
         if (dtasksSize.get() == 0 && ptasksSize.get() == 0)
             return null;
-        if (dtasksSize.get() == 0)
-            return ptasks.poll();
-        if (ptasksSize.get() == 0)
-            return dtasks.poll();
 
-        if (Math.random() > Config.parsingPriority()) {
-            var ret = ptasks.poll();
-            if (ret != null)
-                ptasksSize.decrementAndGet();
-            return ret;
-        } else if (dtasksSize.get() > 0) {
-            if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads()) {
-                var ret = dtasks.poll();
-                if (ret == null)
-                    dtasksSize.decrementAndGet();
-                return ret;
+        ParsingTask ret = null;
+        boolean dlt = false;
+        if (dtasksSize.get() == 0) {
+            ret = ptasks.poll();
+            //System.err.println("y " + parallelDownloads.get());
+        } else if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads() && ptasksSize.get() == 0) {
+            dlt = true;
+            ret = dtasks.poll();
+            //System.err.println("z " + parallelDownloads.get());
+        } else {
+            parallelDownloads.decrementAndGet();
+            //System.err.println("a" + parallelDownloads.get());
+            if (Math.random() > Config.parsingPriority()) {
+                //System.err.println("b " + parallelDownloads.get());
+                ret = ptasks.poll();
+            } else if (parallelDownloads.incrementAndGet() <= Config.maxParallelDownloads()) {
+                dlt = true;
+                ret = dtasks.poll();
+                //System.err.println("c " + parallelDownloads.get());
             } else {
                 parallelDownloads.decrementAndGet();
-                return null;
+            }
+        }
+
+        if (ret == null) {
+            if (dlt) {
+                parallelDownloads.decrementAndGet();
+                //System.err.println("d " + parallelDownloads.get());
             }
         } else {
-            return null;
+            if (dlt) {
+                dtasksSize.decrementAndGet();
+            } else {
+                ptasksSize.decrementAndGet();
+            }
         }
+        return ret;
     }
 
     public GenericTask popGenericTask() {return gtasks.poll();}
