@@ -310,7 +310,6 @@ public class MainPanel extends JFrame {
                 super.mousePressed(event);
                 if (!parseButton.isEnabled())
                     return;
-
                 var checkeds = Processing.getChecked(tree);
                 regions = create_region_array();
 
