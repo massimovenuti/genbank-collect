@@ -10,6 +10,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -78,7 +80,7 @@ public class MainPanel extends JFrame {
     private JButton optionsButton;
     private JPanel toggleContainer;
     private JSlider slider;
-    private JSpinner downloadspinner;
+    private JSpinner downloadSpinner;
     private JComboBox cacheBox;
     private JPanel optPan;
     private JTextPane textPane1;
@@ -206,7 +208,6 @@ public class MainPanel extends JFrame {
         return triggerButton;
     }
     public void show_bars(){
-
         int i;
         for (i = 0; i < GlobalProgress.get().all_tasks().size() ; i++) {
             var progressTask = GlobalProgress.get().all_tasks().get(i);
@@ -338,6 +339,8 @@ public class MainPanel extends JFrame {
                 } catch (IOException ex) {
                     GlobalGUIVariables.get().insert_text(Color.RED,"Couldn't stop.\n");
                 }
+                set_bars_invisible();
+
             }
         });
 
@@ -372,24 +375,19 @@ public class MainPanel extends JFrame {
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
 
-
-                if((int) downloadspinner.getValue() <= (int) threadSpinner.getValue()) {
-                    toggleContainer.setVisible(true);
-                    optionsContainer.setVisible(false);
-                    Config.setMaxParallelDownloads((int)downloadspinner.getValue());
-                    Config.setNbThreads((int) threadSpinner.getValue());
-                    Config.setPriority((float)slider.getValue() / 100.f);
-                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
-                    if(cacheBox.getSelectedItem().equals("Oui")) {
-                        Config.setRemoveFromCacheAfterParsing(true);
-                    }else{
-                        Config.setRemoveFromCacheAfterParsing(false);
-                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
-                    }
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+                Config.setMaxParallelDownloads((int) downloadSpinner.getValue());
+                Config.setNbThreads((int) threadSpinner.getValue());
+                Config.setPriority((float)slider.getValue() / 100.f);
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                if(cacheBox.getSelectedItem().equals("Oui")) {
+                    Config.setRemoveFromCacheAfterParsing(true);
+                }else{
+                    Config.setRemoveFromCacheAfterParsing(false);
+                    JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
                 }
-                else{
-                    JOptionPane.showMessageDialog(frame, "Nombre maximum de telechargements en parallele ne peut pas depasser le nombre de threads");
-                }
+                downloadSpinner.setModel(new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1));
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
@@ -400,7 +398,13 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
             }
         });
-
+        downloadSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                if((int) downloadSpinner.getValue() > (int) threadSpinner.getValue()){
+                    downloadSpinner.setValue(threadSpinner.getValue());
+                }
+            }
+        });
     }
 
     public void update_tree_from_root() {
@@ -431,9 +435,10 @@ public class MainPanel extends JFrame {
         tree.repaint();
 
         SpinnerNumberModel model_threads = new SpinnerNumberModel(Config.getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1);
 
         threadSpinner = new JSpinner(model_threads);
-
+        downloadSpinner = new JSpinner(model_dl);
         BufferedImage img = null;
         try {
             img = ImageIO.read(this.getClass().getResource("/settings.png"));
