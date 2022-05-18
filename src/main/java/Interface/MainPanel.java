@@ -192,18 +192,23 @@ public class MainPanel extends JFrame {
         return temp;
     }
 
-    public void set_bars_invisible()
-    {
+    public void fill_progbars(){
         for (Component c: progressBarContainer.getComponents()){
             if(c instanceof JProgressBar){
-                c.setVisible(false);
                 progBars.add((JProgressBar) c);
             }
             if(c instanceof JLabel){
-                c.setVisible(false);
                 barLabels.add((JLabel) c);
             }
         }
+    }
+
+    public void set_bars_invisible()
+    {
+        for (Component c: progBars)
+            c.setVisible(false);
+        for (Component c: barLabels)
+            c.setVisible(false);
     }
     public JButton get_trigger(){
         return triggerButton;
@@ -219,9 +224,12 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
-        /*for (i = i+1; i < progBars.size(); ++i)
-            progBars.get(i).setVisible(false);*/
-        if(GlobalProgress.get().all_tasks().size() == 0) {
+        for(int j = i + 1 ; j < GlobalProgress.get().all_tasks().size(); j++ ){
+            progBars.get(j).setVisible(false);
+            barLabels.get(j).setVisible(false);
+        }
+
+        if(i == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
                 stopButton.setVisible(false);
@@ -278,6 +286,7 @@ public class MainPanel extends JFrame {
         GlobalGUIVariables.get().setLogArea(document);
         this.progBars = new ArrayList<>();
         this.barLabels = new ArrayList<>();
+        fill_progbars();
         treePaths = new ArrayList<>();
         var frame = this;
 
@@ -303,9 +312,9 @@ public class MainPanel extends JFrame {
                 regions = create_region_array();
 
                 if (checkeds.size() == 0) {
-                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins un item", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Parsing annule: Veuillez selectionner au moins un item", "Parsing annule", JOptionPane.ERROR_MESSAGE);
                 } else if (regions.size() == 0) {
-                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins une région", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Parsing annule: Veuillez selectionner au moins une region", "Parsing annule", JOptionPane.ERROR_MESSAGE);
                 } else {
                     GlobalGUIVariables.get().setStop(false);
                     parseButton.setVisible(false);
@@ -383,17 +392,17 @@ public class MainPanel extends JFrame {
                     GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
                     GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
                     Config.setPriority(slider.getValue() / 100);
-                    JOptionPane.showMessageDialog(frame, "Changements sauvegardés, veuillez relancer le programme");
+                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
                     if(cacheBox.getSelectedItem().equals("Oui")) {
                         GlobalGUIVariables.get().setDelete_cache(true);
                     }else{
                         GlobalGUIVariables.get().setDelete_cache(false);
-                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut dépasser 150Go");
+                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
 
                     }
                 }
                 else{
-                    JOptionPane.showMessageDialog(frame, "Nombre maximum de téléchargements en parallèle ne peut pas dépasser le nombre de threads");
+                    JOptionPane.showMessageDialog(frame, "Nombre maximum de telechargements en parallèle ne peut pas depasser le nombre de threads");
                 }
             }
         });

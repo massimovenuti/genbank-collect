@@ -73,7 +73,7 @@ public class Main {
                 if (mt.getMt().getDlTask().getDone() >= r.size()) {
                     mt.getMt().clearParsing();
 
-                    var t = GlobalProgress.get().registerTask("Cr\u00e9ation de l'arborescence");
+                    var t = GlobalProgress.get().registerTask("Creation de l'arborescence");
                     t.addTodo(1);
                     var new_tree = createHierarchy(t);
                     t.addDone(1);
@@ -90,7 +90,7 @@ public class Main {
     public static void update(Ncbi ncbi) throws IOException {
         Progress gl = GlobalProgress.get();
         ArrayList<IndexData> idxDatas = new ArrayList<IndexData>();
-        var task = gl.registerTask("Mise \u00e0 jour des indexes");
+        var task = gl.registerTask("Mise a jour des indexes");
         task.addTodo(5);
         var od = ncbi.overview_to_db();
         task.addDone(1);

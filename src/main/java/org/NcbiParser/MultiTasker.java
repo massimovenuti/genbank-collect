@@ -42,7 +42,7 @@ public class MultiTasker {
     public void pushTask(ParsingTask task) {
         if (task.isDl()) {
             if (dlTask == null)
-                dlTask = GlobalProgress.get().registerTask("Téléchargements");
+                dlTask = GlobalProgress.get().registerTask("Telechargements");
             if (Math.random() < Config.parsingPriority()) {
                 parsings.addFirst(task);
             } else {
