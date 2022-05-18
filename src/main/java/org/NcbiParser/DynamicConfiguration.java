@@ -41,7 +41,7 @@ public class DynamicConfiguration {
         prop.setProperty("cacheDirectory", "cache");
         prop.setProperty("removeFromCacheAfterParsing", "true");
         prop.setProperty("priority", "0.2");
-        prop.setProperty("maxParallelDownloads", "2");
+        prop.setProperty("maxParallelDownloads", Integer.toString(maxThreads));
         prop.storeToXML(of, "Genebank configuration");
         of.close();
     }
