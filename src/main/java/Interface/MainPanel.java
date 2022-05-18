@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.event.ChangeEvent;
@@ -81,7 +80,7 @@ public class MainPanel extends JFrame {
     private JButton optionsButton;
     private JPanel toggleContainer;
     private JSlider slider;
-    private JSpinner downloadspinner;
+    private JSpinner downloadSpinner;
     private JComboBox cacheBox;
     private JPanel optPan;
     private JTextPane textPane1;
@@ -224,12 +223,9 @@ public class MainPanel extends JFrame {
             progBars.get(i).setValue(progressTask.getDone());
             barLabels.get(i).setText(String.format(" %10s (%10s restantes) ", progressTask.getName(), progressTask.getDone() == 0 ? "?" : formatMs(progressTask.estimatedTimeLeftMs())));
         }
-        for(int j = i + 1 ; j < GlobalProgress.get().all_tasks().size(); j++ ){
-            progBars.get(j).setVisible(false);
-            barLabels.get(j).setVisible(false);
-        }
-
-        if(i == 0) {
+        /*for (i = i+1; i < progBars.size(); ++i)
+            progBars.get(i).setVisible(false);*/
+        if(GlobalProgress.get().all_tasks().size() == 0) {
             set_bars_invisible();
             if (stopButton.isVisible()) {
                 stopButton.setVisible(false);
@@ -312,9 +308,9 @@ public class MainPanel extends JFrame {
                 regions = create_region_array();
 
                 if (checkeds.size() == 0) {
-                    JOptionPane.showMessageDialog(frame, "Parsing annule: Veuillez selectionner au moins un item", "Parsing annule", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins un item", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
                 } else if (regions.size() == 0) {
-                    JOptionPane.showMessageDialog(frame, "Parsing annule: Veuillez selectionner au moins une region", "Parsing annule", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Parsing annulé: Veuillez sélectionner au moins une région", "Parsing annulé", JOptionPane.ERROR_MESSAGE);
                 } else {
                     GlobalGUIVariables.get().setStop(false);
                     parseButton.setVisible(false);
@@ -385,25 +381,19 @@ public class MainPanel extends JFrame {
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
 
-
-                if((int) downloadspinner.getValue() <= (int) threadSpinner.getValue()) {
-                    toggleContainer.setVisible(true);
-                    optionsContainer.setVisible(false);
-                    GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
-                    GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
-                    Config.setPriority(slider.getValue() / 100);
-                    JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
-                    if(cacheBox.getSelectedItem().equals("Oui")) {
-                        GlobalGUIVariables.get().setDelete_cache(true);
-                    }else{
-                        GlobalGUIVariables.get().setDelete_cache(false);
-                        JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
-
-                    }
+                toggleContainer.setVisible(true);
+                optionsContainer.setVisible(false);
+                Config.setMaxParallelDownloads((int) downloadSpinner.getValue());
+                Config.setNbThreads((int) threadSpinner.getValue());
+                Config.setPriority((float)slider.getValue() / 100.f);
+                JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
+                if(cacheBox.getSelectedItem().equals("Oui")) {
+                    Config.setRemoveFromCacheAfterParsing(true);
+                }else{
+                    Config.setRemoveFromCacheAfterParsing(false);
+                    JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
                 }
-                else{
-                    JOptionPane.showMessageDialog(frame, "Nombre maximum de telechargements en parallèle ne peut pas depasser le nombre de threads");
-                }
+                downloadSpinner.setModel(new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1));
             }
         });
         annulerButton.addMouseListener(new MouseAdapter() {
@@ -414,10 +404,10 @@ public class MainPanel extends JFrame {
                 optionsContainer.setVisible(false);
             }
         });
-        downloadspinner.addChangeListener(new ChangeListener() {
+        downloadSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                if((int) downloadspinner.getValue() > (int) threadSpinner.getValue()){
-                    downloadspinner.setValue(threadSpinner.getValue());
+                if((int) downloadSpinner.getValue() > (int) threadSpinner.getValue()){
+                    downloadSpinner.setValue(threadSpinner.getValue());
                 }
             }
         });
@@ -450,10 +440,11 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(Config.getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_dl = new SpinnerNumberModel(Config.maxParallelDownloads(), 1, Config.getNbThreads(), 1);
 
         threadSpinner = new JSpinner(model_threads);
-        downloadspinner = new JSpinner(model_threads);
+        downloadSpinner = new JSpinner(model_dl);
         BufferedImage img = null;
         try {
             img = ImageIO.read(this.getClass().getResource("/settings.png"));
