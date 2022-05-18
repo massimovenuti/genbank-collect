@@ -42,7 +42,7 @@ public class Main {
             if (ncbi == null)
                 ncbi = new Ncbi();
             if (mt == null)
-                mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, ini);
+                mt = new MultiThreading(Config.getNbThreads(), 1, ini);
 
             mt.getMt().pushTask(new GenericTask(() -> {
                 try {
@@ -220,7 +220,7 @@ public class Main {
 
     public static MultiThreading getMt() throws IOException {
         if (mt == null)
-            mt = new MultiThreading(GlobalGUIVariables.get().getNbThreads(), 1, null);
+            mt = new MultiThreading(Config.getNbThreads(), 1, null);
         return mt;
     }
 }

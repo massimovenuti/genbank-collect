@@ -376,16 +376,15 @@ public class MainPanel extends JFrame {
                 if((int) downloadspinner.getValue() <= (int) threadSpinner.getValue()) {
                     toggleContainer.setVisible(true);
                     optionsContainer.setVisible(false);
-                    GlobalGUIVariables.get().setNbDownloadParallel((int)downloadspinner.getValue());
-                    GlobalGUIVariables.get().setNbThreads((int) threadSpinner.getValue());
+                    Config.setMaxParallelDownloads((int)downloadspinner.getValue());
+                    Config.setNbThreads((int) threadSpinner.getValue());
                     Config.setPriority((float)slider.getValue() / 100.f);
                     JOptionPane.showMessageDialog(frame, "Changements sauvegardes, veuillez relancer le programme");
                     if(cacheBox.getSelectedItem().equals("Oui")) {
-                        GlobalGUIVariables.get().setDelete_cache(true);
+                        Config.setRemoveFromCacheAfterParsing(true);
                     }else{
-                        GlobalGUIVariables.get().setDelete_cache(false);
+                        Config.setRemoveFromCacheAfterParsing(false);
                         JOptionPane.showMessageDialog(frame, "Attention ! Le cache peut depasser 150Go");
-
                     }
                 }
                 else{
@@ -431,7 +430,7 @@ public class MainPanel extends JFrame {
         tree.revalidate();
         tree.repaint();
 
-        SpinnerNumberModel model_threads = new SpinnerNumberModel(GlobalGUIVariables.get().getNbThreads(), 1, 1000, 1);
+        SpinnerNumberModel model_threads = new SpinnerNumberModel(Config.getNbThreads(), 1, 1000, 1);
 
         threadSpinner = new JSpinner(model_threads);
 

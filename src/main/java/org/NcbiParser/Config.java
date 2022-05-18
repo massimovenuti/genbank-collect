@@ -43,6 +43,11 @@ public class Config {
     public static boolean removeFromCacheAfterParsing() {
         return fromDynamicConfiguration("removeFromCacheAfterParsing", "true").contentEquals("true");
     }
+
+    public static void setRemoveFromCacheAfterParsing(boolean value) {
+        setDynamicConfiguration("removeFromCacheAfterParsing", value ? "true" : "false");
+    }
+
     public static int maxParallelDownloads() {
         return Integer.parseInt(fromDynamicConfiguration("maxParallelDownloads", "2"));
     }
@@ -50,4 +55,12 @@ public class Config {
         assert new_max > 0: "Bad numbber of DL";
         setDynamicConfiguration("maxParallelDownloads", Integer.toString(new_max));
     }
+    public static void setNbThreads(int nbThreadsParsing) {
+        setDynamicConfiguration("nbThreads", Integer.toString(nbThreadsParsing));
+    }
+    public static int getNbThreads() {
+        var ret =  fromDynamicConfiguration("nbThreads", "");
+        return ret == "" ? Runtime.getRuntime().availableProcessors() : Integer.parseInt(ret);
+    }
+
 }
